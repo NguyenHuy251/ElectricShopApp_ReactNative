@@ -18,7 +18,7 @@ function AdminApplication() {
   // Let Ant Design disable its motion lifecycle, rather than removing CSS
   // animations while popup positioning/closing still waits for their events.
   return <BrowserRouter>
-    <ConfigProvider locale={viVN} theme={{ token: { motion: !reducedMotion, colorPrimary: '#087f8c', colorText: '#152d46', colorTextSecondary: '#66788a', colorBorder: '#e2e9f1', borderRadius: 10, controlHeight: 40, fontFamily: '"Segoe UI", sans-serif' }, components: { Table: { headerBg: '#f6f8fc', headerColor: '#66788a', cellPaddingBlock: 16 }, Button: { primaryShadow: '0 4px 10px #087f8c20' }, Card: { borderRadiusLG: 16 } } }}><AntApp><App /></AntApp></ConfigProvider>
+    <ConfigProvider locale={viVN} theme={{ token: { motion: !reducedMotion, colorPrimary: '#126b60', colorInfo: '#126b60', colorSuccess: '#28704e', colorWarning: '#a16b22', colorError: '#b84444', colorText: '#182d2a', colorTextSecondary: '#6a7c76', colorBorder: '#dfe7e2', colorBgLayout: '#f5f7f6', borderRadius: 10, controlHeight: 40, fontSize: 14, fontFamily: '"Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif' }, components: { Table: { headerBg: '#f6f8f7', headerColor: '#6a7c76', cellPaddingBlock: 16, rowHoverBg: '#f2f7f4' }, Button: { primaryShadow: '0 2px 4px #126b6014', fontWeight: 600 }, Card: { borderRadiusLG: 16 }, Modal: { borderRadiusLG: 18, titleFontSize: 19 }, Tabs: { inkBarColor: '#126b60' } } }}><AntApp><App /></AntApp></ConfigProvider>
   </BrowserRouter>;
 }
 

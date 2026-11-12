@@ -42,10 +42,12 @@ test('management waits for the buyer and cannot choose delivered status', async 
   const mock = await mockApi(page);
   mock.data['don-hang'][0].trang_thai = 'DangGiao';
   await page.goto('/orders');
+  await page.getByRole('button', {name:'Cập nhật đơn 10',exact:true}).click();
   await page.getByRole('combobox', { name: 'Đổi trạng thái đơn 10' }).click();
   await expect(page.locator('.ant-select-item-option').filter({hasText:'Đã giao'})).toHaveCount(0);
   await expect(page.locator('.ant-select-item-option').filter({hasText:'Đã hủy'})).toBeVisible();
   await page.keyboard.press('Escape');
+  await page.getByRole('dialog').getByRole('button',{name:'Hủy',exact:true}).click();
   await page.getByRole('button', {name:'Xem chi tiết',exact:true}).click();
   await expect(page.getByRole('dialog').getByText('Đang chờ khách hàng xác nhận đã nhận hàng trên ứng dụng.', {exact:false})).toBeVisible();
 });

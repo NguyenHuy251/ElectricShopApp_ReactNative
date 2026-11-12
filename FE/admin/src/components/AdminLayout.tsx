@@ -8,6 +8,7 @@ import { useAuth } from '../auth/AuthContext';
 import { canAccess } from '../auth/permissions';
 export default function AdminLayout() {
   const [open, setOpen] = useState(false);
+  const [sidebarHidden, setSidebarHidden] = useState(false);
   const { pathname } = useLocation();
   const { user } = useAuth();
   const title = navigation.find(([path]) => path === pathname)?.[1] || 'Quản trị';
@@ -25,5 +26,5 @@ export default function AdminLayout() {
     }, 800);
     return () => { cancelled = true; window.clearTimeout(timer); };
   }, [user?.ma_tai_khoan, user?.vai_tro, user?.permissions?.join(',')]);
-  return <div className="layout"><div className="desktop-sidebar"><Sidebar /></div><Drawer title="Menu quản trị" placement="left" open={open} onClose={() => setOpen(false)} width={280}><Sidebar onNavigate={() => setOpen(false)} /></Drawer><main className="main"><Topbar title={title} toggle={() => setOpen(true)} /><div className="page"><Suspense fallback={<Spin tip="Đang tải trang"><div className="loading-area" /></Spin>}><Outlet /></Suspense></div></main></div>;
+  return <div className={`layout${sidebarHidden ? ' sidebar-hidden' : ''}`}><div className="desktop-sidebar" id="admin-sidebar"><Sidebar /></div><Drawer title="Menu quản trị" placement="left" open={open} onClose={() => setOpen(false)} width={280}><Sidebar onNavigate={() => setOpen(false)} /></Drawer><main className="main"><Topbar title={title} toggle={() => setOpen(true)} sidebarHidden={sidebarHidden} toggleSidebar={() => setSidebarHidden(hidden => !hidden)} /><div className="page"><Suspense fallback={<Spin tip="Đang tải trang"><div className="loading-area" /></Spin>}><Outlet /></Suspense></div></main></div>;
 }

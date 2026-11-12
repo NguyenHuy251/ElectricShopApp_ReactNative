@@ -1,5 +1,7 @@
 import { useCallback, useDeferredValue, useMemo, useRef, useState, type ReactNode } from 'react';
-import { App, Button, Descriptions, Drawer, Empty, Form, Input, InputNumber, Modal, Select, Space, Switch, Table, Tooltip } from 'antd';
+import { App, Button, Descriptions, Drawer, Empty, Form, Input, InputNumber, Select, Space, Switch, Table, Tooltip } from 'antd';
+import Modal from './FormModal';
+import PageHeading from './PageHeading';
 import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import type { Rule } from 'antd/es/form';
@@ -52,10 +54,11 @@ export default function ResourcePage<T extends object>({ title, idKey, api, colu
   }, [data, searchKeySignature]);
   const rows = useMemo(() => searchIndex.filter(({ row, text }) => (!filterValue || !filterKey || String(row[filterKey]) === filterValue) && text.includes(deferredSearch)).map(({ row }) => row), [searchIndex, filterValue, filterKey, deferredSearch]);
   const tableColumns: ColumnsType<T> = [...columns, { title: 'Thao tác', key: 'actions', render: (_, row) => <Space wrap>{rowActions?.(row, reload)}{canView(row) ? <Tooltip title="Xem chi tiết"><Button aria-label="Xem chi tiết" icon={<EyeOutlined />} disabled={busy} onClick={() => view(row, false)} /></Tooltip> : null}{canModify(row) ? <Tooltip title={editLabel}><Button aria-label={editLabel} icon={<EditOutlined />} disabled={busy} onClick={() => view(row, true)} /></Tooltip> : null}{canDelete(row) ? <Tooltip title="Xóa"><Button aria-label="Xóa" danger icon={<DeleteOutlined />} disabled={busy} onClick={() => remove(row)} /></Tooltip> : null}</Space> }];
-  return <><div className="page-heading"><h1 className="page-title">{title}</h1>{api.create && <Tooltip title="Thêm mới"><Button type="primary" aria-label="Thêm mới" icon={<PlusOutlined />} disabled={busy} onClick={() => { setEditing(null); form.resetFields(); form.setFieldsValue(defaults || {}); setOpen(true); }} /></Tooltip>}</div>
+  return <><PageHeading title={title} actions={api.create && <Button type="primary" aria-label="Thêm mới" icon={<PlusOutlined />} disabled={busy} onClick={() => { setEditing(null); form.resetFields(); form.setFieldsValue(defaults || {}); setOpen(true); }}>Thêm mới</Button>} />
     {extra}<LoadError error={error} retry={reload} /><div className="card"><Space className="toolbar" wrap><Input.Search aria-label="Tìm kiếm" placeholder="Tìm kiếm..." allowClear value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} />{filter && <Select aria-label="Lọc danh sách" placeholder="Tất cả" allowClear value={filterValue} options={filter.options} onChange={value => { setFilterValue(value); setPage(1); }} style={{ minWidth: 180 }} />}<Tooltip title="Làm mới"><Button aria-label="Làm mới" icon={<ReloadOutlined />} onClick={reload} disabled={loading} /></Tooltip></Space>
-      <Table<T> rowKey={idKey} columns={tableColumns} dataSource={rows} loading={loading} scroll={{ x: 900 }} locale={{ emptyText: <Empty description="Chưa có dữ liệu" /> }} pagination={{ current: Math.min(page, Math.max(1, Math.ceil(rows.length / 10))), pageSize: 10, onChange: setPage, showSizeChanger: false }} />
-    </div><Modal open={open} title={editing ? 'Chỉnh sửa' : 'Thêm mới'} onCancel={() => { if (!busy) setOpen(false); }} onOk={() => form.submit()} confirmLoading={busy} cancelButtonProps={{ disabled: busy }} okText="Lưu" cancelText="Hủy" width={720}>
+      <div className="list-caption"><strong>Danh sách {title.toLocaleLowerCase('vi')}</strong><span>{rows.length} kết quả</span></div>
+      <Table<T> rowKey={idKey} columns={tableColumns} dataSource={rows} loading={loading} scroll={{ x: 900 }} locale={{ emptyText: <Empty description="Chưa có dữ liệu" /> }} pagination={{ current: Math.min(page, Math.max(1, Math.ceil(rows.length / 10))), pageSize: 10, onChange: setPage, showSizeChanger: false, showTotal: total => `${total} bản ghi` }} />
+    </div><Modal open={open} title={editing ? `Chỉnh sửa · ${title}` : `Thêm mới · ${title}`} onCancel={() => { if (!busy) setOpen(false); }} onOk={() => form.submit()} confirmLoading={busy} cancelButtonProps={{ disabled: busy }} okText="Lưu" cancelText="Hủy" width={720}>
       <Form form={form} layout="vertical" disabled={busy} onFinish={async (values: Partial<T>) => {
         if (lock.current) return; lock.current = true; setBusy(true);
         try { if (editing) await api.update(id(editing), values); else await api.create?.(values); message.success('Đã lưu thành công'); setOpen(false); await reload(); }

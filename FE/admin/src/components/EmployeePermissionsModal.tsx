@@ -1,5 +1,6 @@
+import Modal from './FormModal';
 import { forwardRef, memo, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import { Alert, App, Button, Checkbox, Modal, Select, Space } from 'antd';
+import { Alert, App, Button, Checkbox, Select, Space } from 'antd';
 import { permissionApi, type PermissionData, type StaffAccount } from '../api/permission.api';
 import type { Permission } from '../auth/permissions';
 import { errorMessage } from '../utils/errors';

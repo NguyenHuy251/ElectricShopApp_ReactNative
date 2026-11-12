@@ -1,8 +1,8 @@
+import Modal from '../components/FormModal';
 import { useCallback, useState } from 'react';
 import {
   App,
   Button,
-  Card,
   Form,
   Input,
   InputNumber,
@@ -10,7 +10,6 @@ import {
   Switch,
   Select,
   Space,
-  Modal,
   Alert,
   Tag,
   Tooltip,
@@ -22,12 +21,13 @@ import { errorMessage } from '../utils/errors';
 import { money, dateTime } from '../utils/format';
 import {
   PlusOutlined,
-  CloseOutlined,
+  EditOutlined,
   GiftOutlined,
   UserOutlined,
   SearchOutlined,
   CheckCircleOutlined,
 } from '@ant-design/icons';
+import PageHeading from '../components/PageHeading';
 
 export default function ShopOperationsPage({ kind }: { kind: 'vouchers' | 'inventory' }) {
   const { message } = App.useApp();
@@ -42,6 +42,20 @@ export default function ShopOperationsPage({ kind }: { kind: 'vouchers' | 'inven
   const [lookupError, setLookupError] = useState<string>('');
   const [granting, setGranting] = useState(false);
   const [variants, setVariants] = useState<{ ma_bien_the: number; ten_bien_the: string }[]>([]);
+  const [editingVoucher, setEditingVoucher] = useState<any>(null);
+  const [statusForm] = Form.useForm();
+
+  const saveVoucherStatus = async (values: { trang_thai: boolean }) => {
+    if (busy || !editingVoucher) return;
+    setBusy(true);
+    try {
+      await api.put(`/shop/vouchers/${editingVoucher.ma_voucher}`, values);
+      message.success('Đã cập nhật mã giảm giá');
+      setEditingVoucher(null);
+      await result.reload();
+    } catch (error) { message.error(errorMessage(error)); }
+    finally { setBusy(false); }
+  };
 
   const result = useLoad(
     useCallback(async () => {
@@ -153,13 +167,11 @@ export default function ShopOperationsPage({ kind }: { kind: 'vouchers' | 'inven
 
   return (
     <>
-      <div className="page-heading">
-        <h1 className="page-title">{kind === 'vouchers' ? 'Mã giảm giá' : 'Nhập kho'}</h1>
-        <Space wrap>
+      <PageHeading title={kind === 'vouchers' ? 'Mã giảm giá' : 'Nhập kho'} actions={<Space wrap>
           {kind === 'vouchers' && (
             <Button
-              type="primary"
-              style={{ backgroundColor: '#176B52', borderColor: '#176B52' }}
+              type="default"
+              style={{ color: '#126b60' }}
               icon={<GiftOutlined />}
               onClick={() => openGrantModal(null)}
             >
@@ -167,17 +179,15 @@ export default function ShopOperationsPage({ kind }: { kind: 'vouchers' | 'inven
             </Button>
           )}
           <Button
-            type={showForm ? 'default' : 'primary'}
-            icon={showForm ? <CloseOutlined /> : <PlusOutlined />}
+            type="primary"
+            aria-label={kind === 'vouchers' ? 'Thêm mã giảm giá' : 'Tạo phiếu nhập'}
+            icon={<PlusOutlined />}
             disabled={busy}
-            aria-expanded={showForm}
-            aria-controls="shop-add-form"
-            onClick={() => setShowForm((current) => !current)}
+            onClick={() => { form.resetFields(); setVariants([]); setShowForm(true); }}
           >
-            {showForm ? 'Ẩn form thêm' : kind === 'vouchers' ? 'Thêm mã giảm giá' : 'Tạo phiếu nhập'}
+            {kind === 'vouchers' ? 'Thêm mã giảm giá' : 'Tạo phiếu nhập'}
           </Button>
-        </Space>
-      </div>
+        </Space>} />
 
       <LoadError
         error={result.error || products.error}
@@ -187,9 +197,8 @@ export default function ShopOperationsPage({ kind }: { kind: 'vouchers' | 'inven
         }}
       />
 
-      {showForm && (
-        <Card id="shop-add-form" title={kind === 'vouchers' ? 'Tạo mã giảm giá' : 'Tạo phiếu nhập'}>
-          <Form form={form} layout="vertical" onFinish={save}>
+        <Modal open={showForm} title={kind === 'vouchers' ? 'Tạo mã giảm giá' : 'Tạo phiếu nhập'} onCancel={() => {if(!busy)setShowForm(false);}} onOk={() => form.submit()} confirmLoading={busy} cancelButtonProps={{disabled:busy}} okText="Lưu" cancelText="Hủy">
+          <Form form={form} layout="vertical" disabled={busy} onFinish={save}><div className="form-grid">
             {kind === 'vouchers' ? (
               <>
                 <Form.Item
@@ -261,29 +270,14 @@ export default function ShopOperationsPage({ kind }: { kind: 'vouchers' | 'inven
                 </Form.Item>
               </>
             )}
-            <Space>
-              <Button htmlType="submit" type="primary" loading={busy}>
-                Lưu
-              </Button>
-              <Button
-                disabled={busy}
-                onClick={() => {
-                  form.resetFields();
-                  setVariants([]);
-                  setShowForm(false);
-                }}
-              >
-                Hủy
-              </Button>
-            </Space>
-          </Form>
-        </Card>
-      )}
+          </div></Form>
+        </Modal>
 
       <div className="card mt">
-        <Space style={{ marginBottom: 16 }}>
+        <Space className="toolbar" wrap>
           <Button onClick={result.reload}>Làm mới</Button>
         </Space>
+        <div className="list-caption"><strong>{kind === 'vouchers' ? 'Danh sách mã giảm giá' : 'Lịch sử nhập kho'}</strong><span>{result.data?.length || 0} bản ghi</span></div>
         <Table
           rowKey={kind === 'vouchers' ? 'ma_voucher' : 'ma_nhap'}
           loading={result.loading}
@@ -310,20 +304,8 @@ export default function ShopOperationsPage({ kind }: { kind: 'vouchers' | 'inven
                   { title: 'Lượt/khách', render: (_, r) => r.moi_khach || 'Không giới hạn' },
                   { title: 'Hết hạn', dataIndex: 'ket_thuc', render: dateTime },
                   {
-                    title: 'Hoạt động',
-                    render: (_, r) => (
-                      <Switch
-                        checked={Boolean(r.trang_thai)}
-                        onChange={async (trang_thai) => {
-                          try {
-                            await api.put(`/shop/vouchers/${r.ma_voucher}`, { trang_thai });
-                            await result.reload();
-                          } catch (e) {
-                            message.error(errorMessage(e));
-                          }
-                        }}
-                      />
-                    ),
+                    title: 'Trạng thái',
+                    render: (_, r) => <Space wrap><Tag color={r.trang_thai ? 'green' : 'default'}>{r.trang_thai ? 'Hoạt động' : 'Tạm dừng'}</Tag><Button aria-label={`Sửa voucher ${r.ma_code}`} icon={<EditOutlined />} onClick={() => { statusForm.setFieldsValue({trang_thai:Boolean(r.trang_thai)}); setEditingVoucher(r); }} /></Space>,
                   },
                   {
                     title: 'Cấp riêng',
@@ -354,16 +336,24 @@ export default function ShopOperationsPage({ kind }: { kind: 'vouchers' | 'inven
         />
       </div>
 
+      <Modal title={`Chỉnh sửa trạng thái · ${editingVoucher?.ma_code || ''}`} open={!!editingVoucher} confirmLoading={busy} cancelButtonProps={{disabled:busy}} onCancel={() => {if(!busy)setEditingVoucher(null);}} onOk={() => statusForm.submit()} okText="Lưu" cancelText="Hủy" width={520}>
+        <p className="modal-description">Tạm dừng hoặc cho phép tiếp tục sử dụng mã giảm giá này. Lịch sử sử dụng được giữ nguyên.</p>
+        <Form form={statusForm} layout="vertical" disabled={busy} onFinish={saveVoucherStatus}>
+          <Form.Item name="trang_thai" label="Cho phép sử dụng" valuePropName="checked"><Switch /></Form.Item>
+        </Form>
+      </Modal>
       {/* Modal Kích hoạt Voucher riêng cho tài khoản */}
       <Modal
         title={
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 16 }}>
-            <GiftOutlined style={{ color: '#176B52', fontSize: 20 }} />
+            <GiftOutlined style={{ color: '#126b60', fontSize: 20 }} />
             <span>Kích hoạt Voucher riêng cho Tài khoản</span>
           </div>
         }
         open={showGrantModal}
+        confirmLoading={granting}
         onCancel={() => {
+          if (granting) return;
           setShowGrantModal(false);
           setFoundUser(null);
           setLookupError('');
@@ -396,7 +386,7 @@ export default function ShopOperationsPage({ kind }: { kind: 'vouchers' | 'inven
           >
             <Space.Compact style={{ width: '100%' }}>
               <Input
-                prefix={<UserOutlined style={{ color: '#176B52' }} />}
+                prefix={<UserOutlined style={{ color: '#126b60' }} />}
                 placeholder="Ví dụ: 0912345678 hoặc dung2005"
                 allowClear
                 onPressEnter={handleLookupUser}
@@ -464,7 +454,7 @@ export default function ShopOperationsPage({ kind }: { kind: 'vouchers' | 'inven
               htmlType="submit"
               loading={granting}
               icon={<GiftOutlined />}
-              style={{ backgroundColor: '#176B52', borderColor: '#176B52' }}
+              style={{ backgroundColor: '#126b60', borderColor: '#126b60' }}
             >
               Kích hoạt vào Ví khách hàng
             </Button>

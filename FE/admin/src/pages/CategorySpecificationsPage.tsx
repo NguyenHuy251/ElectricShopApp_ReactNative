@@ -1,3 +1,5 @@
+import Modal from '../components/FormModal';
+import PageHeading from '../components/PageHeading';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Button,
@@ -7,7 +9,6 @@ import {
   Form,
   Input,
   InputNumber,
-  Modal,
   Popconfirm,
   Radio,
   Row,
@@ -42,7 +43,7 @@ import type {
   SpecificationGroup,
 } from '../types';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const GROUP_COLORS: Record<string, string> = {
   'Thông tin cơ bản': 'blue',
@@ -207,23 +208,6 @@ export default function CategorySpecificationsPage() {
     }
   };
 
-  // Toggle Bat Buoc directly from table
-  const handleToggleBatBuoc = async (record: CategorySpecification, checked: boolean) => {
-    if (!selectedCategoryId) return;
-    try {
-      await specificationApi.updateInCategory(selectedCategoryId, record.ma_thong_so, {
-        bat_buoc: checked,
-      });
-      message.success(
-        `Đã đổi '${record.ten_thong_so}' thành ${checked ? 'Bắt buộc nhập' : 'Tùy chọn'}`
-      );
-      setCategorySpecs(prev =>
-        prev.map(s => (s.ma_thong_so === record.ma_thong_so ? { ...s, bat_buoc: checked } : s))
-      );
-    } catch {
-      message.error('Lỗi khi cập nhật cấu hình thông số');
-    }
-  };
 
   // Edit Category Spec modal
   const handleOpenEditCategorySpec = (record: CategorySpecification) => {
@@ -374,21 +358,13 @@ export default function CategorySpecificationsPage() {
   const selectedCategoryObj = categories.find(c => c.ma_danh_muc === selectedCategoryId);
 
   return (
-    <div style={{ padding: '0 4px' }}>
+    <div className="specifications-page">
       {/* Page Header */}
-      <div style={{ marginBottom: 20 }}>
-        <Title level={3} style={{ marginBottom: 4 }}>
-          <SettingOutlined style={{ marginRight: 8, color: '#176B52' }} />
-          Quản lý Danh mục Thông số Kỹ thuật
-        </Title>
-        <Text type="secondary">
-          Thiết lập các thông số kỹ thuật được phép sử dụng cho từng danh mục sản phẩm (Dynamic EAV Specifications).
-        </Text>
-      </div>
+      <PageHeading title="Quản lý Danh mục Thông số Kỹ thuật" description="Thiết lập thông số, nhóm thông số và các thuộc tính phù hợp cho từng danh mục sản phẩm." />
 
       <Tabs
         defaultActiveKey="1"
-        type="card"
+        type="line"
         items={[
           {
             key: '1',
@@ -403,7 +379,7 @@ export default function CategorySpecificationsPage() {
                 <Card style={{ marginBottom: 16 }}>
                   <Row gutter={[16, 16]} align="middle" justify="space-between">
                     <Col xs={24} md={12} lg={10}>
-                      <Space direction="horizontal" size="middle" style={{ width: '100%' }}>
+                      <Space wrap className="category-picker" size="middle" style={{ width: '100%' }}>
                         <Text strong style={{ minWidth: 100 }}>
                           Chọn danh mục:
                         </Text>
@@ -432,7 +408,7 @@ export default function CategorySpecificationsPage() {
                         <Button
                           type="primary"
                           icon={<PlusOutlined />}
-                          style={{ backgroundColor: '#176B52' }}
+                          style={{ backgroundColor: '#126b60' }}
                           onClick={() => {
                             assignForm.resetFields();
                             assignForm.setFieldsValue({
@@ -454,7 +430,7 @@ export default function CategorySpecificationsPage() {
                     <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid #f0f0f0' }}>
                       <Space size="large" wrap>
                         <Text>
-                          Danh mục: <strong style={{ color: '#176B52' }}>{selectedCategoryObj.ten_danh_muc}</strong>
+                          Danh mục: <strong style={{ color: '#126b60' }}>{selectedCategoryObj.ten_danh_muc}</strong>
                         </Text>
                         <Text>
                           Tổng số thông số: <strong>{categorySpecs.length}</strong>
@@ -479,6 +455,7 @@ export default function CategorySpecificationsPage() {
                 {/* Category Specs Table */}
                 <Card title={`Danh sách thông số của [ ${selectedCategoryObj?.ten_danh_muc || 'Danh mục'} ]`}>
                   <Table
+                    scroll={{x:900}}
                     loading={loadingCategorySpecs}
                     dataSource={categorySpecs}
                     rowKey="ma_thong_so"
@@ -513,16 +490,7 @@ export default function CategorySpecificationsPage() {
                       {
                         title: 'Bắt buộc nhập',
                         dataIndex: 'bat_buoc',
-                        render: (val: boolean, record) => (
-                          <Tooltip title="Nhấp để bật/tắt yêu cầu bắt buộc">
-                            <Switch
-                              checked={Boolean(val)}
-                              checkedChildren="Bắt buộc"
-                              unCheckedChildren="Tùy chọn"
-                              onChange={checked => handleToggleBatBuoc(record, checked)}
-                            />
-                          </Tooltip>
-                        ),
+                        render: (val: boolean) => <Tag color={val ? 'green' : 'default'}>{val ? 'Bắt buộc' : 'Tùy chọn'}</Tag>,
                       },
                       {
                         title: 'Cho phép lọc',
@@ -549,6 +517,7 @@ export default function CategorySpecificationsPage() {
                         render: (_, record) => (
                           <Space size="middle">
                             <Button
+                              aria-label="Sửa cấu hình thông số"
                               type="text"
                               icon={<EditOutlined style={{ color: '#1890ff' }} />}
                               onClick={() => handleOpenEditCategorySpec(record)}
@@ -610,7 +579,7 @@ export default function CategorySpecificationsPage() {
                     <Button
                       type="primary"
                       icon={<PlusOutlined />}
-                      style={{ backgroundColor: '#176B52' }}
+                      style={{ backgroundColor: '#126b60' }}
                       onClick={() => {
                         setEditingSpec(null);
                         specForm.resetFields();
@@ -628,6 +597,7 @@ export default function CategorySpecificationsPage() {
                 </Row>
 
                 <Table
+                  scroll={{x:900}}
                   dataSource={filteredSpecs}
                   rowKey="ma_thong_so"
                   pagination={{ pageSize: 12 }}
@@ -716,7 +686,7 @@ export default function CategorySpecificationsPage() {
                   <Button
                     type="primary"
                     icon={<PlusOutlined />}
-                    style={{ backgroundColor: '#176B52' }}
+                    style={{ backgroundColor: '#126b60' }}
                     onClick={() => {
                       setEditingGroup(null);
                       groupForm.resetFields();
@@ -729,6 +699,7 @@ export default function CategorySpecificationsPage() {
                 </div>
 
                 <Table
+                  scroll={{x:700}}
                   dataSource={groups}
                   rowKey="ma_nhom_thong_so"
                   pagination={false}
@@ -895,7 +866,7 @@ export default function CategorySpecificationsPage() {
           <div style={{ textAlign: 'right', marginTop: 12 }}>
             <Space>
               <Button onClick={() => setAssignModalOpen(false)}>Hủy</Button>
-              <Button type="primary" htmlType="submit" style={{ backgroundColor: '#176B52' }}>
+              <Button type="primary" htmlType="submit" style={{ backgroundColor: '#126b60' }}>
                 Lưu và Gán
               </Button>
             </Space>
@@ -924,7 +895,7 @@ export default function CategorySpecificationsPage() {
           <div style={{ textAlign: 'right', marginTop: 12 }}>
             <Space>
               <Button onClick={() => setEditCategorySpecModalOpen(false)}>Hủy</Button>
-              <Button type="primary" htmlType="submit" style={{ backgroundColor: '#176B52' }}>
+              <Button type="primary" htmlType="submit" style={{ backgroundColor: '#126b60' }}>
                 Lưu thay đổi
               </Button>
             </Space>
@@ -1000,7 +971,7 @@ export default function CategorySpecificationsPage() {
           <div style={{ textAlign: 'right', marginTop: 12 }}>
             <Space>
               <Button onClick={() => setSpecModalOpen(false)}>Hủy</Button>
-              <Button type="primary" htmlType="submit" style={{ backgroundColor: '#176B52' }}>
+              <Button type="primary" htmlType="submit" style={{ backgroundColor: '#126b60' }}>
                 Lưu
               </Button>
             </Space>
@@ -1033,7 +1004,7 @@ export default function CategorySpecificationsPage() {
           <div style={{ textAlign: 'right', marginTop: 12 }}>
             <Space>
               <Button onClick={() => setGroupModalOpen(false)}>Hủy</Button>
-              <Button type="primary" htmlType="submit" style={{ backgroundColor: '#176B52' }}>
+              <Button type="primary" htmlType="submit" style={{ backgroundColor: '#126b60' }}>
                 Lưu
               </Button>
             </Space>

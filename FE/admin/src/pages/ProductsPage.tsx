@@ -1,3 +1,5 @@
+import Modal from '../components/FormModal';
+import PageHeading from '../components/PageHeading';
 import { useCallback, useRef, useState } from 'react';
 import {
   App,
@@ -10,7 +12,6 @@ import {
   Image,
   Input,
   InputNumber,
-  Modal,
   Select,
   Space,
   Table,
@@ -355,9 +356,7 @@ export default function ProductsPage() {
 
   return (
     <>
-      <div className="page-heading">
-        <h1 className="page-title">Sản phẩm</h1>
-        <Button
+      <PageHeading title="Sản phẩm" actions={<Button
           type="primary"
           disabled={busy || references.loading || !!references.error}
           onClick={() => {
@@ -372,8 +371,7 @@ export default function ProductsPage() {
           }}
         >
           Thêm sản phẩm
-        </Button>
-      </div>
+        </Button>} />
 
       <LoadError error={products.error} retry={products.reload} />
       <LoadError error={references.error} retry={references.reload} />
@@ -405,6 +403,7 @@ export default function ProductsPage() {
           <Button onClick={products.reload}>Làm mới</Button>
         </Space>
 
+        <div className="list-caption"><strong>Danh sách sản phẩm</strong><span>{products.data?.pagination?.total || 0} sản phẩm</span></div>
         <Table<Product>
           rowKey="ma_san_pham"
           loading={products.loading}

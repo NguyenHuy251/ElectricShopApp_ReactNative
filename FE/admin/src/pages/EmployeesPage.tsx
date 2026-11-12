@@ -1,6 +1,7 @@
+import Modal from '../components/FormModal';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Alert, App, Button, Form, Input, Modal, Space, Tag } from 'antd';
+import { Alert, App, Button, Form, Input,  Space, Tag } from 'antd';
 import { SafetyCertificateOutlined, UserAddOutlined } from '@ant-design/icons';
 import EmployeePermissionsModal, { type EmployeePermissionsHandle } from '../components/EmployeePermissionsModal';
 import { permissionApi, type StaffAccount } from '../api/permission.api';
