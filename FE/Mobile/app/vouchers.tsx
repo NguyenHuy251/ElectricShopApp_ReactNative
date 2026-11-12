@@ -1,16 +1,9 @@
+import { Pressable, Text, TextInput } from '@/components/ui';
+import { shop, layout, radius, space } from '@/constants/shop-theme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import {
-  Alert,
-  Keyboard,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { Alert, Keyboard, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { VoucherCard } from '../components/voucher-card';
 import { LoadingState } from '../components/shop-ui';
@@ -87,13 +80,13 @@ export default function VouchersScreen() {
         {/* Claim Promo Code Box */}
         <View style={styles.claimBox}>
           <View style={styles.claimInputWrap}>
-            <MaterialIcons name="confirmation-number" size={20} color="#087F8C" />
+            <MaterialIcons name="confirmation-number" size={20} color={shop.primary} />
             <TextInput
               style={styles.claimInput}
               value={inputCode}
               onChangeText={setInputCode}
-              placeholder="Nhập mã ưu đãi (Ví dụ: ESHOP20K...)"
-              placeholderTextColor="#7B8EA1"
+              placeholder="Nhập mã ưu đãi"
+              placeholderTextColor={shop.muted}
               autoCapitalize="characters"
               returnKeyType="done"
               onSubmitEditing={handleClaim}
@@ -144,7 +137,7 @@ export default function VouchersScreen() {
             <Text style={styles.refreshLink}>Làm mới danh sách</Text>
           </Pressable>
           <Pressable onPress={() => router.push('/rewards' as any)} style={styles.rewardLinkWrap}>
-            <MaterialIcons name="stars" size={16} color="#087F8C" />
+            <MaterialIcons name="stars" size={16} color={shop.primary} />
             <Text style={styles.rewardLink}>Săn thêm Voucher</Text>
           </Pressable>
         </View>
@@ -196,32 +189,32 @@ export default function VouchersScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#F4F7FB',
+    backgroundColor: shop.background,
   },
   content: {
-    padding: 20,
-    gap: 16,
+    padding: layout.gutter,
+    gap: space.md,
     width: '100%',
-    maxWidth: 760,
+    maxWidth: layout.maxWidth,
     alignSelf: 'center',
   },
   header: {
     gap: 6,
   },
   eyebrow: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#087F8C',
+    fontSize: 12,
+    fontWeight: '700',
+    color: shop.primary,
     letterSpacing: 1.2,
   },
   title: {
-    color: '#152D46',
+    color: shop.ink,
     fontSize: 26,
-    fontWeight: '800',
+    fontWeight: '700',
     letterSpacing: -0.5,
   },
   detail: {
-    color: '#66788A',
+    color: shop.muted,
     fontSize: 13,
     lineHeight: 20,
   },
@@ -230,34 +223,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
     backgroundColor: '#fff',
-    borderRadius: 16,
+    borderRadius: radius.md,
     padding: 8,
     paddingLeft: 12,
     borderWidth: 1,
-    borderColor: '#E2EBE2',
+    borderColor: shop.border,
   },
   claimInputWrap: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: space.xs,
   },
   claimInput: {
     flex: 1,
     fontSize: 13,
-    color: '#152D46',
+    color: shop.ink,
     fontWeight: '700',
     minHeight: 40,
   },
   claimBtn: {
-    backgroundColor: '#087F8C',
+    backgroundColor: shop.primary,
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 12,
   },
   claimBtnText: {
     color: '#fff',
-    fontWeight: '800',
+    fontWeight: '700',
     fontSize: 13,
   },
   btnDisabled: {
@@ -274,7 +267,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 8,
     alignItems: 'center',
-    borderRadius: 10,
+    borderRadius: radius.sm,
   },
   tabItemActive: {
     backgroundColor: '#fff',
@@ -287,10 +280,10 @@ const styles = StyleSheet.create({
   tabText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#66788A',
+    color: shop.muted,
   },
   tabTextActive: {
-    color: '#152D46',
+    color: shop.ink,
   },
   actionRow: {
     flexDirection: 'row',
@@ -299,7 +292,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   refreshLink: {
-    color: '#087F8C',
+    color: shop.primary,
     fontWeight: '700',
     fontSize: 12,
   },
@@ -309,36 +302,36 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   rewardLink: {
-    color: '#087F8C',
+    color: shop.primary,
     fontWeight: '700',
     fontSize: 12,
   },
   voucherList: {
-    gap: 12,
+    gap: space.sm,
   },
   error: {
     color: '#A52D2D',
     fontSize: 13,
   },
   empty: {
-    padding: 24,
+    padding: space.lg,
     backgroundColor: '#fff',
     borderRadius: 18,
     alignItems: 'center',
-    gap: 8,
+    gap: space.xs,
     borderWidth: 1,
-    borderColor: '#E2EBE2',
+    borderColor: shop.border,
   },
   emptyTitle: {
     fontSize: 15,
-    fontWeight: '800',
-    color: '#152D46',
+    fontWeight: '700',
+    color: shop.ink,
     textAlign: 'center',
     marginTop: 4,
   },
   emptyDetail: {
     fontSize: 12,
-    color: '#66788A',
+    color: shop.muted,
     textAlign: 'center',
     lineHeight: 18,
     maxWidth: 280,
@@ -351,20 +344,20 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   earnBtnText: {
-    color: '#087F8C',
-    fontWeight: '800',
+    color: shop.primary,
+    fontWeight: '700',
     fontSize: 12,
   },
   button: {
-    padding: 16,
+    padding: space.md,
     alignItems: 'center',
-    backgroundColor: '#087F8C',
-    borderRadius: 16,
+    backgroundColor: shop.primary,
+    borderRadius: radius.md,
     marginTop: 10,
   },
   buttonText: {
     color: '#fff',
-    fontWeight: '800',
+    fontWeight: '700',
     fontSize: 14,
   },
 });

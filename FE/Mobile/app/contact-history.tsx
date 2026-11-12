@@ -1,7 +1,9 @@
+import { Pressable, Text } from '@/components/ui';
+import { shop, layout, radius, space } from '@/constants/shop-theme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
-import { AppState, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AppState, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { EmptyState, LoadingState } from '../components/shop-ui';
 import { contactService } from '../services/contact.service';
@@ -46,12 +48,12 @@ export default function ContactHistoryScreen() {
 
   return <SafeAreaView style={styles.safe} edges={['bottom']}>
     <ScrollView contentContainerStyle={styles.content} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); void load(); }} />}>
-      <Pressable accessibilityLabel="Quay lại" onPress={() => router.back()} style={styles.back}><MaterialIcons name="arrow-back" size={22} color="#152D46" /><Text style={styles.backText}>Tài khoản</Text></Pressable>
+      <Pressable accessibilityLabel="Quay lại" onPress={() => router.back()} style={styles.back}><MaterialIcons name="arrow-back" size={22} color={shop.ink} /><Text style={styles.backText}>Tài khoản</Text></Pressable>
       <Text style={styles.eyebrow}>HỖ TRỢ KHÁCH HÀNG</Text>
       <Text style={styles.title}>Phản hồi của tôi</Text>
       <Text style={styles.subtitle}>Theo dõi các câu hỏi và trả lời từ cửa hàng.</Text>
       {error ? <Text style={styles.error}>{error}</Text> : null}
-      {!contacts.length ? <View style={styles.empty}><MaterialIcons name="forum" size={30} color="#087F8C" /><Text style={styles.emptyTitle}>Bạn chưa gửi liên hệ nào</Text><Pressable onPress={() => router.push('/contact')}><Text style={styles.link}>Gửi liên hệ đầu tiên</Text></Pressable></View> : contacts.map(contact => <View key={contact.ma_lien_he} style={styles.card}>
+      {!contacts.length ? <View style={styles.empty}><MaterialIcons name="forum" size={30} color={shop.primary} /><Text style={styles.emptyTitle}>Bạn chưa gửi liên hệ nào</Text><Pressable onPress={() => router.push('/contact')}><Text style={styles.link}>Gửi liên hệ đầu tiên</Text></Pressable></View> : contacts.map(contact => <View key={contact.ma_lien_he} style={styles.card}>
         <View style={styles.row}><Text style={styles.subject}>{contact.tieu_de}</Text><View style={[styles.badge, contact.trang_thai === 'DaPhanHoi' ? styles.replied : styles.waiting]}><Text style={styles.badgeText}>{contact.trang_thai === 'DaPhanHoi' ? 'Đã phản hồi' : 'Chờ phản hồi'}</Text></View></View>
         <Text style={styles.date}>{contact.ngay_gui ? formatDate(contact.ngay_gui) : ''}</Text>
         <Text style={styles.body}>{contact.noi_dung}</Text>
@@ -62,27 +64,27 @@ export default function ContactHistoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#F4F7FB' },
-  content: { padding: 20, gap: 14, paddingBottom: 36, width: '100%', maxWidth: 760, alignSelf: 'center' },
-  back: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 40 },
-  backText: { color: '#152D46', fontSize: 14, fontWeight: '700' },
-  eyebrow: { color: '#087F8C', fontSize: 10, fontWeight: '800', letterSpacing: 1.6 },
-  title: { color: '#152D46', fontSize: 28, fontWeight: '800' },
-  subtitle: { color: '#66788A', fontSize: 14, lineHeight: 21 },
-  card: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#E2E9F1', borderRadius: 20, padding: 17, gap: 8 },
+  safe: { flex: 1, backgroundColor: shop.background },
+  content: { padding: layout.gutter, gap: 14, paddingBottom: 36, width: '100%', maxWidth: layout.maxWidth, alignSelf: 'center' },
+  back: { flexDirection: 'row', alignItems: 'center', gap: space.xs, minHeight: 40 },
+  backText: { color: shop.ink, fontSize: 14, fontWeight: '700' },
+  eyebrow: { color: shop.primary, fontSize: 12, fontWeight: '700', letterSpacing: 1.6 },
+  title: { color: shop.ink, fontSize: 28, fontWeight: '700' },
+  subtitle: { color: shop.muted, fontSize: 14, lineHeight: 21 },
+  card: { backgroundColor: shop.surface, borderWidth: 1, borderColor: shop.border, borderRadius: radius.md, padding: layout.gutter, gap: space.sm },
   row: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 },
-  subject: { flex: 1, color: '#152D46', fontSize: 16, fontWeight: '800' },
+  subject: { flex: 1, color: shop.ink, fontSize: 16, fontWeight: '700' },
   badge: { borderRadius: 999, paddingHorizontal: 9, paddingVertical: 6 },
   waiting: { backgroundColor: '#F8EEDB' },
-  replied: { backgroundColor: '#E7F4F5' },
-  badgeText: { color: '#152D46', fontSize: 11, fontWeight: '800' },
-  date: { color: '#7B8EA1', fontSize: 12 },
+  replied: { backgroundColor: shop.soft },
+  badgeText: { color: shop.ink, fontSize: 12, fontWeight: '700' },
+  date: { color: shop.muted, fontSize: 12 },
   body: { color: '#556B80', fontSize: 14, lineHeight: 22 },
-  reply: { backgroundColor: '#EDF4E9', borderRadius: 13, padding: 13, gap: 6, marginTop: 5 },
-  replyLabel: { color: '#087F8C', fontSize: 12, fontWeight: '800' },
-  muted: { color: '#7B8EA1', fontSize: 13 },
+  reply: { backgroundColor: shop.soft, borderLeftWidth: 3, borderColor: shop.primary, borderRadius: 8, padding: space.md, gap: space.xs, marginTop: 12 },
+  replyLabel: { color: shop.primary, fontSize: 12, fontWeight: '700' },
+  muted: { color: shop.muted, fontSize: 13 },
   error: { color: '#A52D2D', fontSize: 13 },
   empty: { backgroundColor: '#fff', borderRadius: 20, padding: 28, alignItems: 'center', gap: 10 },
-  emptyTitle: { color: '#152D46', fontSize: 15, fontWeight: '800' },
-  link: { color: '#087F8C', fontSize: 13, fontWeight: '800', paddingVertical: 5 },
+  emptyTitle: { color: shop.ink, fontSize: 15, fontWeight: '700' },
+  link: { color: shop.primary, fontSize: 13, fontWeight: '700', paddingVertical: 5 },
 });

@@ -1,7 +1,9 @@
+import { Pressable, Text, TextInput } from '@/components/ui';
+import { shop, layout, radius, space } from '@/constants/shop-theme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenHeading } from '../components/shop-ui';
 import { authService } from '../services/auth.service';
@@ -72,7 +74,7 @@ export default function ContactScreen() {
         onChangeText={value => setField(key, value)}
         editable={!sending}
         placeholder={placeholder}
-        placeholderTextColor="#7B8EA1"
+        placeholderTextColor={shop.muted}
         multiline={multiline}
         maxLength={key === 'noi_dung' ? 5000 : key === 'tieu_de' ? 200 : key === 'so_dien_thoai' ? 15 : 100}
         keyboardType={key === 'email' ? 'email-address' : key === 'so_dien_thoai' ? 'phone-pad' : 'default'}
@@ -87,7 +89,7 @@ export default function ContactScreen() {
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <KeyboardAvoidingView style={styles.safe} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-          <Pressable accessibilityLabel="Quay lại" onPress={() => router.back()} style={styles.back}><MaterialIcons name="arrow-back" size={22} color="#152D46" /><Text style={styles.backText}>Tài khoản</Text></Pressable>
+          <Pressable accessibilityLabel="Quay lại" onPress={() => router.back()} style={styles.back}><MaterialIcons name="arrow-back" size={22} color={shop.ink} /><Text style={styles.backText}>Tài khoản</Text></Pressable>
           <ScreenHeading eyebrow="KẾT NỐI VỚI CỬA HÀNG" title="Gửi liên hệ" subtitle="Để lại câu hỏi hoặc góp ý, chúng tôi sẽ phản hồi sớm." icon="support-agent" />
           <View style={styles.card}>
             {notice ? <View style={styles.success}><Text accessibilityRole="alert" style={styles.successText}>{notice}</Text><Pressable accessibilityRole="button" onPress={() => router.push('/contact-history')}><Text style={styles.successText}>Xem phản hồi của tôi →</Text></Pressable></View> : null}
@@ -109,19 +111,19 @@ export default function ContactScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#F4F7FB' },
-  content: { padding: 20, gap: 16, paddingBottom: 36, width: '100%', maxWidth: 760, alignSelf: 'center' },
-  back: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 40 },
-  backText: { color: '#152D46', fontSize: 14, fontWeight: '700' },
-  card: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#E2E9F1', borderRadius: 22, padding: 18, gap: 14 },
+  safe: { flex: 1, backgroundColor: shop.background },
+  content: { padding: layout.gutter, gap: space.md, paddingBottom: 36, width: '100%', maxWidth: layout.maxWidth, alignSelf: 'center' },
+  back: { flexDirection: 'row', alignItems: 'center', gap: space.xs, minHeight: 40 },
+  backText: { color: shop.ink, fontSize: 14, fontWeight: '700' },
+  card: { backgroundColor: shop.surface, borderWidth: 1, borderColor: shop.border, borderRadius: radius.md, padding: layout.gutter, gap: 20 },
   field: { gap: 7 },
-  label: { color: '#152D46', fontSize: 13, fontWeight: '700' },
-  input: { minHeight: 50, borderWidth: 1, borderColor: '#D9E2D8', borderRadius: 12, color: '#152D46', fontSize: 15, paddingHorizontal: 14, backgroundColor: '#FAFCF8' },
+  label: { color: shop.ink, fontSize: 13, fontWeight: '600' },
+  input: { minHeight: 50, borderWidth: 1, borderColor: shop.border, borderRadius: 12, color: shop.ink, fontSize: 15, paddingHorizontal: 14, backgroundColor: shop.surfaceMuted },
   multiline: { minHeight: 140, paddingTop: 12, textAlignVertical: 'top' },
-  counter: { color: '#66788A', fontSize: 11, textAlign: 'right' },
-  button: { minHeight: 54, borderRadius: 14, backgroundColor: '#087F8C', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 9, padding: 14, marginTop: 4 },
-  buttonText: { color: '#fff', fontSize: 15, fontWeight: '800' },
+  counter: { color: shop.muted, fontSize: 12, textAlign: 'right' },
+  button: { minHeight: 54, borderRadius: 14, backgroundColor: shop.primary, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 9, padding: 14, marginTop: 4 },
+  buttonText: { color: '#fff', fontSize: 15, fontWeight: '700' },
   disabled: { opacity: 0.6 },
-  success: { padding:14,backgroundColor:'#E7F4F5',borderRadius:12,gap:10 },
-  successText: { color:'#087F8C',fontSize:13,lineHeight:21,fontWeight:'600' },
+  success: { padding:14,backgroundColor:shop.soft,borderRadius:12,gap:10 },
+  successText: { color:shop.primary,fontSize:13,lineHeight:21,fontWeight:'600' },
 });

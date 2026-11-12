@@ -1,14 +1,15 @@
+import { Pressable, Text, TextInput } from '@/components/ui';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import api from '@/services/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { productService } from '../../services/product.service';
 import { categoryService, type Category } from '../../services/category.service';
 import type { Product } from '../../types';
 import { EmptyState, LoadingState, ProductCard, ScreenHeading } from '@/components/shop-ui';
-import { shop } from '@/constants/shop-theme';
+import { shop, layout, radius, space } from '@/constants/shop-theme';
 import { getApiMessage } from '@/utils/format';
 
 export default function ProductsScreen() {
@@ -87,15 +88,15 @@ export default function ProductsScreen() {
       <View style={styles.container}>
         <ScreenHeading eyebrow="KHÁM PHÁ" title="Chọn cho tổ ấm" subtitle="Những tiện ích nhỏ, cho cuộc sống dễ dàng hơn." icon="grid-view" />
         <View style={styles.searchBox}>
-          <MaterialIcons name="search" size={21} color="#66788A" />
+          <MaterialIcons name="search" size={21} color={shop.muted} />
           <TextInput
             placeholder="Tìm sản phẩm, mã hoặc danh mục"
-            placeholderTextColor="#7B8EA1"
+            placeholderTextColor={shop.muted}
             value={search}
             onChangeText={setSearch}
             style={styles.search}
           />
-          {search ? <Pressable onPress={() => setSearch('')}><MaterialIcons name="close" size={20} color="#66788A" /></Pressable> : null}
+          {search ? <Pressable onPress={() => setSearch('')}><MaterialIcons name="close" size={20} color={shop.muted} /></Pressable> : null}
         </View>
 
         <Pressable
@@ -130,11 +131,11 @@ export default function ProductsScreen() {
         <View style={styles.priceRow}>
           <View style={styles.priceField}>
             <Text style={styles.priceLabel}>Giá từ (đ)</Text>
-            <TextInput accessibilityLabel="Giá từ" placeholder="Ví dụ: 100000" placeholderTextColor="#7B8EA1" keyboardType="number-pad" value={min} onChangeText={setMin} selectionColor={shop.primary} style={styles.priceInput} />
+            <TextInput accessibilityLabel="Giá từ" placeholder="Ví dụ: 100000" placeholderTextColor={shop.muted} keyboardType="number-pad" value={min} onChangeText={setMin} selectionColor={shop.primary} style={styles.priceInput} />
           </View>
           <View style={styles.priceField}>
             <Text style={styles.priceLabel}>Giá đến (đ)</Text>
-            <TextInput accessibilityLabel="Giá đến" placeholder="Ví dụ: 5000000" placeholderTextColor="#7B8EA1" keyboardType="number-pad" value={max} onChangeText={setMax} selectionColor={shop.primary} style={styles.priceInput} />
+            <TextInput accessibilityLabel="Giá đến" placeholder="Ví dụ: 5000000" placeholderTextColor={shop.muted} keyboardType="number-pad" value={max} onChangeText={setMax} selectionColor={shop.primary} style={styles.priceInput} />
           </View>
         </View>
         <ScrollView horizontal style={{flexGrow:0,flexShrink:0}} contentContainerStyle={styles.categories}>{[['newest','Mới nhất'],['price_asc','Giá tăng'],['price_desc','Giá giảm'],['bestseller','Bán chạy']].map(([value,label])=><Pressable key={value} onPress={()=>setSort(value)} style={[styles.chip,sort===value && styles.chipActive]}><Text style={[styles.chipText,sort===value && styles.chipTextActive]}>{label}</Text></Pressable>)}</ScrollView>
@@ -166,25 +167,25 @@ export default function ProductsScreen() {
 }
 
 const styles = StyleSheet.create({
-  filterToggle: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 8, marginVertical: 6 },
+  filterToggle: { minHeight: layout.touch, flexDirection: 'row', alignItems: 'center', gap: space.xs, marginVertical: 12, paddingHorizontal: 12, borderRadius: 12, backgroundColor: shop.soft },
   filterToggleText: { color: shop.primary, fontSize: 13, fontWeight: '700', flex: 1 },
   filterCount: { color: shop.muted, fontSize: 12 },
-  resultCount: { color: shop.muted, fontSize: 12, marginBottom: 16 },
+  resultCount: { color: shop.muted, fontSize: 13, marginBottom: 16, marginTop: 8 },
   productCell: { flex: 1, maxWidth: '49%', marginBottom: 14 },
-  safe: { flex: 1, backgroundColor: '#F4F7FB' },
-  container: { flex: 1, paddingHorizontal: 20, paddingTop: 12, width: '100%', maxWidth: 760, alignSelf: 'center' },
-  searchBox: { height: 54, flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#fff', borderRadius: 18, borderWidth: 1, borderColor: '#E2E9F1', paddingHorizontal: 12 },
-  search: { flex: 1, color: '#152D46', fontSize: 14 },
-  priceRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
+  safe: { flex: 1, backgroundColor: shop.background },
+  container: { flex: 1, paddingHorizontal: layout.gutter, paddingTop: 12, width: '100%', maxWidth: layout.maxWidth, alignSelf: 'center' },
+  searchBox: { minHeight: 54, flexDirection: 'row', alignItems: 'center', gap: space.sm, backgroundColor: shop.surface, borderRadius: radius.md, borderWidth: 1, borderColor: shop.border, paddingHorizontal: 16 },
+  search: { flex: 1, color: shop.ink, fontSize: 14 },
+  priceRow: { flexDirection: 'row', alignItems: 'flex-start', gap: space.sm },
   priceField: { flex: 1, minWidth: 0, gap: 6 },
   priceLabel: { color: '#556B80', fontSize: 12, fontWeight: '600' },
-  priceInput: { minHeight: 48, color: '#152D46', fontSize: 16, backgroundColor: '#fff', borderRadius: 12, borderWidth: 1, borderColor: '#E2E9F1', paddingHorizontal: 12, paddingVertical: 10, textAlignVertical: 'center' },
-  categories: { gap: 8, paddingVertical: 14 },
-  chip: { height: 36, justifyContent: 'center', paddingHorizontal: 14, borderRadius: 18, backgroundColor: '#fff', borderWidth: 1, borderColor: '#E2E9F1' },
-  chipActive: { backgroundColor: '#152D46', borderColor: '#152D46' },
-  chipText: { color: '#66788A', fontSize: 12, fontWeight: '700' },
+  priceInput: { minHeight: layout.touch, color: shop.ink, fontSize: 16, backgroundColor: '#fff', borderRadius: 12, borderWidth: 1, borderColor: shop.border, paddingHorizontal: 12, paddingVertical: 10, textAlignVertical: 'center' },
+  categories: { gap: space.xs, paddingVertical: 14 },
+  chip: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 16, borderRadius: 12, backgroundColor: shop.surface, borderWidth: 1, borderColor: shop.border },
+  chipActive: { backgroundColor: shop.primary, borderColor: shop.primary },
+  chipText: { color: shop.muted, fontSize: 12, fontWeight: '700' },
   chipTextActive: { color: '#fff' },
   list: { paddingBottom: 24 },
   emptyList: { flexGrow: 1, alignItems: 'center', justifyContent: 'center' },
-  row: { gap: 12 },
+  row: { gap: space.sm },
 });

@@ -1,17 +1,10 @@
+import { Pressable, Text } from '@/components/ui';
+import { shop, layout, radius, space } from '@/constants/shop-theme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import {
-  Alert,
-  Linking,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Alert, Linking, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LoadingState } from '../components/shop-ui';
 import {
@@ -214,7 +207,7 @@ export default function RewardsScreen() {
       voucherCode: null,
       icon: 'star',
       bg: '#EAF8F0',
-      iconColor: '#087F8C',
+      iconColor: shop.primary,
     },
     {
       moc: 7,
@@ -267,13 +260,13 @@ export default function RewardsScreen() {
             <View>
               <Text style={styles.heroEyebrow}>KHO XU & TÍCH ĐIỂM THƯỞNG</Text>
               <View style={styles.coinRow}>
-                <MaterialCommunityIcons name="bitcoin" size={32} color="#A5EEE3" />
+                <MaterialCommunityIcons name="bitcoin" size={32} color={shop.accent} />
                 <Text style={styles.coinAmount}>{currentPoints.toLocaleString('vi-VN')}</Text>
                 <Text style={styles.coinUnit}>Xu</Text>
               </View>
             </View>
             <Pressable style={styles.inviteBadge} onPress={() => router.push('/referral' as any)}>
-              <MaterialIcons name="group-add" size={18} color="#152D46" />
+              <MaterialIcons name="group-add" size={18} color={shop.ink} />
               <Text style={styles.inviteBadgeText}>Mời bạn +500 Xu</Text>
             </Pressable>
           </View>
@@ -284,7 +277,7 @@ export default function RewardsScreen() {
         <View style={styles.sectionCard}>
           <View style={styles.cardHeader}>
             <View style={styles.titleRow}>
-              <MaterialIcons name="event-available" size={24} color="#087F8C" />
+              <MaterialIcons name="event-available" size={24} color={shop.primary} />
               <Text style={styles.cardTitle}>Hành trình Điểm danh 30 ngày</Text>
             </View>
             <View style={styles.streakBadge}>
@@ -299,7 +292,7 @@ export default function RewardsScreen() {
           {/* Legend indicator */}
           <View style={styles.gridLegendRow}>
             <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: '#087F8C' }]} />
+              <View style={[styles.legendDot, { backgroundColor: shop.primary }]} />
               <Text style={styles.legendText}>Đã điểm danh</Text>
             </View>
             <View style={styles.legendItem}>
@@ -335,7 +328,7 @@ export default function RewardsScreen() {
                   <MaterialIcons
                     name={(isChecked ? 'check-circle' : item.icon) as any}
                     size={16}
-                    color={isChecked ? '#fff' : isBigMilestone ? '#D97706' : '#087F8C'}
+                    color={isChecked ? '#fff' : isBigMilestone ? '#D97706' : shop.primary}
                   />
                   <Text style={[styles.gridCellPoints, isChecked && styles.gridCellPointsChecked]}>
                     +{item.points >= 1000 ? '1K' : item.points}
@@ -354,7 +347,7 @@ export default function RewardsScreen() {
             <MaterialIcons
               name={status?.da_diem_danh_hom_nay ? 'check' : 'touch-app'}
               size={22}
-              color={status?.da_diem_danh_hom_nay ? '#556A60' : '#152D46'}
+              color={status?.da_diem_danh_hom_nay ? '#556A60' : shop.ink}
             />
             <Text style={[styles.checkinButtonText, status?.da_diem_danh_hom_nay && styles.checkinButtonTextDone]}>
               {status?.da_diem_danh_hom_nay
@@ -422,7 +415,7 @@ export default function RewardsScreen() {
                     <View style={styles.milestoneActionWrap}>
                       {isClaimed ? (
                         <View style={styles.btnClaimed}>
-                          <MaterialIcons name="check-circle" size={16} color="#087F8C" />
+                          <MaterialIcons name="check-circle" size={16} color={shop.primary} />
                           <Text style={styles.btnClaimedText}>Đã nhận</Text>
                         </View>
                       ) : canClaim ? (
@@ -431,14 +424,14 @@ export default function RewardsScreen() {
                           onPress={() => handleClaimMilestone(item.moc)}
                           disabled={isClaiming}
                         >
-                          <MaterialIcons name="redeem" size={16} color="#152D46" />
+                          <MaterialIcons name="redeem" size={16} color={shop.ink} />
                           <Text style={styles.btnClaimNowText}>
                             {isClaiming ? 'Đang nhận...' : 'Nhận quà'}
                           </Text>
                         </Pressable>
                       ) : (
                         <View style={styles.btnLocked}>
-                          <MaterialIcons name="lock" size={14} color="#7B8EA1" />
+                          <MaterialIcons name="lock" size={14} color={shop.muted} />
                           <Text style={styles.btnLockedText}>Chưa đạt</Text>
                         </View>
                       )}
@@ -454,7 +447,7 @@ export default function RewardsScreen() {
         <View style={styles.sectionCard}>
           <View style={styles.cardHeader}>
             <View style={styles.titleRow}>
-              <MaterialCommunityIcons name="ferris-wheel" size={24} color="#087F8C" />
+              <MaterialCommunityIcons name="ferris-wheel" size={24} color={shop.primary} />
               <Text style={styles.cardTitle}>Vòng quay may mắn</Text>
             </View>
           </View>
@@ -476,7 +469,7 @@ export default function RewardsScreen() {
             <MaterialCommunityIcons
               name={status?.da_quay_hom_nay ? 'check-circle' : 'play-circle'}
               size={24}
-              color="#152D46"
+              color={shop.ink}
             />
             <Text style={[styles.spinButtonText, status?.da_quay_hom_nay && styles.spinButtonTextDone]}>
               {spinning
@@ -492,7 +485,7 @@ export default function RewardsScreen() {
         <View style={styles.sectionCard}>
           <View style={styles.cardHeader}>
             <View style={styles.titleRow}>
-              <MaterialIcons name="local-offer" size={24} color="#087F8C" />
+              <MaterialIcons name="local-offer" size={24} color={shop.primary} />
               <Text style={styles.cardTitle}>Đổi Xu lấy Voucher mua sắm</Text>
             </View>
           </View>
@@ -507,13 +500,13 @@ export default function RewardsScreen() {
                 <View key={v.code} style={styles.voucherItem}>
                   <View style={styles.voucherLeft}>
                     <View style={styles.voucherIconBox}>
-                      <MaterialIcons name="confirmation-number" size={24} color="#087F8C" />
+                      <MaterialIcons name="confirmation-number" size={24} color={shop.primary} />
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.voucherItemTitle}>{v.title}</Text>
                       <Text style={styles.voucherItemMeta}>Đơn tối thiểu {formatCurrency(v.don_toi_thieu)}</Text>
                       <View style={styles.costBadge}>
-                        <MaterialCommunityIcons name="bitcoin" size={14} color="#087F8C" />
+                        <MaterialCommunityIcons name="bitcoin" size={14} color={shop.primary} />
                         <Text style={styles.costText}>{v.xu_can} Xu</Text>
                       </View>
                     </View>
@@ -537,71 +530,63 @@ export default function RewardsScreen() {
         {/* Invite Friends Promotion Banner */}
         <Pressable style={styles.inviteBanner} onPress={() => router.push('/referral' as any)}>
           <View style={styles.inviteIcon}>
-            <MaterialIcons name="share" size={26} color="#087F8C" />
+            <MaterialIcons name="share" size={26} color={shop.primary} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.inviteTitle}>Mời bạn bè, nhận ngay 50.000đ</Text>
             <Text style={styles.inviteText}>Tặng mã quà tặng cho bạn bè và nhận +500 Xu khi họ tham gia.</Text>
           </View>
-          <MaterialIcons name="chevron-right" size={24} color="#087F8C" />
+          <MaterialIcons name="chevron-right" size={24} color={shop.primary} />
         </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function Tag({ color, text }: { color: string; text: string }) {
-  return (
-    <View style={[styles.tag, { borderColor: color }]}>
-      <Text style={[styles.tagText, { color }]}>{text}</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#F4F7FB' },
-  content: { padding: 18, paddingBottom: 36, maxWidth: 760, width: '100%', alignSelf: 'center', gap: 18 },
+  safe: { flex: 1, backgroundColor: shop.background },
+  content: { padding: 18, paddingBottom: 36, maxWidth: layout.maxWidth, width: '100%', alignSelf: 'center', gap: 18 },
   heroCard: {
-    backgroundColor: '#152D46',
-    borderRadius: 24,
-    padding: 22,
+    backgroundColor: shop.ink,
+    borderRadius: radius.lg,
+    padding: space.lg,
     shadowColor: '#000',
-    shadowOpacity: 0.08,
+    shadowOpacity: 0,
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 12,
-    elevation: 3,
+    elevation: 0,
   },
-  heroHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 },
-  heroEyebrow: { color: '#A5EEE3', fontSize: 10, fontWeight: '800', letterSpacing: 1.3 },
+  heroHeader: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: space.md },
+  heroEyebrow: { color: shop.accent, fontSize: 12, fontWeight: '700', letterSpacing: 1.3 },
   coinRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
-  coinAmount: { color: '#fff', fontSize: 32, fontWeight: '900', letterSpacing: -0.5 },
-  coinUnit: { color: '#A5EEE3', fontSize: 16, fontWeight: '700', marginTop: 8 },
+  coinAmount: { color: '#fff', fontSize: 32, fontWeight: '700', letterSpacing: -0.5 },
+  coinUnit: { color: shop.accent, fontSize: 16, fontWeight: '700', marginTop: 8 },
   inviteBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#A5EEE3',
+    backgroundColor: shop.accent,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
     marginTop: 4,
   },
-  inviteBadgeText: { color: '#152D46', fontSize: 12, fontWeight: '800' },
-  heroSubtitle: { color: '#C9D8CE', fontSize: 12, lineHeight: 18, marginTop: 12 },
+  inviteBadgeText: { color: shop.ink, fontSize: 12, fontWeight: '700' },
+  heroSubtitle: { color: '#C9D8CE', fontSize: 14, lineHeight: 22, marginTop: 12 },
 
   sectionCard: {
     backgroundColor: '#fff',
-    borderRadius: 22,
-    padding: 18,
+    borderRadius: radius.md,
+    padding: layout.gutter,
     borderWidth: 1,
-    borderColor: '#E8EFE5',
+    borderColor: shop.border,
   },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  cardTitle: { color: '#152D46', fontSize: 16, fontWeight: '800' },
+  cardHeader: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: space.xs, flexShrink: 1 },
+  cardTitle: { color: shop.ink, fontSize: 18, lineHeight: 25, fontWeight: '700', flexShrink: 1 },
   streakBadge: { backgroundColor: '#FFF5E5', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
-  streakText: { color: '#B36B00', fontSize: 12, fontWeight: '800' },
-  cardDesc: { color: '#6A7D75', fontSize: 12, lineHeight: 18, marginBottom: 14 },
+  streakText: { color: '#B36B00', fontSize: 12, fontWeight: '700' },
+  cardDesc: { color: shop.muted, fontSize: 14, lineHeight: 22, marginBottom: 14 },
 
   gridLegendRow: {
     flexDirection: 'row',
@@ -625,8 +610,8 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   legendText: {
-    fontSize: 11,
-    color: '#6A7D75',
+    fontSize: 12,
+    color: shop.muted,
     fontWeight: '700',
   },
 
@@ -640,7 +625,7 @@ const styles = StyleSheet.create({
   gridCell: {
     width: '15.2%',
     minHeight: 54,
-    backgroundColor: '#F8FAF7',
+    backgroundColor: shop.surfaceMuted,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#EDF3EC',
@@ -650,8 +635,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 1,
   },
   gridCellChecked: {
-    backgroundColor: '#087F8C',
-    borderColor: '#087F8C',
+    backgroundColor: shop.primary,
+    borderColor: shop.primary,
   },
   gridCellToday: {
     borderColor: '#D97706',
@@ -663,36 +648,36 @@ const styles = StyleSheet.create({
     borderColor: '#FDE68A',
   },
   gridCellDay: {
-    fontSize: 9,
-    fontWeight: '800',
-    color: '#6A7D75',
+    fontSize: 11,
+    fontWeight: '700',
+    color: shop.muted,
     marginBottom: 1,
   },
   gridCellDayChecked: {
     color: '#fff',
   },
   gridCellPoints: {
-    fontSize: 8,
+    fontSize: 11,
     fontWeight: '700',
-    color: '#152D46',
+    color: shop.ink,
     marginTop: 1,
   },
   gridCellPointsChecked: {
-    color: '#A5EEE3',
+    color: shop.accent,
   },
 
   checkinButton: {
-    backgroundColor: '#A5EEE3',
-    borderRadius: 16,
+    backgroundColor: shop.accent,
+    borderRadius: radius.md,
     paddingVertical: 14,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: space.xs,
   },
   checkinButtonDone: { backgroundColor: '#EDF2EB' },
-  checkinButtonText: { color: '#152D46', fontSize: 14, fontWeight: '800', letterSpacing: 0.5 },
-  checkinButtonTextDone: { color: '#6A7D75' },
+  checkinButtonText: { color: shop.ink, fontSize: 14, fontWeight: '700', letterSpacing: 0.5 },
+  checkinButtonTextDone: { color: shop.muted },
 
   milestonesContainer: { marginTop: 20, paddingTop: 16, borderTopWidth: 1, borderTopColor: '#EDF3EC' },
   milestoneHeaderRow: {
@@ -701,24 +686,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
-  milestoneTitle: { color: '#6A7D75', fontSize: 10, fontWeight: '800', letterSpacing: 0.8 },
-  milestoneSubtitle: { color: '#087F8C', fontSize: 11, fontWeight: '700' },
+  milestoneTitle: { color: shop.muted, fontSize: 12, fontWeight: '700', letterSpacing: 0.8 },
+  milestoneSubtitle: { color: shop.primary, fontSize: 12, fontWeight: '700' },
 
   milestonesList: { gap: 10 },
   milestoneCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FAFCF9',
-    borderRadius: 16,
+    borderRadius: radius.md,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#E8EFE5',
-    gap: 12,
+    borderColor: shop.border,
+    gap: space.sm,
   },
   milestoneCardCanClaim: {
-    borderColor: '#087F8C',
+    borderColor: shop.primary,
     backgroundColor: '#F5FAF6',
-    shadowColor: '#087F8C',
+    shadowColor: shop.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.12,
     shadowRadius: 6,
@@ -737,15 +722,15 @@ const styles = StyleSheet.create({
   },
   milestoneInfo: { flex: 1, gap: 3 },
   milestoneNameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  milestoneNameText: { color: '#152D46', fontSize: 13, fontWeight: '800' },
+  milestoneNameText: { color: shop.ink, fontSize: 13, fontWeight: '700' },
   codePill: {
     backgroundColor: '#EAF0E8',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 6,
   },
-  codePillText: { color: '#556A60', fontSize: 9, fontWeight: '700' },
-  milestoneRewardText: { color: '#087F8C', fontSize: 12, fontWeight: '700' },
+  codePillText: { color: '#556A60', fontSize: 11, fontWeight: '700' },
+  milestoneRewardText: { color: shop.primary, fontSize: 12, fontWeight: '700' },
 
   progressBarWrap: { marginTop: 4, gap: 2 },
   progressTrack: {
@@ -756,10 +741,10 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#087F8C',
+    backgroundColor: shop.primary,
     borderRadius: 3,
   },
-  progressLabel: { fontSize: 9, color: '#74877F', fontWeight: '600' },
+  progressLabel: { fontSize: 11, color: '#74877F', fontWeight: '600' },
 
   milestoneActionWrap: {
     alignItems: 'flex-end',
@@ -768,7 +753,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#A5EEE3',
+    backgroundColor: shop.accent,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 12,
@@ -776,22 +761,22 @@ const styles = StyleSheet.create({
     borderColor: '#C6E87A',
   },
   btnClaimNowText: {
-    color: '#152D46',
+    color: shop.ink,
     fontSize: 12,
-    fontWeight: '800',
+    fontWeight: '700',
   },
   btnClaimed: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#EAF5EE',
+    backgroundColor: shop.soft,
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 10,
+    borderRadius: radius.sm,
   },
   btnClaimedText: {
-    color: '#087F8C',
-    fontSize: 11,
+    color: shop.primary,
+    fontSize: 12,
     fontWeight: '700',
   },
   btnLocked: {
@@ -801,11 +786,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#EDF2EB',
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 10,
+    borderRadius: radius.sm,
   },
   btnLockedText: {
-    color: '#7B8EA1',
-    fontSize: 11,
+    color: shop.muted,
+    fontSize: 12,
     fontWeight: '600',
   },
   btnDisabled: {
@@ -816,81 +801,79 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFDF0',
     borderWidth: 1,
     borderColor: '#FEE8A2',
-    borderRadius: 16,
+    borderRadius: radius.md,
     padding: 14,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: space.sm,
     marginBottom: 14,
   },
-  spinPrizeTitle: { color: '#8A5C00', fontSize: 13, fontWeight: '800' },
-  spinPrizeList: { color: '#997300', fontSize: 11, marginTop: 4, lineHeight: 16 },
+  spinPrizeTitle: { color: '#8A5C00', fontSize: 13, fontWeight: '700' },
+  spinPrizeList: { color: '#997300', fontSize: 12, marginTop: 4, lineHeight: 16 },
   spinButton: {
-    backgroundColor: '#A5EEE3',
-    borderRadius: 16,
+    backgroundColor: shop.accent,
+    borderRadius: radius.md,
     paddingVertical: 14,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: space.xs,
   },
   spinButtonDisabled: { backgroundColor: '#EDF2EB' },
-  spinButtonText: { color: '#152D46', fontSize: 13, fontWeight: '800' },
-  spinButtonTextDone: { color: '#6A7D75' },
+  spinButtonText: { color: shop.ink, fontSize: 13, fontWeight: '700' },
+  spinButtonTextDone: { color: shop.muted },
 
   voucherList: { gap: 10, marginTop: 6 },
   voucherItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#F8FAF7',
-    borderRadius: 16,
+    backgroundColor: shop.surfaceMuted,
+    borderRadius: radius.md,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#E8EFE5',
-    gap: 12,
+    borderColor: shop.border,
+    gap: space.sm,
   },
   voucherLeft: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 },
   voucherIconBox: {
     width: 42,
-    height: 42,
+    minHeight: 44,
     borderRadius: 14,
     backgroundColor: '#EAF8F0',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  voucherItemTitle: { color: '#152D46', fontSize: 13, fontWeight: '800' },
-  voucherItemMeta: { color: '#74877F', fontSize: 11, marginTop: 2 },
+  voucherItemTitle: { color: shop.ink, fontSize: 13, fontWeight: '700' },
+  voucherItemMeta: { color: '#74877F', fontSize: 12, marginTop: 2 },
   costBadge: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 4 },
-  costText: { color: '#087F8C', fontSize: 11, fontWeight: '800' },
+  costText: { color: shop.primary, fontSize: 12, fontWeight: '700' },
   exchangeButton: {
-    backgroundColor: '#087F8C',
+    backgroundColor: shop.primary,
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 12,
   },
   exchangeButtonDisabled: { backgroundColor: '#D8E2D7' },
-  exchangeButtonText: { color: '#fff', fontSize: 12, fontWeight: '800' },
-  exchangeButtonTextDisabled: { color: '#7B8EA1' },
+  exchangeButtonText: { color: '#fff', fontSize: 12, fontWeight: '700' },
+  exchangeButtonTextDisabled: { color: shop.muted },
 
   inviteBanner: {
-    backgroundColor: '#152D46',
+    backgroundColor: shop.ink,
     borderRadius: 20,
-    padding: 16,
+    padding: space.md,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: space.sm,
   },
   inviteIcon: {
     width: 44,
     height: 44,
-    borderRadius: 16,
+    borderRadius: radius.md,
     backgroundColor: '#23455E',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  inviteTitle: { color: '#fff', fontSize: 13, fontWeight: '800' },
-  inviteText: { color: '#C9D8CE', fontSize: 11, marginTop: 3 },
-  tag: { borderWidth: 1, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 3 },
-  tagText: { fontSize: 11, fontWeight: '700' },
+  inviteTitle: { color: '#fff', fontSize: 13, fontWeight: '700' },
+  inviteText: { color: '#C9D8CE', fontSize: 12, marginTop: 3 },
 });

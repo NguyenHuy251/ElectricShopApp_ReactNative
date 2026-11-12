@@ -1,8 +1,10 @@
+import { Pressable, Text, TextInput } from '@/components/ui';
+import { shop, layout, radius, space } from '@/constants/shop-theme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { EmptyState, LoadingState, ProductImage } from '../components/shop-ui';
 import { authService } from '../services/auth.service';
@@ -165,7 +167,7 @@ function CheckoutContent({ initialSelection }: { initialSelection: CheckoutSelec
 
   const field = (key: keyof Form, label: string, placeholder: string, maxLength: number, multiline = false) => <View style={styles.field} key={key}>
     <Text style={styles.label}>{label}</Text>
-    <TextInput editable={!checking && !submitting} accessibilityLabel={label} value={form[key]} onChangeText={value => change(key, value)} placeholder={placeholder} placeholderTextColor="#7B8EA1" maxLength={maxLength} multiline={multiline} keyboardType={key === 'so_dien_thoai' ? 'phone-pad' : 'default'} autoComplete={key === 'so_dien_thoai' ? 'tel' : key === 'ho_ten_nguoi_nhan' ? 'name' : 'off'} style={[styles.input, multiline && styles.multiline, Boolean(fieldErrors[key]) && styles.invalid]} />
+    <TextInput editable={!checking && !submitting} accessibilityLabel={label} value={form[key]} onChangeText={value => change(key, value)} placeholder={placeholder} placeholderTextColor={shop.muted} maxLength={maxLength} multiline={multiline} keyboardType={key === 'so_dien_thoai' ? 'phone-pad' : 'default'} autoComplete={key === 'so_dien_thoai' ? 'tel' : key === 'ho_ten_nguoi_nhan' ? 'name' : 'off'} style={[styles.input, multiline && styles.multiline, Boolean(fieldErrors[key]) && styles.invalid]} />
     {fieldErrors[key] ? <Text accessibilityRole="alert" style={styles.errorText}>{fieldErrors[key]}</Text> : null}
   </View>;
 
@@ -174,7 +176,7 @@ function CheckoutContent({ initialSelection }: { initialSelection: CheckoutSelec
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
         <Text style={styles.eyebrow}>HOÀN TẤT ĐƠN HÀNG</Text>
         <Text style={styles.title}>{review ? 'Kiểm tra lần cuối' : 'Giao đến người bạn thương'}</Text>
-        <Text style={styles.muted}>1. Thông tin nhận hàng  ·  2. Xác nhận đặt hàng</Text>
+        <View style={styles.checkoutSteps}>{['Nhận hàng', 'Kiểm tra & đặt hàng'].map((label, index) => <View key={label} style={[styles.checkoutStep, ((review ? 1 : 0) === index) && styles.currentStep]}><Text style={[styles.stepNumber, ((review ? 1 : 0) === index) && { color: '#fff' }]}>{index + 1}</Text><Text style={[styles.stepLabel, ((review ? 1 : 0) === index) && { color: '#fff' }]}>{label}</Text></View>)}</View>
         {selection.source === 'buy_now' ? <View style={styles.notice}><Text style={styles.label}>Thanh toán ngay sản phẩm đã chọn</Text><Text style={styles.muted}>Đơn này chỉ gồm sản phẩm bên dưới. Các sản phẩm trong giỏ hàng của bạn vẫn được giữ nguyên.</Text></View> : null}
         {error ? <View accessibilityRole="alert" style={styles.errorBox}><Text style={styles.errorText}>{error}</Text></View> : null}
         {uncertain ? <View style={styles.notice}><Text style={styles.label}>Đang chờ xác nhận kết quả</Text><Text style={styles.muted}>Thông tin đã gửi được giữ nguyên. Thử gửi lại cùng yêu cầu để nhận kết quả, tránh tạo thêm đơn hàng.</Text><Pressable accessibilityRole="button" disabled={submitting} onPress={submit}><Text style={styles.link}>{submitting ? 'Đang kiểm tra...' : 'Thử gửi lại đơn'}</Text></Pressable><Pressable onPress={() => router.push('/orders')}><Text style={styles.link}>Xem danh sách đơn hàng</Text></Pressable></View> : null}
@@ -201,7 +203,7 @@ function CheckoutContent({ initialSelection }: { initialSelection: CheckoutSelec
         </View>
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Giao hàng & thanh toán</Text>
-          <View style={styles.payment}><MaterialIcons name="radio-button-checked" size={23} color="#087F8C" /><View style={{ flex: 1 }}><Text style={styles.name}>Thanh toán khi nhận hàng (COD)</Text><Text style={styles.muted}>Trả tiền cho nhân viên giao hàng khi nhận đơn. Bạn chưa cần thanh toán lúc đặt hàng.</Text></View></View>
+          <View style={styles.payment}><MaterialIcons name="radio-button-checked" size={23} color={shop.primary} /><View style={{ flex: 1 }}><Text style={styles.name}>Thanh toán khi nhận hàng (COD)</Text><Text style={styles.muted}>Trả tiền cho nhân viên giao hàng khi nhận đơn. Bạn chưa cần thanh toán lúc đặt hàng.</Text></View></View>
           <View style={styles.notice}><Text style={styles.muted}>Giao hàng tiêu chuẩn · {quote.phi_giao_hang === 0 ? 'Miễn phí giao hàng' : `Phí giao hàng ${formatCurrency(quote.phi_giao_hang)}`}. Cửa hàng sẽ liên hệ xác nhận đơn và thời gian giao phù hợp.</Text></View>
         </View>
         <View style={styles.card}>
@@ -218,7 +220,7 @@ function CheckoutContent({ initialSelection }: { initialSelection: CheckoutSelec
           {quote.giam_gia ? <View style={styles.row}><Text style={styles.muted}>Giảm giá</Text><Text style={styles.link}>−{formatCurrency(quote.giam_gia)}</Text></View> : null}
           <View style={styles.row}><Text style={styles.muted}>Phí giao hàng</Text><Text style={styles.link}>{quote.phi_giao_hang === 0 ? 'Miễn phí' : formatCurrency(quote.phi_giao_hang)}</Text></View>
           <View style={[styles.row, styles.total]}><Text style={styles.name}>Tổng thanh toán khi nhận hàng</Text><Text style={styles.totalAmount}>{formatCurrency(quote.tong_tien)}</Text></View>
-          {review ? <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: confirmed, disabled: submitting || uncertain }} disabled={submitting || uncertain} onPress={() => setConfirmed(value => !value)} style={styles.payment}><MaterialIcons name={confirmed ? 'check-box' : 'check-box-outline-blank'} color="#087F8C" size={24} /><Text style={[styles.muted, { flex: 1 }]}>Tôi đã kiểm tra thông tin nhận hàng, sản phẩm và tổng tiền phải trả.</Text></Pressable> : null}
+          {review ? <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: confirmed, disabled: submitting || uncertain }} disabled={submitting || uncertain} onPress={() => setConfirmed(value => !value)} style={styles.payment}><MaterialIcons name={confirmed ? 'check-box' : 'check-box-outline-blank'} color={shop.primary} size={24} /><Text style={[styles.muted, { flex: 1 }]}>Tôi đã kiểm tra thông tin nhận hàng, sản phẩm và tổng tiền phải trả.</Text></Pressable> : null}
           <Pressable accessibilityRole="button" accessibilityLabel={checking ? 'Đang kiểm tra giá và tồn kho' : submitting ? 'Đang gửi yêu cầu' : uncertain ? 'Kiểm tra lại đơn' : review ? 'Xác nhận đặt hàng COD' : 'Kiểm tra đơn hàng'} disabled={checking || submitting || !quote.can_checkout || (review && !confirmed)} style={[styles.button, (checking || submitting || !quote.can_checkout || (review && !confirmed)) && styles.disabled]} onPress={review ? submit : checkForm}>
             <Text style={styles.buttonText}>{checking ? 'Đang kiểm tra giá và tồn kho...' : submitting ? 'Đang gửi yêu cầu...' : uncertain ? 'Kiểm tra lại đơn' : review ? 'Xác nhận đặt hàng COD' : 'Kiểm tra đơn hàng'}</Text><MaterialIcons name="arrow-forward" size={20} color="#fff" />
           </Pressable>
@@ -230,14 +232,17 @@ function CheckoutContent({ initialSelection }: { initialSelection: CheckoutSelec
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#F4F7FB' }, content: { padding: 20, gap: 16, width: '100%', maxWidth: 820, alignSelf: 'center', paddingBottom: 40 },
-  eyebrow: { color: '#087F8C', fontSize: 10, fontWeight: '800', letterSpacing: 2 }, title: { color: '#152D46', fontSize: 28, fontWeight: '800' },
-  card: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#E2E9F1', borderRadius: 22, padding: 20, gap: 14 }, sectionTitle: { color: '#152D46', fontSize: 17, fontWeight: '800', flexShrink: 1 },
-  field: { gap: 7 }, label: { color: '#152D46', fontSize: 13, fontWeight: '700' }, input: { minHeight: 50, paddingHorizontal: 14, borderWidth: 1, borderColor: '#D9E2D8', borderRadius: 12, color: '#152D46', fontSize: 15, backgroundColor: '#FAFCF8' },
-  multiline: { minHeight: 80, paddingTop: 12, textAlignVertical: 'top' }, invalid: { borderColor: '#BC4545' }, errorText: { color: '#A52D2D', fontSize: 13, lineHeight: 20 }, errorBox: { backgroundColor: '#FBEDEC', padding: 16, borderRadius: 12 },
-  muted: { color: '#66788A', fontSize: 13, lineHeight: 21 }, hint: { color: '#66788A', fontSize: 12, lineHeight: 19 }, link: { color: '#087F8C', fontSize: 13, fontWeight: '700', paddingVertical: 6 },
-  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }, name: { color: '#152D46', fontSize: 14, fontWeight: '700', lineHeight: 21 },
-  product: { flexDirection: 'row', gap: 12, alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderColor: '#E2E9F1', flexWrap: 'wrap' }, image: { width: 56, height: 56, borderRadius: 10 }, amount: { color: '#152D46', fontWeight: '700', fontSize: 13 },
-  payment: { flexDirection: 'row', gap: 12, alignItems: 'center', paddingVertical: 10 }, notice: { padding: 14, backgroundColor: '#EDF4E9', borderRadius: 12, gap: 8 }, total: { borderTopWidth: 1, borderColor: '#E2E9F1', paddingTop: 16 }, totalAmount: { color: '#087F8C', fontSize: 24, fontWeight: '800' },
-  button: { minHeight: 54, backgroundColor: '#087F8C', borderRadius: 14, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 10, padding: 14 }, buttonText: { color: '#fff', fontWeight: '800', fontSize: 15 }, disabled: { opacity: 0.5 },
+  checkoutSteps: { flexDirection: 'row', gap: space.xs, marginVertical: 8 },
+  checkoutStep: { flex: 1, minHeight: 52, padding: 12, borderRadius: 12, flexDirection: 'row', gap: space.xs, alignItems: 'center', backgroundColor: shop.soft },
+  currentStep: { backgroundColor: shop.primary }, stepNumber: { fontSize: 14, color: shop.primary, fontWeight: '700' }, stepLabel: { flex: 1, fontSize: 12, color: shop.primary, fontWeight: '600' },
+  safe: { flex: 1, backgroundColor: shop.background }, content: { padding: layout.gutter, gap: space.md, width: '100%', maxWidth: 820, alignSelf: 'center', paddingBottom: 40 },
+  eyebrow: { color: shop.primary, fontSize: 12, fontWeight: '700', letterSpacing: 2 }, title: { color: shop.ink, fontSize: 28, fontWeight: '700' },
+  card: { backgroundColor: '#fff', borderWidth: 1, borderColor: shop.border, borderRadius: radius.md, padding: layout.gutter, gap: 20 }, sectionTitle: { color: shop.ink, fontSize: 19, fontWeight: '700', flexShrink: 1 },
+  field: { gap: 7 }, label: { color: shop.ink, fontSize: 13, fontWeight: '700' }, input: { minHeight: 50, paddingHorizontal: 14, borderWidth: 1, borderColor: shop.border, borderRadius: 12, color: shop.ink, fontSize: 15, backgroundColor: shop.surfaceMuted },
+  multiline: { minHeight: 80, paddingTop: 12, textAlignVertical: 'top' }, invalid: { borderColor: shop.danger }, errorText: { color: '#A52D2D', fontSize: 13, lineHeight: 20 }, errorBox: { backgroundColor: '#FBEDEC', padding: space.md, borderRadius: 12 },
+  muted: { color: shop.muted, fontSize: 13, lineHeight: 21 }, hint: { color: shop.muted, fontSize: 12, lineHeight: 19 }, link: { color: shop.primary, fontSize: 13, fontWeight: '700', paddingVertical: 6 },
+  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm, flexWrap: 'wrap' }, name: { color: shop.ink, fontSize: 14, fontWeight: '700', lineHeight: 21 },
+  product: { flexDirection: 'row', gap: space.sm, alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderColor: shop.border, flexWrap: 'wrap' }, image: { width: 56, height: 56, borderRadius: radius.sm }, amount: { color: shop.ink, fontWeight: '700', fontSize: 13 },
+  payment: { flexDirection: 'row', gap: space.sm, alignItems: 'center', paddingVertical: 10 }, notice: { padding: 14, backgroundColor: shop.soft, borderRadius: 12, gap: space.xs }, total: { borderTopWidth: 1, borderColor: shop.border, paddingTop: 16 }, totalAmount: { color: shop.primary, fontSize: 24, fontWeight: '700' },
+  button: { minHeight: 54, backgroundColor: shop.primary, borderRadius: 14, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 10, padding: 14 }, buttonText: { color: '#fff', fontWeight: '700', fontSize: 15 }, disabled: { opacity: 0.5 },
 });

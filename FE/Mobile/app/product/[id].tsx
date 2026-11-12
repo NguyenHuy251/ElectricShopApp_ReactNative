@@ -1,13 +1,16 @@
+import { Pressable, Text, TextInput } from '@/components/ui';
+import { ProductMetrics } from '@/components/product-metrics';
+import { shop, layout, radius, space } from '@/constants/shop-theme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { choicesForSelectedColor, getVariantAttrValue, hasVariantStock, selectVariantChoice, variantsForSelectedColor, type VariantAttributeGroup } from '@/utils/variant-selection';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { Image, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Image, Modal, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { EmptyState, LoadingState, ProductCard, ProductImage } from '@/components/shop-ui';
 import { cartService } from '@/services/cart.service';
 import { productService } from '@/services/product.service';
-import type { GroupedSpecification, GroupedSpecificationItem, Product, ProductImage as IProductImage, ProductReview, ProductSpecification, ProductVariant } from '@/types';
+import type { GroupedSpecification, Product, ProductImage as IProductImage, ProductReview, ProductSpecification, ProductVariant } from '@/types';
 import { formatCurrency, formatDate, getApiMessage } from '@/utils/format';
 
 export default function ProductDetailScreen() {
@@ -326,7 +329,7 @@ function ProductDetail({ id, initialQuantity }: { id: string; initialQuantity?: 
         <Pressable accessibilityRole="button" accessibilityLabel="Xem ảnh sản phẩm" style={styles.imageCard} onPress={() => setZoom(true)}>
           <ProductImage uri={currentImageUri} style={styles.image} />
           <View style={styles.imageLabel}>
-            <MaterialIcons name="zoom-in" size={19} color="#087F8C" />
+            <MaterialIcons name="zoom-in" size={19} color={shop.primary} />
             <Text style={styles.muted}>Phóng to ảnh</Text>
           </View>
         </Pressable>
@@ -359,10 +362,10 @@ function ProductDetail({ id, initialQuantity }: { id: string; initialQuantity?: 
         <Text style={styles.title}>{product.ten_san_pham}</Text>
 
         <Text style={styles.muted}>Mã: {product.ma_san_pham_code}{product.ten_thuong_hieu ? ` · ${product.ten_thuong_hieu}` : ''}</Text>
-        {rating && !reviewError ? <Text style={styles.rating}>★ {rating}/5 · {reviews.length} đánh giá</Text> : null}
+        <ProductMetrics product={product} />
         <Text style={styles.price}>{formatCurrency(displayPrice)}</Text>
         <View style={styles.inline}>
-          <MaterialIcons name={available ? 'check-circle' : 'error-outline'} size={19} color={available ? '#087F8C' : '#A52D2D'} />
+          <MaterialIcons name={available ? 'check-circle' : 'error-outline'} size={19} color={available ? shop.primary : '#A52D2D'} />
           <Text style={[styles.stock, !available && styles.error]}>{stockLabel}</Text>
         </View>
 
@@ -379,7 +382,7 @@ function ProductDetail({ id, initialQuantity }: { id: string; initialQuantity?: 
             <Text style={styles.sectionTitle}>Tùy chọn sản phẩm</Text>
             {selectedVariant ? (
               <Text style={styles.muted}>
-                Đang chọn: <Text style={{ fontWeight: '700', color: '#152D46' }}>{selectedVariant.ten_bien_the}</Text>
+                Đang chọn: <Text style={{ fontWeight: '700', color: shop.ink }}>{selectedVariant.ten_bien_the}</Text>
               </Text>
             ) : null}
 
@@ -440,7 +443,7 @@ function ProductDetail({ id, initialQuantity }: { id: string; initialQuantity?: 
                 style={[styles.qtyButton, (!available || count <= 1) && styles.disabled]}
                 onPress={() => changeQuantity(String(count - 1))}
               >
-                <MaterialIcons name="remove" size={20} color="#152D46" />
+                <MaterialIcons name="remove" size={20} color={shop.ink} />
               </Pressable>
               <TextInput
                 accessibilityLabel="Số lượng mua"
@@ -459,7 +462,7 @@ function ProductDetail({ id, initialQuantity }: { id: string; initialQuantity?: 
                 style={[styles.qtyButton, (!available || count >= max) && styles.disabled]}
                 onPress={() => changeQuantity(String(Math.max(1, count + 1)))}
               >
-                <MaterialIcons name="add" size={20} color="#152D46" />
+                <MaterialIcons name="add" size={20} color={shop.ink} />
               </Pressable>
             </View>
             <Text style={styles.muted}>Tối đa {max} sản phẩm</Text>
@@ -576,7 +579,7 @@ function ProductDetail({ id, initialQuantity }: { id: string; initialQuantity?: 
             style={[styles.action, styles.addButton, !canBuy && styles.disabled]}
             onPress={addToCart}
           >
-            <MaterialIcons name="add-shopping-cart" size={19} color="#087F8C" />
+            <MaterialIcons name="add-shopping-cart" size={19} color={shop.primary} />
             <Text style={styles.addText}>{adding ? 'Đang thêm...' : 'Thêm vào giỏ hàng'}</Text>
           </Pressable>
           <Pressable
@@ -599,7 +602,7 @@ function ProductDetail({ id, initialQuantity }: { id: string; initialQuantity?: 
             <Text style={styles.sectionTitle}>{product.ten_san_pham}</Text>
             <ProductImage uri={currentImageUri} style={styles.zoomImage} />
             <Pressable accessibilityRole="button" accessibilityLabel="Đóng ảnh sản phẩm" onPress={() => setZoom(false)} style={styles.qtyButton}>
-              <MaterialIcons name="close" size={24} color="#152D46" />
+              <MaterialIcons name="close" size={24} color={shop.ink} />
             </Pressable>
           </View>
         </View>
@@ -609,62 +612,62 @@ function ProductDetail({ id, initialQuantity }: { id: string; initialQuantity?: 
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#F4F7FB' },
-  content: { padding: 20, paddingBottom: 28, width: '100%', maxWidth: 800, alignSelf: 'center', gap: 14 },
-  imageCard: { borderRadius: 24, backgroundColor: '#F0F5FA', overflow: 'hidden' },
+  safe: { flex: 1, backgroundColor: shop.background },
+  content: { padding: layout.gutter, paddingBottom: 28, width: '100%', maxWidth: 800, alignSelf: 'center', gap: 14 },
+  imageCard: { borderRadius: radius.lg, backgroundColor: shop.surface, overflow: 'hidden' },
   image: { width: '100%', aspectRatio: 1.25, maxHeight: 380 },
   imageLabel: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, padding: 10 },
   galleryRow: { flexDirection: 'row', gap: 10, marginVertical: 4 },
-  thumbnailWrap: { width: 56, height: 56, borderRadius: 12, borderWidth: 2, borderColor: '#E2E9F1', overflow: 'hidden', padding: 2, backgroundColor: '#fff' },
-  thumbnailActive: { borderColor: '#087F8C' },
+  thumbnailWrap: { width: 56, height: 56, borderRadius: 12, borderWidth: 2, borderColor: shop.border, overflow: 'hidden', padding: 2, backgroundColor: '#fff' },
+  thumbnailActive: { borderColor: shop.primary },
   thumbnail: { width: '100%', height: '100%', borderRadius: 8 },
-  category: { color: '#087F8C', fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 },
-  title: { color: '#152D46', fontSize: 25, lineHeight: 32, fontWeight: '800' },
-  price: { color: '#087F8C', fontSize: 26, fontWeight: '800' },
-  stock: { color: '#087F8C', fontSize: 13, fontWeight: '700', flexShrink: 1 },
-  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' },
+  category: { color: shop.primary, fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1 },
+  title: { color: shop.ink, fontSize: 28, lineHeight: 36, fontWeight: '700', letterSpacing: -0.6 },
+  price: { color: shop.ink, fontSize: 32, lineHeight: 40, fontWeight: '700' },
+  stock: { color: shop.primary, fontSize: 13, fontWeight: '700', flexShrink: 1 },
+  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm, flexWrap: 'wrap' },
   inline: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  muted: { color: '#66788A', fontSize: 13, lineHeight: 21 },
-  hint: { color: '#66788A', fontSize: 12, lineHeight: 19 },
-  name: { color: '#152D46', fontSize: 14, fontWeight: '700' },
+  muted: { color: shop.muted, fontSize: 13, lineHeight: 21 },
+  hint: { color: shop.muted, fontSize: 12, lineHeight: 19 },
+  name: { color: shop.ink, fontSize: 14, fontWeight: '700' },
   rating: { color: '#956900', fontSize: 13, fontWeight: '700' },
-  link: { color: '#087F8C', fontWeight: '700', paddingVertical: 8, fontSize: 13 },
-  centerLink: { color: '#087F8C', textAlign: 'center', padding: 20 },
-  benefits: { backgroundColor: '#EAF2E6', padding: 14, borderRadius: 14, gap: 6 },
+  link: { color: shop.primary, fontWeight: '700', paddingVertical: 8, fontSize: 13 },
+  centerLink: { color: shop.primary, textAlign: 'center', padding: layout.gutter },
+  benefits: { backgroundColor: shop.soft, padding: 18, borderRadius: radius.md, gap: space.xs },
   variantRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  variantButton: { minWidth: 108, borderWidth: 1, borderColor: '#D9E2D8', borderRadius: 12, padding: 10, gap: 4, backgroundColor: '#fff' },
-  variantSelected: { borderColor: '#087F8C', backgroundColor: '#EDF5E9' },
-  variantLabel: { color: '#152D46', fontSize: 14, fontWeight: '800' },
-  variantLabelSelected: { color: '#087F8C' },
-  variantPrice: { color: '#66788A', fontSize: 11 },
+  variantButton: { minWidth: 108, minHeight: 56, borderWidth: 1, borderColor: shop.border, borderRadius: 12, padding: 12, gap: 6, backgroundColor: shop.surface },
+  variantSelected: { borderColor: shop.primary, backgroundColor: shop.soft },
+  variantLabel: { color: shop.ink, fontSize: 14, fontWeight: '700' },
+  variantLabelSelected: { color: shop.primary },
+  variantPrice: { color: shop.muted, fontSize: 12 },
   disabledText: { color: '#8A9993' },
-  unavailableBadge: { fontSize: 10, color: '#A52D2D', fontWeight: '600', marginTop: 2 },
+  unavailableBadge: { fontSize: 12, color: '#A52D2D', fontWeight: '600', marginTop: 2 },
   specChoice: { gap: 9 },
-  choiceTitle: { color: '#152D46', fontSize: 14, fontWeight: '800' },
-  card: { padding: 18, borderRadius: 20, borderWidth: 1, borderColor: '#E2E9F1', backgroundColor: '#fff', gap: 14 },
-  sectionTitle: { color: '#152D46', fontSize: 17, fontWeight: '800' },
+  choiceTitle: { color: shop.ink, fontSize: 14, fontWeight: '700' },
+  card: { paddingVertical: 24, borderBottomWidth: 1, borderColor: shop.border, gap: space.md },
+  sectionTitle: { color: shop.ink, fontSize: 20, fontWeight: '700' },
   description: { color: '#556B80', fontSize: 14, lineHeight: 23 },
-  qtyButton: { width: 44, height: 44, borderRadius: 10, backgroundColor: '#EDF3F8', alignItems: 'center', justifyContent: 'center' },
-  quantityInput: { width: 54, height: 44, borderWidth: 1, borderColor: '#D9E2D8', borderRadius: 10, textAlign: 'center', color: '#152D46', fontSize: 16, fontWeight: '700' },
+  qtyButton: { width: 44, height: 44, borderRadius: radius.sm, backgroundColor: shop.surfaceMuted, alignItems: 'center', justifyContent: 'center' },
+  quantityInput: { width: 54, height: 44, borderWidth: 1, borderColor: shop.border, borderRadius: radius.sm, textAlign: 'center', color: shop.ink, fontSize: 16, fontWeight: '700' },
   specGroupBlock: { marginBottom: 12 },
-  specGroupTitle: { fontSize: 11, fontWeight: '800', color: '#087F8C', letterSpacing: 1, marginBottom: 8, borderBottomWidth: 1, borderBottomColor: '#F0F4EE', paddingBottom: 4 },
-  specRow: { flexDirection: 'row', gap: 12, paddingVertical: 8, borderBottomWidth: 1, borderColor: '#EDF3F8' },
-  specLabel: { width: '40%', color: '#66788A', fontSize: 13 },
-  specValue: { flex: 1, color: '#152D46', fontSize: 13, lineHeight: 20, fontWeight: '600' },
-  review: { gap: 8, paddingTop: 14, borderTopWidth: 1, borderColor: '#EDF3F8' },
-  related: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  specGroupTitle: { fontSize: 12, fontWeight: '700', color: shop.primary, letterSpacing: 1, marginBottom: 8, borderBottomWidth: 1, borderBottomColor: '#F0F4EE', paddingBottom: 4 },
+  specRow: { flexDirection: 'row', gap: space.sm, paddingVertical: 8, borderBottomWidth: 1, borderColor: shop.surfaceMuted },
+  specLabel: { width: '40%', color: shop.muted, fontSize: 13 },
+  specValue: { flex: 1, color: shop.ink, fontSize: 13, lineHeight: 20, fontWeight: '600' },
+  review: { gap: space.xs, paddingTop: 14, borderTopWidth: 1, borderColor: shop.surfaceMuted },
+  related: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   relatedItem: { width: '47%', flexGrow: 1 },
-  footer: { padding: 16, width: '100%', maxWidth: 800, alignSelf: 'center', backgroundColor: '#fff', borderTopWidth: 1, borderColor: '#E2E9F1', gap: 10 },
-  footerPrice: { color: '#087F8C', fontSize: 22, fontWeight: '800' },
+  footer: { padding: space.md, width: '100%', maxWidth: 800, alignSelf: 'center', backgroundColor: '#fff', borderTopWidth: 1, borderColor: shop.border, gap: 10 },
+  footerPrice: { color: shop.ink, fontSize: 26, fontWeight: '700' },
   actions: { flexDirection: 'row', gap: 10 },
   action: { flex: 1, minHeight: 54, padding: 10, borderRadius: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7 },
-  addButton: { borderWidth: 1, borderColor: '#087F8C', backgroundColor: '#EDF5E9' },
-  buyButton: { backgroundColor: '#087F8C' },
-  addText: { color: '#087F8C', fontSize: 13, fontWeight: '800', flexShrink: 1, textAlign: 'center' },
-  buyText: { color: '#fff', fontSize: 13, fontWeight: '800', flexShrink: 1, textAlign: 'center' },
+  addButton: { borderWidth: 1, borderColor: shop.primary, backgroundColor: shop.soft },
+  buyButton: { backgroundColor: shop.primary },
+  addText: { color: shop.primary, fontSize: 13, fontWeight: '700', flexShrink: 1, textAlign: 'center' },
+  buyText: { color: '#fff', fontSize: 13, fontWeight: '700', flexShrink: 1, textAlign: 'center' },
   disabled: { opacity: 0.45 },
   error: { color: '#A52D2D', fontSize: 13, lineHeight: 20 },
-  overlay: { flex: 1, backgroundColor: '#00000099', justifyContent: 'center', alignItems: 'center', padding: 20 },
-  zoomCard: { width: '100%', maxWidth: 760, backgroundColor: '#fff', borderRadius: 22, padding: 18, alignItems: 'center', gap: 16 },
+  overlay: { flex: 1, backgroundColor: '#00000099', justifyContent: 'center', alignItems: 'center', padding: layout.gutter },
+  zoomCard: { width: '100%', maxWidth: layout.maxWidth, backgroundColor: '#fff', borderRadius: 22, padding: 18, alignItems: 'center', gap: space.md },
   zoomImage: { width: '100%', aspectRatio: 1, maxHeight: 500 },
 });

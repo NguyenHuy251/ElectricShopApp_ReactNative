@@ -1,5 +1,7 @@
+import { Pressable, Text } from '@/components/ui';
+import { shop, radius, space } from '@/constants/shop-theme';
 import { useEffect, useRef, useState } from 'react';
-import { AppState, Pressable, StyleSheet, Text, View } from 'react-native';
+import { AppState, StyleSheet, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -60,11 +62,11 @@ export function ContactReplyNotice() {
   </View>;
 }
 const styles = StyleSheet.create({
-  banner: { position:'absolute',left:16,right:16,zIndex:1000,elevation:12,maxWidth:700,alignSelf:'center',padding:16,borderRadius:16,backgroundColor:'#E7F4F5',borderWidth:1,borderColor:'#BCD6C6',gap:8 },
-  title: { color:'#087F8C',fontSize:14,fontWeight:'800' },
-  body: { color:'#152D46',fontSize:13,lineHeight:20 },
-  actions: { flexDirection:'row',justifyContent:'space-between',gap:16 },
+  banner: { position:'absolute',left:16,right:16,zIndex:1000,elevation:12,maxWidth:700,alignSelf:'center',padding: space.md,borderRadius: radius.md,backgroundColor:shop.soft,borderWidth:1,borderColor:'#BCD6C6',gap: space.xs },
+  title: { color:shop.primary,fontSize:14,fontWeight: '700' },
+  body: { color:shop.ink,fontSize:13,lineHeight:20 },
+  actions: { flexDirection:'row',justifyContent:'space-between',gap: space.md },
   button: { paddingVertical:8,paddingHorizontal:4 },
-  link: { color:'#087F8C',fontSize:13,fontWeight:'700' },
+  link: { color:shop.primary,fontSize:13,fontWeight:'700' },
   error: { color:'#A52D2D',fontSize:12 },
 });

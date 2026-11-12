@@ -1,5 +1,7 @@
+import { Pressable, Text } from '@/components/ui';
+import { shop, layout, space } from '@/constants/shop-theme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import type { CustomerVoucher } from '../services/voucher.service';
 import { formatCurrency, formatDate } from '../utils/format';
 
@@ -23,7 +25,7 @@ export function VoucherCard({ voucher, selected, disabled, onSelect }: {
         <MaterialIcons
           name={isFreeship ? 'local-shipping' : 'local-offer'}
           size={24}
-          color="#152D46"
+          color={shop.ink}
         />
         <Text style={styles.stubLabel}>{isFreeship ? 'FREESHIP' : 'GIẢM GIÁ'}</Text>
       </View>
@@ -87,7 +89,7 @@ export function VoucherCard({ voucher, selected, disabled, onSelect }: {
             <MaterialIcons
               name={voucher.co_the_dung ? 'check-circle' : 'schedule'}
               size={14}
-              color={voucher.co_the_dung ? '#087F8C' : '#7B8EA1'}
+              color={voucher.co_the_dung ? shop.primary : shop.muted}
             />
             <Text style={[styles.statusText, !voucher.co_the_dung && styles.statusMuted]}>
               {voucher.co_the_dung ? 'Sẵn sàng dùng khi thanh toán' : 'Chưa đủ điều kiện sử dụng'}
@@ -105,7 +107,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#E2EBE2',
+    borderColor: shop.border,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -115,7 +117,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   selectedCard: {
-    borderColor: '#087F8C',
+    borderColor: shop.primary,
     borderWidth: 1.5,
     backgroundColor: '#FAFCFA',
   },
@@ -124,13 +126,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAFBF9',
   },
   couponStub: {
-    width: 72,
+    width: 64,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 16,
     paddingHorizontal: 6,
     borderRightWidth: 1,
-    borderRightColor: '#E2EBE2',
+    borderRightColor: shop.border,
     borderStyle: 'dashed',
   },
   stubDiscount: {
@@ -140,9 +142,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#EAF5FF',
   },
   stubLabel: {
-    fontSize: 9,
-    fontWeight: '800',
-    color: '#152D46',
+    fontSize: 11,
+    fontWeight: '700',
+    color: shop.ink,
     marginTop: 6,
     letterSpacing: 0.5,
   },
@@ -159,13 +161,13 @@ const styles = StyleSheet.create({
   codeWrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: space.xs,
     flexWrap: 'wrap',
   },
   codeText: {
     fontSize: 15,
-    fontWeight: '800',
-    color: '#152D46',
+    fontWeight: '700',
+    color: shop.ink,
     letterSpacing: 0.5,
   },
   badge: {
@@ -180,9 +182,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#FEF3C7',
   },
   badgeText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '700',
-    color: '#152D46',
+    color: shop.ink,
   },
   badgeQty: {
     paddingHorizontal: 8,
@@ -191,14 +193,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#D7F0E4',
   },
   badgeQtyText: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#087F8C',
+    fontSize: 12,
+    fontWeight: '700',
+    color: shop.primary,
   },
   discountText: {
     fontSize: 16,
-    fontWeight: '800',
-    color: '#087F8C',
+    fontWeight: '700',
+    color: shop.primary,
   },
   descText: {
     fontSize: 12,
@@ -206,17 +208,18 @@ const styles = StyleSheet.create({
     lineHeight: 17,
   },
   conditionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
     gap: 6,
     marginTop: 2,
   },
   detailText: {
-    fontSize: 11,
-    color: '#66788A',
+    fontSize: 12,
+    color: shop.muted,
   },
   dot: {
-    fontSize: 11,
+    display: 'none',
+    fontSize: 12,
     color: '#BAC6BF',
   },
   reasonWrap: {
@@ -230,25 +233,25 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   reasonText: {
-    fontSize: 11,
+    fontSize: 12,
     color: '#A52D2D',
     fontWeight: '600',
     flex: 1,
   },
   button: {
-    minHeight: 38,
+    minHeight: layout.touch,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 12,
     marginTop: 6,
   },
   buttonNormal: {
-    backgroundColor: '#087F8C',
+    backgroundColor: shop.primary,
   },
   buttonSelected: {
     backgroundColor: '#EAF8F0',
     borderWidth: 1,
-    borderColor: '#087F8C',
+    borderColor: shop.primary,
   },
   buttonDisabled: {
     backgroundColor: '#E5ECE7',
@@ -259,7 +262,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   buttonTextSelected: {
-    color: '#087F8C',
+    color: shop.primary,
   },
   statusFooter: {
     flexDirection: 'row',
@@ -268,11 +271,11 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   statusText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
-    color: '#087F8C',
+    color: shop.primary,
   },
   statusMuted: {
-    color: '#7B8EA1',
+    color: shop.muted,
   },
 });

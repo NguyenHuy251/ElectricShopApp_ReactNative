@@ -1,15 +1,16 @@
+import { Pressable, Text } from '@/components/ui';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Link, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { cartService } from '../../services/cart.service';
 import { productService } from '../../services/product.service';
 import { categoryService, type Category } from '../../services/category.service';
 import type { Product } from '../../types';
-import { EmptyState, LoadingState, ProductCard } from '@/components/shop-ui';
-import { shop } from '@/constants/shop-theme';
+import { EmptyState, LoadingState, ProductImage, ProductCard } from '@/components/shop-ui';
+import { shop, layout, radius, space } from '@/constants/shop-theme';
 import { getApiMessage } from '@/utils/format';
 import { getCategoryIcon } from '@/constants/category-icons';
 
@@ -63,7 +64,7 @@ export default function HomeScreen() {
           </View>
           <Link href="/cart" asChild>
             <Pressable accessibilityLabel="Mở giỏ hàng" style={styles.iconButton}>
-              <MaterialIcons name="shopping-bag" size={23} color="#152D46" />
+              <MaterialIcons name="shopping-bag" size={23} color={shop.ink} />
               {cartCount > 0 ? <View style={styles.badge}><Text style={styles.badgeText}>{cartCount > 9 ? '9+' : cartCount}</Text></View> : null}
             </Pressable>
           </Link>
@@ -71,27 +72,46 @@ export default function HomeScreen() {
 
         <Link href="/products" asChild><Pressable style={styles.searchBar}><MaterialIcons name="search" size={22} color={shop.muted} /><Text style={styles.searchText}>Bạn đang tìm thiết bị gì?</Text><View style={styles.searchArrow}><MaterialIcons name="tune" size={18} color={shop.primary} /></View></Pressable></Link>
         <View style={styles.hero}>
-          <View style={styles.heroCircle} />
           <View style={styles.heroCopy}>
             <Text style={styles.heroKicker}>THIẾT BỊ TỐT · SỐNG TIỆN NGHI</Text>
-            <Text style={styles.heroTitle}>{'Nâng tầm nhà.\nNâng chất sống.'}</Text>
-            <Text style={styles.heroText}>Khám phá thiết bị gia dụng cho nhịp sống của bạn.</Text>
+            <Text style={styles.heroTitle}>{'Chọn tiện nghi.\nSống trọn vẹn.'}</Text>
+            <View style={styles.heroDetails}>
+              <Text style={styles.heroText}>Khám phá thiết bị gia dụng cho nhịp sống của bạn.</Text>
+              <View style={styles.featureVisual} pointerEvents="none">{products[0] ? <ProductImage uri={products[0].hinh_anh} style={styles.featureImage} /> : <MaterialCommunityIcons name="home-outline" size={48} color={shop.primary} />}</View>
+            </View>
             <Link href="/products" asChild>
               <Pressable style={styles.heroButton}>
                 <Text style={styles.heroButtonText}>Khám phá ngay</Text>
-                <MaterialIcons name="arrow-forward" size={18} color={shop.ink} />
+                <MaterialIcons name="arrow-forward" size={18} color="#fff" />
               </Pressable>
             </Link>
           </View>
-<View style={styles.applianceScene} pointerEvents="none"><View style={styles.applianceTall}><MaterialCommunityIcons name="fridge-outline" size={77} color="#D6EFEE" /><View style={styles.applianceBase} /></View><View style={styles.applianceSmall}><MaterialCommunityIcons name="washing-machine" size={57} color="#D6EFEE" /></View><View style={styles.sceneDot} /></View>
         </View>
 
+        <SectionHeader title="Góc nhà của bạn" action="Xem tất cả" href="/products" />
+        {categoryError ? <Text style={styles.searchText}>{categoryError}</Text> : null}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryRow}>
+          {categories.map((item, index) => ({ ...item, icon: getCategoryIcon(item.ten_danh_muc), color: categoryColors[index % categoryColors.length] })).map((category) => (
+            <Link href={{ pathname: '/products', params: { categoryId: String(category.ma_danh_muc) } }} key={category.ma_danh_muc} asChild>
+              <Pressable style={styles.category}>
+                <View style={[styles.categoryIcon, { backgroundColor: category.color }]}><MaterialCommunityIcons name={category.icon} size={28} color={shop.ink} /></View>
+                <Text style={styles.categoryLabel}>{category.ten_danh_muc}</Text>
+              </Pressable>
+            </Link>
+          ))}
+        </ScrollView>
+
+        <SectionHeader title="Sản phẩm nổi bật" action="Xem thêm" href="/products" />
+        {loading ? <LoadingState message="Đang chọn sản phẩm cho bạn..." /> : error ? <EmptyState icon="wifi-off" title="Chưa tải được sản phẩm" message={error} action="Thử lại" onAction={loadHome} /> : !products.length ? <EmptyState icon="inventory-2" title="Sản phẩm đang được cập nhật" /> : (
+          <View style={styles.productRow}>{products.map(product => <View key={product.ma_san_pham} style={styles.productCell}><ProductCard product={product} /></View>)}</View>
+        )}
+        <View style={styles.memberIntro}><Text style={styles.sectionTitle}>Dành cho thành viên</Text><Text style={styles.searchText}>Tích lũy, chia sẻ và tận hưởng ưu đãi của bạn.</Text></View>
         {/* Gamification Action Strip */}
         <View style={styles.rewardStrip}>
           <Link href={'/rewards' as any} asChild>
             <Pressable style={styles.rewardActionBtn}>
               <View style={[styles.rewardIconWrap, { backgroundColor: '#EAF8F0' }]}>
-                <MaterialIcons name="event-available" size={24} color="#087F8C" />
+                <MaterialIcons name="event-available" size={24} color={shop.primary} />
                 <View style={styles.miniBadge}><Text style={styles.miniBadgeText}>+100X</Text></View>
               </View>
               <Text style={styles.rewardActionText}>Điểm danh</Text>
@@ -132,7 +152,7 @@ export default function HomeScreen() {
         <Link href={'/rewards' as any} asChild>
           <Pressable style={styles.retentionBanner}>
             <View style={styles.retentionIconWrap}>
-              <MaterialIcons name="stars" size={30} color="#A5EEE3" />
+              <MaterialIcons name="stars" size={30} color={shop.accent} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.retentionTitle}>Tích lũy mỗi ngày, thêm ưu đãi</Text>
@@ -140,28 +160,11 @@ export default function HomeScreen() {
             </View>
             <View style={styles.retentionCta}>
               <Text style={styles.retentionCtaText}>Khám phá</Text>
-              <MaterialIcons name="chevron-right" size={18} color="#152D46" />
+              <MaterialIcons name="chevron-right" size={18} color={shop.ink} />
             </View>
           </Pressable>
         </Link>
 
-        <SectionHeader title="Góc nhà của bạn" action="Xem tất cả" href="/products" />
-        {categoryError ? <Text style={styles.searchText}>{categoryError}</Text> : null}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryRow}>
-          {categories.map((item, index) => ({ ...item, icon: getCategoryIcon(item.ten_danh_muc), color: categoryColors[index % categoryColors.length] })).map((category) => (
-            <Link href={{ pathname: '/products', params: { categoryId: String(category.ma_danh_muc) } }} key={category.ma_danh_muc} asChild>
-              <Pressable style={styles.category}>
-                <View style={[styles.categoryIcon, { backgroundColor: category.color }]}><MaterialCommunityIcons name={category.icon} size={28} color="#152D46" /></View>
-                <Text style={styles.categoryLabel}>{category.ten_danh_muc}</Text>
-              </Pressable>
-            </Link>
-          ))}
-        </ScrollView>
-
-        <SectionHeader title="Sản phẩm nổi bật" action="Xem thêm" href="/products" />
-        {loading ? <LoadingState message="Đang chọn sản phẩm cho bạn..." /> : error ? <EmptyState icon="wifi-off" title="Chưa tải được sản phẩm" message={error} action="Thử lại" onAction={loadHome} /> : !products.length ? <EmptyState icon="inventory-2" title="Sản phẩm đang được cập nhật" /> : (
-          <View style={styles.productRow}>{products.map(product => <View key={product.ma_san_pham} style={styles.productCell}><ProductCard product={product} /></View>)}</View>
-        )}
         <Link href="/products" asChild><Pressable style={styles.bottomBanner}><View style={{ flex: 1 }}><Text style={styles.bottomTitle}>Tìm món đồ hợp với nhà bạn</Text><Text style={styles.bottomText}>Khám phá tất cả sản phẩm</Text></View><MaterialIcons name="arrow-circle-right" size={30} color={shop.primary} /></Pressable></Link>
       </ScrollView>
     </SafeAreaView>
@@ -178,57 +181,61 @@ function SectionHeader({ title, action, href }: { title: string; action: string;
 }
 
 const styles = StyleSheet.create({
-  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  brandBolt: { width: 30, height: 34, borderRadius: 10, backgroundColor: shop.soft, alignItems: 'center', justifyContent: 'center' },
+  heroDetails: { flexDirection: 'row', alignItems: 'center', gap: space.md, marginTop: space.sm },
+  featureVisual: { width: 80, height: 80, alignItems: 'center', justifyContent: 'center', backgroundColor: shop.surface, borderRadius: radius.md, overflow: 'hidden' },
+  featureImage: { width: '100%', height: '100%' },
+  memberIntro: { marginTop: space.xl, gap: space.xs },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: space.xs },
+  brandBolt: { width: 30, height: 34, borderRadius: radius.sm, backgroundColor: shop.soft, alignItems: 'center', justifyContent: 'center' },
   applianceScene: { position: 'absolute', right: 12, bottom: 25, width: 116, height: 146, opacity: 0.6 },
   applianceTall: { position: 'absolute', top: 0, right: 0, height: 120, width: 78, backgroundColor: '#315873', borderWidth: 1, borderColor: '#7195A9', borderRadius: 14, alignItems: 'center', justifyContent: 'center', transform: [{ rotate: '7deg' }] },
   applianceBase: { width: 36, height: 3, backgroundColor: '#7195A9', marginTop: 4, borderRadius: 3 },
   applianceSmall: { position: 'absolute', bottom: 0, left: 0, width: 70, height: 79, borderRadius: 14, borderWidth: 1, borderColor: '#7195A9', backgroundColor: '#254962', alignItems: 'center', justifyContent: 'center', transform: [{ rotate: '-8deg' }] },
   sceneDot: { position: 'absolute', width: 9, height: 9, backgroundColor: shop.accent, borderRadius: 5, left: 3, top: 15 },
   safeArea: { flex: 1, backgroundColor: shop.background },
-  content: { paddingHorizontal: 20, paddingBottom: 28, width: '100%', maxWidth: 760, alignSelf: 'center' },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingTop: 18, paddingBottom: 22 },
-  eyebrow: { color: shop.ink, fontSize: 22, fontWeight: '800', letterSpacing: -0.8 },
+  content: { paddingHorizontal: layout.gutter, paddingBottom: 28, width: '100%', maxWidth: layout.maxWidth, alignSelf: 'center' },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm, paddingTop: 18, paddingBottom: 22 },
+  eyebrow: { color: shop.ink, fontSize: 22, fontWeight: '700', letterSpacing: -0.8 },
   heading: { color: shop.muted, fontSize: 12, marginTop: 8 },
   iconButton: { width: 46, height: 46, borderRadius: 17, backgroundColor: '#fff', borderWidth: 1, borderColor: shop.border, alignItems: 'center', justifyContent: 'center' },
   badge: { position: 'absolute', right: -3, top: -3, minWidth: 20, height: 20, borderRadius: 15, backgroundColor: shop.primary, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4, borderWidth: 2, borderColor: shop.background },
-  badgeText: { color: '#fff', fontSize: 9, fontWeight: '800' },
+  badgeText: { color: '#fff', fontSize: 11, fontWeight: '700' },
   searchBar: { backgroundColor: '#fff', borderRadius: 18, borderWidth: 1, borderColor: shop.border, minHeight: 54, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 15, marginBottom: 20 },
   searchText: { color: shop.muted, fontSize: 13, flex: 1 },
   searchArrow: { backgroundColor: shop.soft, width: 32, height: 32, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
-  hero: { backgroundColor: shop.ink, minHeight: 280, borderRadius: 24, padding: 24, overflow: 'hidden' },
-  heroCircle: { position: 'absolute', right: -90, bottom: -65, width: 260, height: 260, borderRadius: 130, backgroundColor: '#23455E' },
-  heroCopy: { width: '78%', zIndex: 1 },
-  heroKicker: { color: shop.accent, fontSize: 9, fontWeight: '800', letterSpacing: 1.4 },
-  heroTitle: { color: '#fff', fontSize: 29, lineHeight: 36, fontWeight: '800', letterSpacing: -0.8, marginTop: 14 },
-  heroText: { color: '#CAD8E4', fontSize: 13, lineHeight: 21, marginTop: 12, maxWidth: 185 },
-  heroButton: { alignSelf: 'flex-start', flexDirection: 'row', gap: 10, alignItems: 'center', backgroundColor: shop.accent, paddingHorizontal: 16, minHeight: 43, borderRadius: 12, marginTop: 20 },
-  heroButtonText: { color: shop.ink, fontSize: 12, fontWeight: '800' },
+  hero: { backgroundColor: shop.soft, minHeight: 285, borderRadius: radius.lg, padding: space.lg, overflow: 'hidden' },
+  heroCircle: { position: 'absolute', right: -90, bottom: -65, width: 260, height: 260, borderRadius: 130, backgroundColor: shop.soft },
+  heroCopy: { width: '100%' },
+  heroKicker: { color: shop.primary, fontSize: 10, fontWeight: '700', letterSpacing: 0.8 },
+  heroTitle: { color: shop.ink, fontSize: 30, lineHeight: 39, fontWeight: '700', letterSpacing: -1, marginTop: 18 },
+  heroText: { flex: 1, color: shop.muted, fontSize: 14, lineHeight: 22 },
+  heroButton: { alignSelf: 'flex-start', flexDirection: 'row', gap: 10, alignItems: 'center', backgroundColor: shop.primary, paddingHorizontal: 16, minHeight: layout.touch, borderRadius: 14, marginTop: 20 },
+  heroButtonText: { color: '#fff', fontSize: 13, fontWeight: '700' },
   heroIcon: { position: 'absolute', right: -18, bottom: 24, transform: [{ rotate: '-12deg' }], opacity: 0.35 },
   promise: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, marginTop: 16 },
-  promiseText: { color: shop.muted, fontSize: 10, flexShrink: 1 },
+  promiseText: { color: shop.muted, fontSize: 12, flexShrink: 1 },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 28, marginBottom: 16 },
-  sectionTitle: { color: shop.ink, fontSize: 19, fontWeight: '800', letterSpacing: -0.5 },
-  sectionAction: { color: shop.primary, fontSize: 11, fontWeight: '700', paddingVertical: 8 },
-  categoryRow: { gap: 16, paddingBottom: 2 },
+  sectionTitle: { color: shop.ink, fontSize: 21, fontWeight: '700', letterSpacing: -0.5 },
+  sectionAction: { color: shop.primary, fontSize: 12, fontWeight: '700', paddingVertical: 8 },
+  categoryRow: { gap: space.md, paddingBottom: 2 },
   category: { alignItems: 'center', width: 72 },
-  categoryIcon: { width: 66, height: 66, borderRadius: 23, alignItems: 'center', justifyContent: 'center' },
-  categoryLabel: { color: shop.ink, fontSize: 11, fontWeight: '600', textAlign: 'center', marginTop: 10 },
-  productRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  categoryIcon: { width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center' },
+  categoryLabel: { color: shop.ink, fontSize: 12, fontWeight: '600', textAlign: 'center', marginTop: 10 },
+  productRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   productCell: { width: '48%', flexGrow: 1, maxWidth: '49%' },
-  bottomBanner: { backgroundColor: shop.soft, padding: 20, borderRadius: 22, flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 24 },
+  bottomBanner: { backgroundColor: shop.soft, padding: layout.gutter, borderRadius: 22, flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 24 },
   bottomTitle: { color: shop.ink, fontSize: 14, fontWeight: '700' },
   bottomText: { color: shop.muted, fontSize: 12, marginTop: 5 },
-  rewardStrip: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: '#fff', borderRadius: 22, paddingVertical: 14, paddingHorizontal: 12, marginTop: 16, borderWidth: 1, borderColor: shop.border },
+  rewardStrip: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 18, marginTop: 8, borderBottomWidth: 1, borderColor: shop.border },
   rewardActionBtn: { alignItems: 'center', flex: 1 },
   rewardIconWrap: { width: 48, height: 48, borderRadius: 18, alignItems: 'center', justifyContent: 'center', position: 'relative' },
-  miniBadge: { position: 'absolute', top: -4, right: -6, backgroundColor: '#087F8C', borderRadius: 10, paddingHorizontal: 5, paddingVertical: 2 },
-  miniBadgeText: { color: '#fff', fontSize: 8, fontWeight: '800' },
-  rewardActionText: { color: shop.ink, fontSize: 11, fontWeight: '700', marginTop: 6 },
-  retentionBanner: { backgroundColor: '#E7F4F5', borderRadius: 22, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 14 },
-  retentionIconWrap: { width: 38, height: 42, borderRadius: 12, backgroundColor: '#23455E', alignItems: 'center', justifyContent: 'center' },
-  retentionTitle: { color: shop.ink, fontSize: 12, fontWeight: '800' },
-  retentionSub: { color: shop.muted, fontSize: 10, marginTop: 3 },
+  miniBadge: { display: 'none' },
+  miniBadgeText: { color: '#fff', fontSize: 11, fontWeight: '700' },
+  rewardActionText: { color: shop.ink, fontSize: 12, fontWeight: '700', marginTop: 6 },
+  retentionBanner: { backgroundColor: shop.surface, borderRadius: radius.md, padding: space.md, flexDirection: 'row', alignItems: 'center', gap: space.sm, marginTop: 16, borderWidth: 1, borderColor: shop.border },
+  retentionIconWrap: { width: 38, minHeight: 44, borderRadius: 12, backgroundColor: '#23455E', alignItems: 'center', justifyContent: 'center' },
+  retentionTitle: { color: shop.ink, fontSize: 12, fontWeight: '700' },
+  retentionSub: { color: shop.muted, fontSize: 12, marginTop: 3 },
   retentionCta: { backgroundColor: '#FFFFFF', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 2 },
-  retentionCtaText: { color: '#152D46', fontSize: 10, fontWeight: '800' },
+  retentionCtaText: { color: shop.ink, fontSize: 12, fontWeight: '700' },
 });

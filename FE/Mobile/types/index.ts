@@ -66,6 +66,9 @@ export interface Product {
   mo_ta?: string | null;
   gia_ban: number;
   so_luong: number;
+  so_luong_da_ban?: number;
+  diem_danh_gia?: number | null;
+  so_luong_danh_gia?: number;
   hinh_anh?: string | null;
   ten_danh_muc?: string;
   ten_thuong_hieu?: string;

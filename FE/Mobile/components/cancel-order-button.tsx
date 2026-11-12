@@ -1,5 +1,7 @@
+import { Pressable, Text } from '@/components/ui';
+import { shop, space } from '@/constants/shop-theme';
 import { useRef, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, StyleSheet, View } from 'react-native';
 import { orderService } from '@/services/order.service';
 import { getApiMessage } from '@/utils/format';
 
@@ -31,5 +33,5 @@ export function CancelOrderButton({ orderId, onCanceled }: { orderId: number; on
 }
 const styles = StyleSheet.create({
   cancel: { padding: 14, borderRadius: 12, borderWidth: 1, borderColor: '#EACACA', alignItems: 'center', marginTop: 8 }, danger: { color: '#A52D2D', fontSize: 14, fontWeight: '700', lineHeight: 21 },
-  overlay: { flex: 1, backgroundColor: '#00000066', alignItems: 'center', justifyContent: 'center', padding: 24 }, card: { backgroundColor: '#fff', padding: 24, borderRadius: 22, width: '100%', maxWidth: 440, gap: 16 }, title: { color: '#152D46', fontSize: 21, fontWeight: '800' }, message: { color: '#66788A', fontSize: 14, lineHeight: 22 }, keep: { backgroundColor: '#087F8C', padding: 16, borderRadius: 12, alignItems: 'center' },
+  overlay: { flex: 1, backgroundColor: '#00000066', alignItems: 'center', justifyContent: 'center', padding: space.lg }, card: { backgroundColor: '#fff', padding: space.lg, borderRadius: 22, width: '100%', maxWidth: 440, gap: space.md }, title: { color: shop.ink, fontSize: 21, fontWeight: '700' }, message: { color: shop.muted, fontSize: 14, lineHeight: 22 }, keep: { backgroundColor: shop.primary, padding: space.md, borderRadius: 12, alignItems: 'center' },
 });

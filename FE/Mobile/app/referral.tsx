@@ -1,20 +1,11 @@
+import { Pressable, Text, TextInput } from '@/components/ui';
+import { shop, layout, radius, space } from '@/constants/shop-theme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import * as Clipboard from 'expo-clipboard';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  Share,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, Share, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LoadingState } from '../components/shop-ui';
 import {
@@ -111,17 +102,6 @@ export default function ReferralScreen() {
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          {/* Top Promotional Hero */}
-          <View style={styles.heroCard}>
-            <View style={styles.heroBadge}>
-              <Text style={styles.heroBadgeText}>CHƯƠNG TRÌNH ĐỒNG HÀNH</Text>
-            </View>
-            <Text style={styles.heroTitle}>Mời bạn cùng vui,{'\n'}Nhận quà 50.000đ</Text>
-            <Text style={styles.heroSubtitle}>
-              Chia sẻ mã mời đến bạn bè và người thân. Cả hai cùng nhận ngay 500 Xu và Voucher giảm 50.000đ mua sắm thiết bị gia dụng!
-            </Text>
-          </View>
-
           {/* My Referral Code Box */}
           <View style={styles.sectionCard}>
             <Text style={styles.cardHeaderTitle}>MÃ GIỚI THIỆU CỦA BẠN</Text>
@@ -136,15 +116,26 @@ export default function ReferralScreen() {
                 onPress={handleCopyCode}
                 accessibilityLabel={copied ? 'Đã sao chép mã giới thiệu' : 'Sao chép mã giới thiệu'}
               >
-                <MaterialIcons name={copied ? 'check' : 'content-copy'} size={20} color="#152D46" />
+                <MaterialIcons name={copied ? 'check' : 'content-copy'} size={20} color={shop.ink} />
                 <Text style={styles.copyBtnText}>{copied ? 'Đã sao chép' : 'Sao chép'}</Text>
               </Pressable>
             </View>
 
             <Pressable style={styles.shareBtn} onPress={handleShare}>
-              <MaterialIcons name="share" size={20} color="#152D46" />
+              <MaterialIcons name="share" size={20} color={shop.ink} />
               <Text style={styles.shareBtnText}>CHIA SẺ LỜI MỜI CHO BẠN BÈ</Text>
             </Pressable>
+          </View>
+
+          {/* Top Promotional Hero */}
+          <View style={styles.heroCard}>
+            <View style={styles.heroBadge}>
+              <Text style={styles.heroBadgeText}>CHƯƠNG TRÌNH ĐỒNG HÀNH</Text>
+            </View>
+            <Text style={styles.heroTitle}>Mời bạn cùng vui,{'\n'}Nhận quà 50.000đ</Text>
+            <Text style={styles.heroSubtitle}>
+              Chia sẻ mã mời đến bạn bè và người thân. Cả hai cùng nhận ngay 500 Xu và Voucher giảm 50.000đ mua sắm thiết bị gia dụng!
+            </Text>
           </View>
 
           {/* Enter Referral Code Box */}
@@ -154,7 +145,7 @@ export default function ReferralScreen() {
 
             {status?.da_nhap_ma_moi ? (
               <View style={styles.alreadyEnteredCard}>
-                <MaterialIcons name="check-circle" size={26} color="#087F8C" />
+                <MaterialIcons name="check-circle" size={26} color={shop.primary} />
                 <View style={{ flex: 1 }}>
                   <Text style={styles.alreadyEnteredTitle}>Đã nhận quà giới thiệu</Text>
                   <Text style={styles.alreadyEnteredDesc}>Tài khoản của bạn đã kích hoạt quà tân thủ và kết nối thành công.</Text>
@@ -184,7 +175,7 @@ export default function ReferralScreen() {
           {/* Stats Summary */}
           <View style={styles.statsCard}>
             <View style={styles.statItem}>
-              <MaterialIcons name="people" size={26} color="#087F8C" />
+              <MaterialIcons name="people" size={26} color={shop.primary} />
               <Text style={styles.statNumber}>{status?.so_ban_be_da_moi || 0}</Text>
               <Text style={styles.statLabel}>Bạn bè đã mời</Text>
             </View>
@@ -218,7 +209,7 @@ export default function ReferralScreen() {
                       <Text style={styles.invitedDate}>Tham gia: {new Date(item.ngay_tham_gia).toLocaleDateString('vi-VN')}</Text>
                     </View>
                     <View style={styles.invitedBonus}>
-                      <MaterialCommunityIcons name="bitcoin" size={14} color="#087F8C" />
+                      <MaterialCommunityIcons name="bitcoin" size={14} color={shop.primary} />
                       <Text style={styles.invitedBonusText}>+{item.diem_thuong.toLocaleString('vi-VN')}</Text>
                     </View>
                   </View>
@@ -264,9 +255,9 @@ export default function ReferralScreen() {
 
           {/* Back to Rewards */}
           <Pressable style={styles.rewardsLink} onPress={() => router.push('/rewards' as any)}>
-            <MaterialIcons name="military-tech" size={20} color="#087F8C" />
+            <MaterialIcons name="military-tech" size={20} color={shop.primary} />
             <Text style={styles.rewardsLinkText}>Đến Trung tâm Điểm thưởng & Đổi quà</Text>
-            <MaterialIcons name="chevron-right" size={20} color="#087F8C" />
+            <MaterialIcons name="chevron-right" size={20} color={shop.primary} />
           </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -275,18 +266,18 @@ export default function ReferralScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#F4F7FB' },
-  content: { padding: 18, paddingBottom: 36, maxWidth: 760, width: '100%', alignSelf: 'center', gap: 18 },
+  safe: { flex: 1, backgroundColor: shop.background },
+  content: { padding: 18, paddingBottom: 36, maxWidth: layout.maxWidth, width: '100%', alignSelf: 'center', gap: 18 },
 
   heroCard: {
-    backgroundColor: '#152D46',
-    borderRadius: 24,
-    padding: 22,
+    backgroundColor: shop.ink,
+    borderRadius: radius.lg,
+    padding: space.lg,
     shadowColor: '#000',
-    shadowOpacity: 0.08,
+    shadowOpacity: 0,
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 12,
-    elevation: 3,
+    elevation: 0,
   },
   heroBadge: {
     alignSelf: 'flex-start',
@@ -296,172 +287,172 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 10,
   },
-  heroBadgeText: { color: '#A5EEE3', fontSize: 10, fontWeight: '800', letterSpacing: 1 },
-  heroTitle: { color: '#fff', fontSize: 24, fontWeight: '900', lineHeight: 32, letterSpacing: -0.5 },
-  heroSubtitle: { color: '#C8D7CE', fontSize: 12, lineHeight: 18, marginTop: 10 },
+  heroBadgeText: { color: shop.accent, fontSize: 12, fontWeight: '700', letterSpacing: 1 },
+  heroTitle: { color: '#fff', fontSize: 30, fontWeight: '700', lineHeight: 39, letterSpacing: -0.5 },
+  heroSubtitle: { color: '#C8D7CE', fontSize: 14, lineHeight: 22, marginTop: 10 },
 
   sectionCard: {
     backgroundColor: '#fff',
-    borderRadius: 22,
-    padding: 18,
+    borderRadius: radius.md,
+    padding: layout.gutter,
     borderWidth: 1,
-    borderColor: '#E8EFE5',
+    borderColor: shop.border,
   },
-  cardHeaderTitle: { color: '#152D46', fontSize: 13, fontWeight: '800', letterSpacing: 0.8, marginBottom: 4 },
-  cardDesc: { color: '#6A7D75', fontSize: 12, lineHeight: 18, marginBottom: 14 },
+  cardHeaderTitle: { color: shop.ink, fontSize: 13, fontWeight: '700', letterSpacing: 0.8, marginBottom: 4 },
+  cardDesc: { color: shop.muted, fontSize: 14, lineHeight: 22, marginBottom: 14 },
 
   codeContainer: { flexDirection: 'row', gap: 10, marginBottom: 12 },
   codeBox: {
     flex: 1,
-    backgroundColor: '#F7FAF6',
+    backgroundColor: shop.surfaceMuted,
     borderWidth: 2,
     borderColor: '#CBE0D1',
     borderStyle: 'dashed',
-    borderRadius: 16,
+    borderRadius: radius.md,
     paddingVertical: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  codeText: { color: '#087F8C', fontSize: 18, fontWeight: '900', letterSpacing: 1.5 },
+  codeText: { color: shop.primary, fontSize: 18, fontWeight: '700', letterSpacing: 1.5 },
   copyBtn: {
-    backgroundColor: '#A5EEE3',
+    backgroundColor: shop.accent,
     paddingHorizontal: 16,
-    borderRadius: 16,
+    borderRadius: radius.md,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
   },
-  copyBtnText: { color: '#152D46', fontSize: 12, fontWeight: '800' },
+  copyBtnText: { color: shop.ink, fontSize: 12, fontWeight: '700' },
   copyBtnDone: { backgroundColor: '#A8E063' },
 
   shareBtn: {
-    backgroundColor: '#EAF4EE',
-    borderRadius: 16,
+    backgroundColor: shop.soft,
+    borderRadius: radius.md,
     paddingVertical: 14,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: space.xs,
     borderWidth: 1,
     borderColor: '#C7E2D1',
   },
-  shareBtnText: { color: '#087F8C', fontSize: 13, fontWeight: '800', letterSpacing: 0.5 },
+  shareBtnText: { color: shop.primary, fontSize: 13, fontWeight: '700', letterSpacing: 0.5 },
 
   inputContainer: { flexDirection: 'row', gap: 10 },
   input: {
     flex: 1,
-    backgroundColor: '#F8FAF7',
+    backgroundColor: shop.surfaceMuted,
     borderRadius: 14,
     paddingHorizontal: 14,
     paddingVertical: 12,
     borderWidth: 1,
     borderColor: '#E2ECE4',
-    color: '#152D46',
+    color: shop.ink,
     fontSize: 14,
     fontWeight: '700',
   },
   submitBtn: {
-    backgroundColor: '#087F8C',
+    backgroundColor: shop.primary,
     paddingHorizontal: 18,
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
   btnDisabled: { opacity: 0.6 },
-  submitBtnText: { color: '#fff', fontSize: 13, fontWeight: '800' },
+  submitBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
 
   alreadyEnteredCard: {
-    backgroundColor: '#EAF5EE',
-    borderRadius: 16,
+    backgroundColor: shop.soft,
+    borderRadius: radius.md,
     padding: 14,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: space.sm,
     borderWidth: 1,
     borderColor: '#C1E0CC',
   },
-  alreadyEnteredTitle: { color: '#087F8C', fontSize: 13, fontWeight: '800' },
-  alreadyEnteredDesc: { color: '#4F6C5E', fontSize: 11, marginTop: 2 },
+  alreadyEnteredTitle: { color: shop.primary, fontSize: 13, fontWeight: '700' },
+  alreadyEnteredDesc: { color: '#4F6C5E', fontSize: 12, marginTop: 2 },
 
   statsCard: {
     backgroundColor: '#fff',
-    borderRadius: 22,
-    padding: 18,
+    borderRadius: radius.md,
+    padding: layout.gutter,
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E8EFE5',
+    borderColor: shop.border,
   },
   statItem: { flex: 1, alignItems: 'center' },
-  statDivider: { width: 1, height: 40, backgroundColor: '#E4ECE5' },
-  statNumber: { color: '#152D46', fontSize: 20, fontWeight: '900', marginTop: 4 },
-  statLabel: { color: '#768880', fontSize: 11, marginTop: 2 },
+  statDivider: { width: 1, minHeight: 44, backgroundColor: '#E4ECE5' },
+  statNumber: { color: shop.ink, fontSize: 20, fontWeight: '700', marginTop: 4 },
+  statLabel: { color: shop.muted, fontSize: 12, marginTop: 2 },
 
   invitedList: { gap: 10 },
   invitedItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAF7',
+    backgroundColor: shop.surfaceMuted,
     borderRadius: 14,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#E8EFE5',
-    gap: 12,
+    borderColor: shop.border,
+    gap: space.sm,
   },
   invitedAvatar: {
     width: 40,
-    height: 40,
+    minHeight: 44,
     borderRadius: 20,
-    backgroundColor: '#A5EEE3',
+    backgroundColor: shop.accent,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  invitedAvatarText: { color: '#152D46', fontSize: 16, fontWeight: '900' },
-  invitedName: { color: '#152D46', fontSize: 13, fontWeight: '800' },
-  invitedDate: { color: '#768880', fontSize: 11, marginTop: 2 },
+  invitedAvatarText: { color: shop.ink, fontSize: 16, fontWeight: '700' },
+  invitedName: { color: shop.ink, fontSize: 13, fontWeight: '700' },
+  invitedDate: { color: shop.muted, fontSize: 12, marginTop: 2 },
   invitedBonus: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#EAF5EE',
+    backgroundColor: shop.soft,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 10,
+    borderRadius: radius.sm,
   },
-  invitedBonusText: { color: '#087F8C', fontSize: 11, fontWeight: '800' },
+  invitedBonusText: { color: shop.primary, fontSize: 12, fontWeight: '700' },
   emptyInvitedBox: {
     alignItems: 'center',
-    gap: 8,
+    gap: space.xs,
     paddingVertical: 22,
-    backgroundColor: '#F8FAF7',
+    backgroundColor: shop.surfaceMuted,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#E8EFE5',
+    borderColor: shop.border,
   },
-  emptyInvitedText: { color: '#768880', fontSize: 12, textAlign: 'center', paddingHorizontal: 20, lineHeight: 18 },
+  emptyInvitedText: { color: shop.muted, fontSize: 12, textAlign: 'center', paddingHorizontal: layout.gutter, lineHeight: 18 },
 
   stepRow: { flexDirection: 'row', gap: 14, alignItems: 'flex-start', marginTop: 12 },
   stepNumber: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#087F8C',
+    backgroundColor: shop.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  stepNumberText: { color: '#fff', fontSize: 12, fontWeight: '800' },
-  stepTitle: { color: '#152D46', fontSize: 13, fontWeight: '800' },
-  stepDesc: { color: '#687B72', fontSize: 11, lineHeight: 17, marginTop: 2 },
+  stepNumberText: { color: '#fff', fontSize: 12, fontWeight: '700' },
+  stepTitle: { color: shop.ink, fontSize: 13, fontWeight: '700' },
+  stepDesc: { color: '#687B72', fontSize: 12, lineHeight: 17, marginTop: 2 },
 
   rewardsLink: {
     backgroundColor: '#E8F2EC',
-    borderRadius: 16,
+    borderRadius: radius.md,
     padding: 14,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: space.xs,
   },
-  rewardsLinkText: { color: '#087F8C', fontSize: 13, fontWeight: '800' },
+  rewardsLinkText: { color: shop.primary, fontSize: 13, fontWeight: '700' },
 });

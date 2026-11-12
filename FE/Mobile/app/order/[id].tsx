@@ -1,7 +1,9 @@
+import { OrderProgress, Pressable, Text } from '@/components/ui';
+import { shop, layout, radius, space } from '@/constants/shop-theme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { CancelOrderButton } from '../../components/cancel-order-button';
 import { ConfirmReceiptButton } from '../../components/confirm-receipt-button';
 import { OrderProductReview } from '../../components/order-product-review';
@@ -73,16 +75,13 @@ export default function OrderDetailScreen() {
             <Text style={styles.date}>{formatDate(order.ngay_dat)}</Text>
           </View>
           <View style={[styles.status, { backgroundColor: order.trang_thai === 'DaHuy' ? '#FBEDEC' : '#F8EEDB' }]}>
-            <Text style={[styles.statusText, { color: order.trang_thai === 'DaHuy' ? '#BC4545' : '#916B24' }]}>{statusLabel[order.trang_thai] || order.trang_thai}</Text>
+            <Text style={[styles.statusText, { color: order.trang_thai === 'DaHuy' ? shop.danger : '#916B24' }]}>{statusLabel[order.trang_thai] || order.trang_thai}</Text>
           </View>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Tiến trình đơn hàng</Text>
-          {['ChoXacNhan','DaXacNhan','DangGiao','DaGiao'].map((status,index)=>{
-            const current=['ChoXacNhan','DaXacNhan','DangGiao','DaGiao'].indexOf(order.trang_thai);
-            return <Text key={status} style={[styles.date,{color:index<=current?'#087F8C':'#7B8EA1'}]}>{index<=current?'●':'○'} {statusLabel[status]}{status===order.trang_thai?' · Hiện tại':''}</Text>;
-          })}
+          <OrderProgress status={order.trang_thai} />
           {order.trang_thai==='DaHuy'?<Text style={styles.date}>Đơn hàng đã hủy</Text>:null}
         </View>
         <View style={styles.section}>
@@ -130,7 +129,7 @@ function OrderedProductDetails({ item }: { item: OrderItem }) {
   return <View>
     <Pressable accessibilityRole="button" accessibilityLabel={`Chi tiết ${item.ten_san_pham}, ${item.ten_bien_the || 'sản phẩm tiêu chuẩn'}`} accessibilityState={{ expanded }} onPress={() => setExpanded(value => !value)} style={styles.detailButton}>
       <Text style={styles.detailButtonText}>{expanded ? 'Thu gọn chi tiết' : 'Xem chi tiết sản phẩm'}</Text>
-      <MaterialIcons name={expanded ? 'expand-less' : 'expand-more'} size={20} color="#087F8C" />
+      <MaterialIcons name={expanded ? 'expand-less' : 'expand-more'} size={20} color={shop.primary} />
     </Pressable>
     {expanded ? <View style={styles.productDetails}>
       <Text style={styles.itemName}>Thông tin sản phẩm đã đặt</Text>
@@ -159,7 +158,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 function InfoRow({ icon, label, value }: { icon: any; label: string; value: string }) {
   return (
     <View style={styles.infoRow}>
-      <MaterialIcons name={icon} size={19} color="#087F8C" />
+      <MaterialIcons name={icon} size={19} color={shop.primary} />
       <Text style={styles.infoLabel}>{label}</Text>
       <Text style={styles.infoValue}>{value}</Text>
     </View>
@@ -167,33 +166,33 @@ function InfoRow({ icon, label, value }: { icon: any; label: string; value: stri
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#F4F7FB' },
-  content: { padding: 20, paddingBottom: 32, width: '100%', maxWidth: 760, alignSelf: 'center' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 18 },
-  eyebrow: { color: '#087F8C', fontSize: 10, fontWeight: '800', letterSpacing: 1.5 },
-  title: { color: '#152D46', fontSize: 25, fontWeight: '800', marginTop: 6 },
-  date: { color: '#66788A', fontSize: 12, marginTop: 5 },
+  safe: { flex: 1, backgroundColor: shop.background },
+  content: { padding: layout.gutter, paddingBottom: 32, width: '100%', maxWidth: layout.maxWidth, alignSelf: 'center' },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: space.sm, marginBottom: 18 },
+  eyebrow: { color: shop.primary, fontSize: 12, fontWeight: '700', letterSpacing: 1.5 },
+  title: { color: shop.ink, fontSize: 25, fontWeight: '700', marginTop: 6 },
+  date: { color: shop.muted, fontSize: 12, marginTop: 5 },
   status: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 7, marginTop: 4 },
-  statusText: { fontSize: 11, fontWeight: '800' },
-  section: { backgroundColor: '#fff', borderRadius: 22, padding: 18, marginBottom: 14, borderWidth: 1, borderColor: '#E2E9F1' },
-  sectionTitle: { color: '#152D46', fontSize: 16, fontWeight: '800', marginBottom: 14 },
-  item: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#EDF3F8' },
-  itemImage: { width: 56, height: 56, borderRadius: 12, backgroundColor: '#F4F7FB' },
+  statusText: { fontSize: 12, fontWeight: '700' },
+  section: { backgroundColor: shop.surface, borderRadius: radius.md, padding: layout.gutter, marginBottom: 20, borderWidth: 1, borderColor: shop.border },
+  sectionTitle: { color: shop.ink, fontSize: 16, fontWeight: '700', marginBottom: 14 },
+  item: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: shop.surfaceMuted },
+  itemImage: { width: 56, height: 56, borderRadius: 12, backgroundColor: shop.background },
   itemInfo: { flex: 1 },
-  itemName: { color: '#152D46', fontSize: 13, fontWeight: '700' },
-  itemMeta: { color: '#66788A', fontSize: 12, marginTop: 4 },
-  itemTotal: { color: '#087F8C', fontSize: 13, fontWeight: '800' },
+  itemName: { color: shop.ink, fontSize: 13, fontWeight: '700' },
+  itemMeta: { color: shop.muted, fontSize: 12, marginTop: 4 },
+  itemTotal: { color: shop.primary, fontSize: 13, fontWeight: '700' },
   detailButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12 },
-  detailButtonText: { fontSize: 12, color: '#087F8C', fontWeight: '700' },
-  productDetails: { padding: 14, borderRadius: 14, backgroundColor: '#F4F7FB', marginBottom: 12 },
-  specHeading: { color: '#152D46', fontSize: 13, fontWeight: '700', marginTop: 16, marginBottom: 6 },
-  specRow: { flexDirection: 'row', gap: 12, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#E4EBE3' },
-  specLabel: { flex: 1, color: '#66788A', fontSize: 12 },
-  specValue: { flex: 1, textAlign: 'right', color: '#152D46', fontSize: 12, fontWeight: '600' },
+  detailButtonText: { fontSize: 12, color: shop.primary, fontWeight: '700' },
+  productDetails: { padding: 14, borderRadius: 14, backgroundColor: shop.background, marginBottom: 12 },
+  specHeading: { color: shop.ink, fontSize: 13, fontWeight: '700', marginTop: 16, marginBottom: 6 },
+  specRow: { flexDirection: 'row', gap: space.sm, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#E4EBE3' },
+  specLabel: { flex: 1, color: shop.muted, fontSize: 12 },
+  specValue: { flex: 1, textAlign: 'right', color: shop.ink, fontSize: 12, fontWeight: '600' },
   totalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: 16, marginTop: 2 },
-  totalLabel: { color: '#66788A', fontSize: 13 },
-  total: { color: '#152D46', fontSize: 19, fontWeight: '800' },
-  infoRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 9, paddingVertical: 9 },
-  infoLabel: { color: '#66788A', fontSize: 12, width: 88 },
-  infoValue: { color: '#152D46', fontSize: 13, fontWeight: '700', flex: 1, textAlign: 'right' },
+  totalLabel: { color: shop.muted, fontSize: 13 },
+  total: { color: shop.ink, fontSize: 25, fontWeight: '700' },
+  infoRow: { flexDirection: 'row', alignItems: 'flex-start', gap: space.sm, paddingVertical: 14, borderBottomWidth: 1, borderColor: shop.border },
+  infoLabel: { color: shop.muted, fontSize: 13, width: 90 },
+  infoValue: { color: shop.ink, fontSize: 14, lineHeight: 22, fontWeight: '600', flex: 1, textAlign: 'right' },
 });

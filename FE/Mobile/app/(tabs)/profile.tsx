@@ -1,7 +1,9 @@
+import { Pressable, Text, TextInput } from '@/components/ui';
+import { shop, layout, radius, space } from '@/constants/shop-theme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LoadingState, ScreenHeading } from '@/components/shop-ui';
 import { authService } from '../../services/auth.service';
@@ -87,7 +89,7 @@ export default function ProfileScreen() {
               <Text style={styles.meta}>{user.so_dien_thoai || 'Chưa có số điện thoại'}</Text>
             </View>
             <Pressable accessibilityLabel="Chỉnh sửa thông tin tài khoản" onPress={() => setEditing(true)} style={styles.editButton}>
-              <MaterialIcons name="edit" size={20} color="#152D46" />
+              <MaterialIcons name="edit" size={20} color={shop.ink} />
             </Pressable>
           </View>
         ) : (
@@ -97,10 +99,10 @@ export default function ProfileScreen() {
         {editing ? (
           <View style={styles.editForm}>
             <Text style={styles.formTitle}>Cập nhật thông tin</Text>
-            <TextInput style={styles.input} value={form.ho_ten} onChangeText={(value) => updateField('ho_ten', value)} placeholder="Họ tên" placeholderTextColor="#7B8EA1" />
-            <TextInput style={styles.input} value={form.email} onChangeText={(value) => updateField('email', value)} placeholder="Email" placeholderTextColor="#7B8EA1" keyboardType="email-address" autoCapitalize="none" />
-            <TextInput style={styles.input} value={form.so_dien_thoai} onChangeText={(value) => updateField('so_dien_thoai', value)} placeholder="Số điện thoại" placeholderTextColor="#7B8EA1" keyboardType="phone-pad" />
-            <TextInput style={[styles.input, styles.addressInput]} value={form.dia_chi} onChangeText={(value) => updateField('dia_chi', value)} placeholder="Địa chỉ giao hàng" placeholderTextColor="#7B8EA1" multiline />
+            <TextInput style={styles.input} value={form.ho_ten} onChangeText={(value) => updateField('ho_ten', value)} placeholder="Họ tên" placeholderTextColor={shop.muted} />
+            <TextInput style={styles.input} value={form.email} onChangeText={(value) => updateField('email', value)} placeholder="Email" placeholderTextColor={shop.muted} keyboardType="email-address" autoCapitalize="none" />
+            <TextInput style={styles.input} value={form.so_dien_thoai} onChangeText={(value) => updateField('so_dien_thoai', value)} placeholder="Số điện thoại" placeholderTextColor={shop.muted} keyboardType="phone-pad" />
+            <TextInput style={[styles.input, styles.addressInput]} value={form.dia_chi} onChangeText={(value) => updateField('dia_chi', value)} placeholder="Địa chỉ giao hàng" placeholderTextColor={shop.muted} multiline />
             <View style={styles.formActions}>
               <Pressable style={styles.cancelButton} onPress={() => setEditing(false)} disabled={saving}><Text style={styles.cancelText}>Hủy</Text></Pressable>
               <Pressable style={[styles.saveButton, saving && styles.disabled]} onPress={handleSave} disabled={saving}><Text style={styles.saveText}>{saving ? 'Đang lưu...' : 'Lưu thay đổi'}</Text></Pressable>
@@ -112,7 +114,7 @@ export default function ProfileScreen() {
           <View style={styles.rewardSummaryCard}>
             <View style={styles.rewardSummaryLeft}>
               <View style={styles.coinCircle}>
-                <MaterialIcons name="monetization-on" size={24} color="#A5EEE3" />
+                <MaterialIcons name="monetization-on" size={24} color={shop.accent} />
               </View>
               <View>
                 <Text style={styles.rewardSummarySub}>Ví Xu tích lũy</Text>
@@ -123,27 +125,63 @@ export default function ProfileScreen() {
             </View>
             <Pressable style={styles.rewardSummaryBtn} onPress={() => router.push('/rewards' as any)}>
               <Text style={styles.rewardSummaryBtnText}>Đổi quà</Text>
-              <MaterialIcons name="arrow-forward" size={16} color="#152D46" />
+              <MaterialIcons name="arrow-forward" size={16} color={shop.ink} />
             </Pressable>
           </View>
         ) : null}
+
+        <Text style={styles.menuLabel}>MUA SẮM & GIAO NHẬN</Text>
+        <View style={styles.menu}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Voucher của tôi" style={styles.menuItem} onPress={() => router.push('/vouchers')}>
+            <MaterialIcons name="local-offer" size={22} color={shop.primary} /><Text style={styles.menuText}>Voucher của tôi</Text><MaterialIcons name="chevron-right" size={23} color={shop.muted} />
+          </Pressable>
+          <Pressable style={styles.menuItem} onPress={() => router.push({ pathname: '/account-tools' as any, params: { section: 'password' } })}>
+            <MaterialIcons name="lock-outline" size={22} color={shop.primary} />
+            <Text style={styles.menuText}>Đổi mật khẩu</Text>
+            <MaterialIcons name="chevron-right" size={23} color={shop.muted} />
+          </Pressable>
+          <Pressable style={styles.menuItem} onPress={() => router.push('/orders' as any)}>
+            <MaterialIcons name="receipt-long" size={22} color={shop.primary} />
+            <Text style={styles.menuText}>Đơn hàng của tôi</Text>
+            <MaterialIcons name="chevron-right" size={23} color={shop.muted} />
+          </Pressable>
+          <Pressable style={styles.menuItem} onPress={() => router.push('/cart' as any)}>
+            <MaterialIcons name="shopping-cart" size={22} color={shop.primary} />
+            <Text style={styles.menuText}>Giỏ hàng</Text>
+            <MaterialIcons name="chevron-right" size={23} color={shop.muted} />
+          </Pressable>
+          <Pressable style={styles.menuItem} onPress={() => router.push('/contact' as any)}>
+            <MaterialIcons name="support-agent" size={22} color={shop.primary} />
+            <Text style={styles.menuText}>Gửi liên hệ cho cửa hàng</Text>
+            <MaterialIcons name="chevron-right" size={23} color={shop.muted} />
+          </Pressable>
+          <Pressable style={styles.menuItem} onPress={() => router.push('/contact-history' as any)}>
+            <MaterialIcons name="forum" size={22} color={shop.primary} />
+            <Text style={styles.menuText}>Phản hồi của tôi</Text>
+            <MaterialIcons name="chevron-right" size={23} color={shop.muted} />
+          </Pressable>
+          <View style={styles.menuItem}>
+            <MaterialIcons name="location-on" size={22} color={shop.primary} />
+            <Text style={styles.menuText}>{user?.dia_chi || 'Chưa có địa chỉ giao hàng'}</Text>
+          </View>
+        </View>
 
         <Text style={styles.menuLabel}>QUÀ TẶNG & GIỚI THIỆU</Text>
         <View style={styles.menu}>
           <Pressable accessibilityRole="button" style={styles.giftMenuItem} onPress={() => router.push('/rewards' as any)}>
             <View style={[styles.giftIconWrap, { backgroundColor: '#EAF8F0' }]}>
-              <MaterialIcons name="event-available" size={22} color="#087F8C" />
+              <MaterialIcons name="event-available" size={22} color={shop.primary} />
             </View>
             <View style={styles.giftItemContent}>
               <View style={styles.giftTitleRow}>
                 <Text style={styles.giftItemTitle}>Điểm danh & Quà tặng</Text>
                 <View style={[styles.giftTagPill, { backgroundColor: '#EAF8F0' }]}>
-                  <Text style={[styles.giftTagText, { color: '#087F8C' }]}>+100 Xu</Text>
+                  <Text style={[styles.giftTagText, { color: shop.primary }]}>+100 Xu</Text>
                 </View>
               </View>
               <Text style={styles.giftItemSub}>Nhận xu mỗi ngày, vòng quay may mắn, đổi voucher</Text>
             </View>
-            <MaterialIcons name="chevron-right" size={22} color="#7B8EA1" />
+            <MaterialIcons name="chevron-right" size={22} color={shop.muted} />
           </Pressable>
           <Pressable accessibilityRole="button" style={[styles.giftMenuItem, styles.giftMenuItemLast]} onPress={() => router.push('/referral' as any)}>
             <View style={[styles.giftIconWrap, { backgroundColor: '#FFF5EB' }]}>
@@ -158,49 +196,13 @@ export default function ProfileScreen() {
               </View>
               <Text style={styles.giftItemSub}>Chia sẻ mã nhận 500 Xu + Voucher cho cả hai</Text>
             </View>
-            <MaterialIcons name="chevron-right" size={22} color="#7B8EA1" />
+            <MaterialIcons name="chevron-right" size={22} color={shop.muted} />
           </Pressable>
         </View>
 
-        <Text style={styles.menuLabel}>MUA SẮM & GIAO NHẬN</Text>
-        <View style={styles.menu}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Voucher của tôi" style={styles.menuItem} onPress={() => router.push('/vouchers')}>
-            <MaterialIcons name="local-offer" size={22} color="#087F8C" /><Text style={styles.menuText}>Voucher của tôi</Text><MaterialIcons name="chevron-right" size={23} color="#7B8EA1" />
-          </Pressable>
-          <Pressable style={styles.menuItem} onPress={() => router.push({ pathname: '/account-tools' as any, params: { section: 'password' } })}>
-            <MaterialIcons name="lock-outline" size={22} color="#087F8C" />
-            <Text style={styles.menuText}>Đổi mật khẩu</Text>
-            <MaterialIcons name="chevron-right" size={23} color="#7B8EA1" />
-          </Pressable>
-          <Pressable style={styles.menuItem} onPress={() => router.push('/orders' as any)}>
-            <MaterialIcons name="receipt-long" size={22} color="#087F8C" />
-            <Text style={styles.menuText}>Đơn hàng của tôi</Text>
-            <MaterialIcons name="chevron-right" size={23} color="#7B8EA1" />
-          </Pressable>
-          <Pressable style={styles.menuItem} onPress={() => router.push('/cart' as any)}>
-            <MaterialIcons name="shopping-cart" size={22} color="#087F8C" />
-            <Text style={styles.menuText}>Giỏ hàng</Text>
-            <MaterialIcons name="chevron-right" size={23} color="#7B8EA1" />
-          </Pressable>
-          <Pressable style={styles.menuItem} onPress={() => router.push('/contact' as any)}>
-            <MaterialIcons name="support-agent" size={22} color="#087F8C" />
-            <Text style={styles.menuText}>Gửi liên hệ cho cửa hàng</Text>
-            <MaterialIcons name="chevron-right" size={23} color="#7B8EA1" />
-          </Pressable>
-          <Pressable style={styles.menuItem} onPress={() => router.push('/contact-history' as any)}>
-            <MaterialIcons name="forum" size={22} color="#087F8C" />
-            <Text style={styles.menuText}>Phản hồi của tôi</Text>
-            <MaterialIcons name="chevron-right" size={23} color="#7B8EA1" />
-          </Pressable>
-          <View style={styles.menuItem}>
-            <MaterialIcons name="location-on" size={22} color="#087F8C" />
-            <Text style={styles.menuText}>{user?.dia_chi || 'Chưa có địa chỉ giao hàng'}</Text>
-          </View>
-        </View>
-
-<View style={styles.profileNote}><MaterialIcons name="spa" size={28} color="#087F8C" /><Text style={styles.profileNoteText}>Cảm ơn bạn đã để Electric Shop đồng hành cùng tổ ấm.</Text></View>
+<View style={styles.profileNote}><MaterialIcons name="spa" size={28} color={shop.primary} /><Text style={styles.profileNoteText}>Cảm ơn bạn đã để Electric Shop đồng hành cùng tổ ấm.</Text></View>
         <Pressable style={styles.logout} onPress={handleLogout}>
-          <MaterialIcons name="logout" size={20} color="#BC4545" />
+          <MaterialIcons name="logout" size={20} color={shop.danger} />
           <Text style={styles.logoutText}>Đăng xuất</Text>
         </Pressable>
       </ScrollView>
@@ -210,52 +212,52 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  memberLabel: { color: '#A5EEE3', fontSize: 8, letterSpacing: 1, fontWeight: '700', marginBottom: 6 },
-  menuLabel: { color: '#66788A', fontSize: 10, fontWeight: '700', letterSpacing: 1.4, marginTop: 30 },
-  profileNote: { backgroundColor: '#E7F4F5', borderRadius: 22, padding: 20, flexDirection: 'row', gap: 12, alignItems: 'center', marginVertical: 24 },
+  memberLabel: { color: shop.primary, fontSize: 11, letterSpacing: 1, fontWeight: '700', marginBottom: 6 },
+  menuLabel: { color: shop.muted, fontSize: 12, fontWeight: '700', letterSpacing: 1.4, marginTop: 30 },
+  profileNote: { backgroundColor: shop.soft, borderRadius: 22, padding: layout.gutter, flexDirection: 'row', gap: space.sm, alignItems: 'center', marginVertical: 24 },
   profileNoteText: { flex: 1, color: '#556B80', fontSize: 13, lineHeight: 21 },
-  safe: { flex: 1, backgroundColor: '#F4F7FB' },
-  container: { flexGrow: 1, padding: 20, width: '100%', maxWidth: 760, alignSelf: 'center' },
-  muted: { color: '#66788A' },
-  card: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#152D46', borderRadius: 22, padding: 22, borderWidth: 1, borderColor: '#E2E9F1' },
-  avatar: { width: 58, height: 58, borderRadius: 29, backgroundColor: '#2C5672', alignItems: 'center', justifyContent: 'center' },
-  avatarText: { color: '#fff', fontSize: 20, fontWeight: '800' },
-  profileInfo: { flex: 1 },
-  name: { color: '#fff', fontSize: 18, fontWeight: '800' },
-  meta: { color: '#CAD8E4', fontSize: 13, marginTop: 4 },
-  menu: { backgroundColor: '#fff', borderRadius: 22, marginTop: 12, overflow: 'hidden', borderWidth: 1, borderColor: '#E2E9F1' },
-  menuItem: { minHeight: 68, flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 14, borderBottomWidth: 1, borderBottomColor: '#EDF3F8' },
-  menuText: { color: '#152D46', fontSize: 14, fontWeight: '700', flex: 1 },
-  logout: { marginTop: 'auto', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E2E9F1', borderRadius: 16, padding: 17 },
-  logoutText: { color: '#BC4545', fontWeight: '800' },
+  safe: { flex: 1, backgroundColor: shop.background },
+  container: { flexGrow: 1, padding: layout.gutter, width: '100%', maxWidth: layout.maxWidth, alignSelf: 'center' },
+  muted: { color: shop.muted },
+  card: { flexDirection: 'column', alignItems: 'center', gap: space.md, backgroundColor: shop.surface, borderRadius: radius.lg, padding: 28, borderWidth: 1, borderColor: shop.border },
+  avatar: { width: 76, height: 76, borderRadius: 38, backgroundColor: shop.primary, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { color: '#fff', fontSize: 20, fontWeight: '700' },
+  profileInfo: { alignItems: 'center', gap: 4 },
+  name: { color: shop.ink, fontSize: 24, fontWeight: '700', textAlign: 'center' },
+  meta: { color: shop.muted, fontSize: 14, marginTop: 4, textAlign: 'center' },
+  menu: { backgroundColor: shop.surface, borderRadius: radius.md, marginTop: 12, overflow: 'hidden' },
+  menuItem: { minHeight: 64, flexDirection: 'row', alignItems: 'center', gap: space.md, paddingHorizontal: 18, borderBottomWidth: 1, borderBottomColor: shop.border },
+  menuText: { color: shop.ink, fontSize: 14, fontWeight: '700', flex: 1 },
+  logout: { marginTop: 'auto', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.xs, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: shop.border, borderRadius: radius.md, padding: 17 },
+  logoutText: { color: shop.danger, fontWeight: '700' },
   keyboard: { flex: 1 },
-  editButton: { width: 40, height: 40, borderRadius: 14, backgroundColor: '#A5EEE3', alignItems: 'center', justifyContent: 'center' },
-  editForm: { backgroundColor: '#fff', borderRadius: 22, padding: 16, marginTop: 14, borderWidth: 1, borderColor: '#E2E9F1' },
-  formTitle: { color: '#152D46', fontSize: 16, fontWeight: '800', marginBottom: 12 },
-  input: { minHeight: 46, borderWidth: 1, borderColor: '#E2E9F1', borderRadius: 14, paddingHorizontal: 12, color: '#152D46', marginBottom: 10, backgroundColor: '#fff' },
+  editButton: { position: 'absolute', right: 16, top: 16, width: 44, minHeight: 44, borderRadius: 22, backgroundColor: shop.soft, alignItems: 'center', justifyContent: 'center' },
+  editForm: { backgroundColor: '#fff', borderRadius: 22, padding: space.md, marginTop: 14, borderWidth: 1, borderColor: shop.border },
+  formTitle: { color: shop.ink, fontSize: 16, fontWeight: '700', marginBottom: 12 },
+  input: { minHeight: 46, borderWidth: 1, borderColor: shop.border, borderRadius: 14, paddingHorizontal: 12, color: shop.ink, marginBottom: 10, backgroundColor: '#fff' },
   addressInput: { minHeight: 72, paddingTop: 12, textAlignVertical: 'top' },
   formActions: { flexDirection: 'row', gap: 10, marginTop: 4 },
-  cancelButton: { flex: 1, minHeight: 46, borderRadius: 14, backgroundColor: '#EDF3F8', alignItems: 'center', justifyContent: 'center' },
-  cancelText: { color: '#152D46', fontWeight: '800' },
-  saveButton: { flex: 1, minHeight: 46, borderRadius: 14, backgroundColor: '#087F8C', alignItems: 'center', justifyContent: 'center' },
-  saveText: { color: '#fff', fontWeight: '800' },
+  cancelButton: { flex: 1, minHeight: 46, borderRadius: 14, backgroundColor: shop.surfaceMuted, alignItems: 'center', justifyContent: 'center' },
+  cancelText: { color: shop.ink, fontWeight: '700' },
+  saveButton: { flex: 1, minHeight: 46, borderRadius: 14, backgroundColor: shop.primary, alignItems: 'center', justifyContent: 'center' },
+  saveText: { color: '#fff', fontWeight: '700' },
   disabled: { opacity: 0.6 },
-  rewardSummaryCard: { backgroundColor: '#152D46', borderRadius: 20, padding: 16, marginTop: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderColor: '#23455E' },
-  rewardSummaryLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  rewardSummaryCard: { backgroundColor: shop.ink, borderRadius: 20, padding: space.md, marginTop: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderColor: '#23455E' },
+  rewardSummaryLeft: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   coinCircle: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#23455E', alignItems: 'center', justifyContent: 'center' },
-  rewardSummarySub: { color: '#CAD8E4', fontSize: 11, fontWeight: '600' },
-  rewardSummaryValue: { color: '#A5EEE3', fontSize: 18, fontWeight: '900', marginTop: 2 },
-  rewardSummaryBtn: { backgroundColor: '#A5EEE3', flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 14 },
-  rewardSummaryBtnText: { color: '#152D46', fontSize: 12, fontWeight: '800' },
-  menuSubText: { color: '#66788A', fontSize: 11, marginTop: 2 },
+  rewardSummarySub: { color: '#CAD8E4', fontSize: 12, fontWeight: '600' },
+  rewardSummaryValue: { color: shop.accent, fontSize: 18, fontWeight: '700', marginTop: 2 },
+  rewardSummaryBtn: { backgroundColor: shop.accent, flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 14 },
+  rewardSummaryBtnText: { color: shop.ink, fontSize: 12, fontWeight: '700' },
+  menuSubText: { color: shop.muted, fontSize: 12, marginTop: 2 },
   giftMenuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: space.sm,
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#EDF3F8',
+    borderBottomColor: shop.surfaceMuted,
   },
   giftMenuItemLast: {
     borderBottomWidth: 0,
@@ -275,12 +277,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 8,
+    gap: space.xs,
   },
   giftItemTitle: {
-    color: '#152D46',
+    color: shop.ink,
     fontSize: 14,
-    fontWeight: '800',
+    fontWeight: '700',
   },
   giftTagPill: {
     paddingHorizontal: 7,
@@ -288,12 +290,12 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   giftTagText: {
-    fontSize: 10,
-    fontWeight: '800',
+    fontSize: 12,
+    fontWeight: '700',
   },
   giftItemSub: {
-    color: '#66788A',
-    fontSize: 11,
+    color: shop.muted,
+    fontSize: 12,
     lineHeight: 16,
     marginTop: 2,
   },

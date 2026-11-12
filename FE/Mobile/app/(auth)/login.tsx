@@ -1,6 +1,8 @@
+import { Pressable, Text } from '@/components/ui';
+import { shop, radius, space } from '@/constants/shop-theme';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { AuthField, AuthShell } from '@/components/auth-ui';
 import { authService } from '../../services/auth.service';
 import { getApiMessage } from '../../utils/format';
@@ -55,13 +57,13 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  success: { color: '#087F8C', fontSize: 13, lineHeight: 20, marginBottom: 12 },
+  success: { color: shop.primary, fontSize: 13, lineHeight: 20, marginBottom: 12 },
   error: { color: '#A52D2D', fontSize: 13, lineHeight: 20, marginBottom: 12 },
-  hint: { color: '#66788A', fontSize: 12, marginBottom: 12 },
-  title: { color: '#152D46', fontSize: 30, fontWeight: '800' },
-  subtitle: { color: '#66788A', marginTop: 6, marginBottom: 24 },
-  button: { height: 54, borderRadius: 16, backgroundColor: '#087F8C', alignItems: 'center', justifyContent: 'center', marginTop: 4 },
+  hint: { color: shop.muted, fontSize: 12, marginBottom: 12 },
+  title: { color: shop.ink, fontSize: 30, fontWeight: '700' },
+  subtitle: { color: shop.muted, marginTop: 6, marginBottom: space.lg },
+  button: { height: 54, borderRadius: radius.md, backgroundColor: shop.primary, alignItems: 'center', justifyContent: 'center', marginTop: 4 },
   disabled: { opacity: 0.65 },
-  buttonText: { color: '#fff', fontWeight: '800', fontSize: 15 },
-  linkText: { paddingVertical: 16, marginTop: 6, textAlign: 'center', color: '#087F8C', fontWeight: '700' },
+  buttonText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  linkText: { paddingVertical: 16, marginTop: 6, textAlign: 'center', color: shop.primary, fontWeight: '700' },
 });
