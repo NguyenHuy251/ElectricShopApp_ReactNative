@@ -6,6 +6,7 @@ import * as sanPhamService from '../services/sanPham.service.js';
 import * as thongSoService from '../services/thongSo.service.js';
 import type { GroupedSpecification, ProductSpecification } from '../types/index.js';
 import { pool } from '../config/database.js';
+import { attachProductStats } from '../services/productStats.service.js';
 
 export function groupSpecifications(specs: ProductSpecification[]): GroupedSpecification[] {
   const map = new Map<string, { group: string; thu_tu_nhom: number; items: any[] }>();
@@ -167,7 +168,8 @@ export async function getAllSanPham(req: Request, res: Response) {
       offset,
     ],sort,specificationFilters);
 
-    const enrichedRows = result.rows.map(row => ({
+    const productsWithStats = await attachProductStats(result.rows);
+    const enrichedRows = productsWithStats.map(row => ({
       ...row,
       specifications: groupSpecifications(row.thong_so_ky_thuat || []),
       images: row.danh_sach_hinh_anh || [],
@@ -200,7 +202,8 @@ export async function getSanPhamById(req: Request, res: Response) {
       return sendError(res, 404, 'Không tìm thấy sản phẩm');
     }
 
-    const { product, categorySpecs } = data;
+    const { categorySpecs } = data;
+    const [product] = await attachProductStats([data.product]);
     const [variantRows] = await pool.query('SELECT ma_bien_the, ma_san_pham, ma_sku, ten_bien_the, gia_ban, so_luong, trang_thai, thong_so_json FROM san_pham_bien_the WHERE ma_san_pham = ? ORDER BY ma_bien_the', [id]);
     const variants = (variantRows as any[]).map(variant => ({
       ...variant,
