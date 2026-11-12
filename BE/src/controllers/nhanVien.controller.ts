@@ -1,0 +1,133 @@
+import { duplicateField } from '../utils/adminErrors.js';
+import { Request, Response } from 'express';
+import { sendError, sendSuccess } from '../utils/response.js';
+import * as nhanVienService from '../services/nhanVien.service.js';
+import bcrypt from 'bcryptjs';
+import type { PoolConnection } from 'mysql2/promise';
+import { pool } from '../config/database.js';
+
+export async function createEmployeeAccount(req: Request, res: Response) {
+  const employeeId = Number(req.params.id);
+  const username = typeof req.body?.ten_dang_nhap === 'string' ? req.body.ten_dang_nhap.trim() : '';
+  const password = req.body?.mat_khau;
+  const email = typeof req.body?.email === 'string' ? req.body.email.trim() : '';
+  const errors: Record<string, string> = {};
+  if (!Number.isSafeInteger(employeeId) || employeeId < 1) return sendError(res, 400, 'Mã nhân viên không hợp lệ');
+  if (!/^[A-Za-z0-9_.-]{3,50}$/.test(username)) errors.ten_dang_nhap = 'Tên đăng nhập gồm 3–50 ký tự chữ, số, dấu chấm, gạch dưới hoặc gạch ngang.';
+  if (typeof password !== 'string' || password.length < 8 || Buffer.byteLength(password, 'utf8') > 72) errors.mat_khau = 'Mật khẩu tối thiểu 8 ký tự và tối đa 72 byte.';
+  if (email.length > 100 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = 'Email không hợp lệ.';
+  if (Object.keys(errors).length) return res.status(400).json({ success: false, message: 'Vui lòng kiểm tra thông tin tài khoản.', fieldErrors: errors });
+  let connection: PoolConnection | undefined;
+  try {
+    const hashedPassword = await bcrypt.hash(password, 12);
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+    const [rows] = await connection.query('SELECT ma_tai_khoan,ho_ten,so_dien_thoai,trang_thai FROM nhan_vien WHERE ma_nhan_vien=? FOR UPDATE', [employeeId]);
+    const employee = (rows as { ma_tai_khoan: number | null; ho_ten: string; so_dien_thoai: string | null; trang_thai: string }[])[0];
+    if (!employee || employee.ma_tai_khoan != null) {
+      await connection.rollback();
+      return sendError(res, employee ? 409 : 404, employee ? 'Nhân viên đã có tài khoản liên kết. Vui lòng làm mới danh sách.' : 'Không tìm thấy nhân viên');
+    }
+    const status = employee.trang_thai === 'DangLam' ? 'HoatDong' : 'Khoa';
+    const [insert] = await connection.execute("INSERT INTO tai_khoan (ten_dang_nhap,mat_khau,ho_ten,email,so_dien_thoai,vai_tro,trang_thai) VALUES (?,?,?,?,?,'NhanVien',?)", [username, hashedPassword, employee.ho_ten, email, employee.so_dien_thoai, status]);
+    const accountId = (insert as { insertId: number }).insertId;
+    await connection.execute('UPDATE nhan_vien SET ma_tai_khoan=? WHERE ma_nhan_vien=?', [accountId, employeeId]);
+    await connection.commit();
+    return sendSuccess(res, 'Đã tạo và liên kết tài khoản nhân viên', { ma_nhan_vien: employeeId, ma_tai_khoan: accountId, ten_dang_nhap: username, vai_tro: 'NhanVien', trang_thai: status });
+  } catch (error) {
+    await connection?.rollback();
+    if ((error as { code?: string }).code === 'ER_DUP_ENTRY') {
+      const field = /email/i.test((error as Error).message) ? 'email' : 'ten_dang_nhap';
+      return res.status(409).json({ success: false, message: 'Tên đăng nhập hoặc email đã được sử dụng.', fieldErrors: { [field]: 'Thông tin này đã được sử dụng.' } });
+    }
+    return sendError(res, 503, 'Chưa thể tạo tài khoản. Vui lòng thử lại.');
+  } finally { connection?.release(); }
+}
+
+async function validateAccount(accountId: unknown, employeeId?: string | string[]) {
+  if (accountId == null || accountId === '') return '';
+  if (!Number.isInteger(Number(accountId)) || Number(accountId) < 1) return 'Tài khoản không hợp lệ';
+  const { accounts, employees } = await nhanVienService.validateNhanVienAccount(Number(accountId), Number(employeeId || 0));
+  if (!accounts.length) return 'Chọn tài khoản Admin hoặc Nhân viên có thật';
+  return employees.length ? 'Tài khoản đã liên kết với nhân viên khác' : '';
+}
+
+
+export async function getAllNhanVien(req: Request, res: Response) {
+  try {
+    const rows = await nhanVienService.listNhanVien();
+    return sendSuccess(res, 'Danh sách nhân viên', rows);
+  } catch (error) {
+    if (duplicateField(error, res, 'ma_tai_khoan', 'Tài khoản đã liên kết với nhân viên khác')) return;
+    return sendError(res, 500, 'Lỗi khi lấy danh sách nhân viên', [(error as Error).message]);
+  }
+}
+
+export async function getNhanVienById(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    const result = await nhanVienService.getNhanVienById(Number(id));
+    if (!result.length) return sendError(res, 404, 'Không tìm thấy nhân viên');
+    return sendSuccess(res, 'Nhân viên được tìm thấy', result[0]);
+  } catch (error) {
+    if (duplicateField(error, res, 'ma_tai_khoan', 'Tài khoản đã liên kết với nhân viên khác')) return;
+    return sendError(res, 500, 'Lỗi khi lấy nhân viên', [(error as Error).message]);
+  }
+}
+
+export async function createNhanVien(req: Request, res: Response) {
+  try {
+    const { ma_tai_khoan, ho_ten, chuc_vu, so_dien_thoai, email, ngay_vao_lam, luong, trang_thai } = req.body;
+    if (!ho_ten) return sendError(res, 400, 'Tên nhân viên là bắt buộc');
+    const accountError = await validateAccount(ma_tai_khoan);
+    if (accountError) return res.status(400).json({ success: false, message: accountError, fieldErrors: { ma_tai_khoan: accountError } });
+
+    const result = await nhanVienService.createNhanVien([
+      ma_tai_khoan || null, ho_ten, chuc_vu || null, so_dien_thoai || null,
+      email || null, ngay_vao_lam || null, luong || 0, trang_thai || 'DangLam',
+    ]);
+
+    const insertResult = result[0] as { insertId: number };
+    return sendSuccess(res, 'Thêm nhân viên thành công', { ma_nhan_vien: insertResult.insertId });
+  } catch (error) {
+    if (duplicateField(error, res, 'ma_tai_khoan', 'Tài khoản đã liên kết với nhân viên khác')) return;
+    return sendError(res, 500, 'Lỗi khi thêm nhân viên', [(error as Error).message]);
+  }
+}
+
+export async function updateNhanVien(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    const { ma_tai_khoan, ho_ten, chuc_vu, so_dien_thoai, email, ngay_vao_lam, luong, trang_thai } = req.body;
+    const accountError = await validateAccount(ma_tai_khoan, id);
+    if (accountError) return res.status(400).json({ success: false, message: accountError, fieldErrors: { ma_tai_khoan: accountError } });
+
+    const result = await nhanVienService.getNhanVienById(Number(id));
+    if (!result.length) return sendError(res, 404, 'Không tìm thấy nhân viên');
+
+    await nhanVienService.updateNhanVien([
+      Number(id), ma_tai_khoan !== undefined, ma_tai_khoan || null, ho_ten ?? null,
+      chuc_vu ?? null, so_dien_thoai ?? null, email ?? null, ngay_vao_lam || null,
+      luong ?? null, trang_thai ?? null,
+    ]);
+
+    return sendSuccess(res, 'Cập nhật nhân viên thành công', { ma_nhan_vien: Number(id) });
+  } catch (error) {
+    if (duplicateField(error, res, 'ma_tai_khoan', 'Tài khoản đã liên kết với nhân viên khác')) return;
+    return sendError(res, 500, 'Lỗi khi cập nhật nhân viên', [(error as Error).message]);
+  }
+}
+
+export async function deleteNhanVien(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    const result = await nhanVienService.getNhanVienById(Number(id));
+    if (!result.length) return sendError(res, 404, 'Không tìm thấy nhân viên');
+
+    await nhanVienService.deleteNhanVien(Number(id));
+    return sendSuccess(res, 'Xóa nhân viên thành công', { ma_nhan_vien: Number(id) });
+  } catch (error) {
+    if (duplicateField(error, res, 'ma_tai_khoan', 'Tài khoản đã liên kết với nhân viên khác')) return;
+    return sendError(res, 500, 'Lỗi khi xóa nhân viên', [(error as Error).message]);
+  }
+}
