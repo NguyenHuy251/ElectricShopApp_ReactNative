@@ -1,0 +1,64 @@
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { authApi } from '../api/auth.api';
+import type { User } from '../types';
+import { errorMessage } from '../utils/errors';
+
+interface AuthState { user: User | null; loading: boolean; error: string; restore: () => Promise<void>; login: (username: string, password: string) => Promise<void>; logout: () => void }
+const AuthContext = createContext<AuthState | null>(null);
+const allowed = (user: User) => user.trang_thai === 'HoatDong' && ['Admin', 'NhanVien'].includes(user.vai_tro);
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const generation = useRef(0);
+  const refreshingPermissions = useRef(false);
+  const logout = useCallback(() => {
+    const refresh=localStorage.getItem('admin_refresh_token');localStorage.removeItem('admin_refresh_token');if(refresh)void authApi.logout(refresh).catch(()=>undefined);
+    generation.current++; localStorage.removeItem('admin_token'); localStorage.removeItem('admin_user'); setUser(null); setError(''); setLoading(false);
+  }, []);
+  const restore = useCallback(async () => {
+    const current = ++generation.current;
+    if (!localStorage.getItem('admin_token')) { setUser(null); setLoading(false); return; }
+    setLoading(true); setError('');
+    try {
+      const { data } = await authApi.me();
+      if (current !== generation.current) return;
+      if (!data.data || !allowed(data.data)) { logout(); return; }
+      setUser(data.data); localStorage.removeItem('admin_user');
+    } catch (e) { if (current === generation.current) setError(errorMessage(e)); }
+    finally { if (current === generation.current) setLoading(false); }
+  }, [logout]);
+  useEffect(() => {
+    let active = true;
+    queueMicrotask(() => { if (active) void restore(); });
+    const storage = (e: StorageEvent) => { if (e.key === 'admin_token') void restore(); };
+    window.addEventListener('admin:unauthorized', logout); window.addEventListener('storage', storage);
+    return () => { active = false; generation.current++; window.removeEventListener('admin:unauthorized', logout); window.removeEventListener('storage', storage); };
+  }, [logout, restore]);
+  useEffect(() => {
+    const refreshPermissions = async () => {
+      if (!localStorage.getItem('admin_token') || document.visibilityState === 'hidden' || refreshingPermissions.current) return;
+      refreshingPermissions.current = true;
+      const current = generation.current;
+      try {
+        const { data } = await authApi.me();
+        if (current !== generation.current) return;
+        if (!data.data || !allowed(data.data)) { logout(); return; }
+        const fresh = data.data;
+        setUser(previous => JSON.stringify(previous) === JSON.stringify(fresh) ? previous : fresh);
+      } catch { /* API authorization remains authoritative if this refresh fails. */ }
+      finally { refreshingPermissions.current = false; }
+    };
+    window.addEventListener('focus', refreshPermissions);
+    window.addEventListener('admin:permissions-changed', refreshPermissions);
+    const timer = window.setInterval(refreshPermissions, 30_000);
+    return () => { window.clearInterval(timer); window.removeEventListener('focus', refreshPermissions); window.removeEventListener('admin:permissions-changed', refreshPermissions); };
+  }, [logout]);
+  const login = async (username: string, password: string) => {
+    const { data } = await authApi.login({ ten_dang_nhap: username, mat_khau: password });
+    if (!data.data?.user || !allowed(data.data.user)) { logout(); throw new Error('Tài khoản không có quyền truy cập quản trị.'); }
+    generation.current++; localStorage.setItem('admin_token', data.data.token); if(data.data.refresh_token)localStorage.setItem('admin_refresh_token',data.data.refresh_token);localStorage.removeItem('admin_user'); setUser(data.data.user); setError('');
+  };
+  return <AuthContext.Provider value={{ user, loading, error, restore, login, logout }}>{children}</AuthContext.Provider>;
+}
+export function useAuth() { const auth = useContext(AuthContext); if (!auth) throw new Error('Thiếu AuthProvider'); return auth; }
