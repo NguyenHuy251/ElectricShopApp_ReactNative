@@ -9,7 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 
 
-function TabIcon({ name, focused, color, reducedMotion }: { name: React.ComponentProps<typeof MaterialIcons>['name']; focused: boolean; color: React.ComponentProps<typeof MaterialIcons>['color']; reducedMotion: boolean }) {
+function TabIcon({ name, focused, reducedMotion }: { name: React.ComponentProps<typeof MaterialIcons>['name']; focused: boolean; reducedMotion: boolean }) {
   const [lift] = useState(() => new Animated.Value(focused ? -12 : 0));
   useEffect(() => {
     if (reducedMotion) { lift.setValue(focused ? -12 : 0); return; }
@@ -19,7 +19,7 @@ function TabIcon({ name, focused, color, reducedMotion }: { name: React.Componen
   }, [focused, reducedMotion, lift]);
   return <View pointerEvents="none" accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={styles.iconSlot}>
     <Animated.View style={[styles.iconCircle, focused && styles.activeCircle, { transform: [{ translateY: lift }] }]}>
-      <MaterialIcons size={focused ? 26 : 24} name={name} color={focused ? shop.surface : color} />
+      <MaterialIcons size={focused ? 26 : 24} name={name} color={focused ? shop.surface : shop.muted} />
     </Animated.View>
   </View>;
 }
@@ -45,28 +45,28 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Trang chủ',
-          tabBarIcon: ({ color, focused }) => <TabIcon name="home" focused={focused} color={color} reducedMotion={reducedMotion} />,
+          tabBarIcon: ({ focused }) => <TabIcon name="home" focused={focused} reducedMotion={reducedMotion} />,
         }}
       />
       <Tabs.Screen
         name="products"
         options={{
           title: 'Sản phẩm',
-          tabBarIcon: ({ color, focused }) => <TabIcon name="grid-view" focused={focused} color={color} reducedMotion={reducedMotion} />,
+          tabBarIcon: ({ focused }) => <TabIcon name="grid-view" focused={focused} reducedMotion={reducedMotion} />,
         }}
       />
       <Tabs.Screen
         name="cart"
         options={{
           title: 'Giỏ hàng',
-          tabBarIcon: ({ color, focused }) => <TabIcon name="shopping-cart" focused={focused} color={color} reducedMotion={reducedMotion} />,
+          tabBarIcon: ({ focused }) => <TabIcon name="shopping-cart" focused={focused} reducedMotion={reducedMotion} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Tài khoản',
-          tabBarIcon: ({ color, focused }) => <TabIcon name="person-outline" focused={focused} color={color} reducedMotion={reducedMotion} />,
+          tabBarIcon: ({ focused }) => <TabIcon name="person-outline" focused={focused} reducedMotion={reducedMotion} />,
         }}
       />
     </Tabs>

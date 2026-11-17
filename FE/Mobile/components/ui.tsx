@@ -1,16 +1,16 @@
-import { forwardRef, useState } from 'react';
+import { forwardRef, useState, type ComponentRef } from 'react';
 import { Pressable as NativePressable, Text as NativeText, TextInput as NativeInput, StyleSheet, View } from 'react-native';
 import type { PressableProps, TextProps, TextInputProps } from 'react-native';
 import { fontFamily, layout, radius, shop, space, typography } from '@/constants/shop-theme';
 
 /** Native primitives with a shared baseline; callers retain their handlers and styles. */
-export const Text = forwardRef<NativeText, TextProps>(function Text({ style, ...props }, ref) {
+export const Text = forwardRef<ComponentRef<typeof NativeText>, TextProps>(function Text({ style, ...props }, ref) {
   return <NativeText ref={ref} {...props} style={[{ fontFamily, color: shop.ink }, style]} />;
 });
-export const Pressable = forwardRef<View, PressableProps>(function Pressable({ style, disabled, accessibilityState, hitSlop = 6, ...props }, ref) {
+export const Pressable = forwardRef<ComponentRef<typeof View>, PressableProps>(function Pressable({ style, disabled, accessibilityState, hitSlop = 6, ...props }, ref) {
   return <NativePressable ref={ref} accessibilityRole="button" {...props} disabled={disabled} hitSlop={hitSlop} accessibilityState={{ ...accessibilityState, disabled: !!disabled || accessibilityState?.disabled }} style={state => [typeof style === 'function' ? style(state) : style, disabled ? { opacity: 0.48 } : state.pressed ? { opacity: 0.7 } : null]} />;
 });
-export const TextInput = forwardRef<NativeInput, TextInputProps>(function TextInput({ style, onFocus, onBlur, ...props }, ref) {
+export const TextInput = forwardRef<ComponentRef<typeof NativeInput>, TextInputProps>(function TextInput({ style, onFocus, onBlur, ...props }, ref) {
   const [focused, setFocused] = useState(false);
   const borderColor = StyleSheet.flatten(style)?.borderColor;
   return <NativeInput ref={ref} placeholderTextColor={shop.muted} selectionColor={shop.primary} {...props} onFocus={event => { setFocused(true); onFocus?.(event); }} onBlur={event => { setFocused(false); onBlur?.(event); }} style={[styles.input, style, focused && { backgroundColor: shop.surface, borderColor: borderColor === shop.danger ? shop.danger : shop.primary }]} />;

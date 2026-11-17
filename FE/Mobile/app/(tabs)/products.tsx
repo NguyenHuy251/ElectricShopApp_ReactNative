@@ -149,13 +149,13 @@ export default function ProductsScreen() {
             data={visibleProducts}
             onEndReached={()=>{if(page<totalPages && !error)void loadProducts(search,false,page+1);}}
             onEndReachedThreshold={0.3}
-            ListFooterComponent={error ? <EmptyState icon="wifi-off" title="Chưa tải được trang tiếp theo" message={error} action="Thử lại" onAction={()=>void loadProducts(search,false,page+1)}/> : more ? <LoadingState message="Đang tải thêm..."/> : null}
+            ListFooterComponent={error ? <EmptyState icon="wifi-off" title="Chưa tải được trang tiếp theo" message={error} action="Thử lại" onAction={()=>void loadProducts(search,false,page+1)}/> : more ? <LoadingState message="Đang tải thêm..."/> : undefined}
             keyExtractor={(item) => String(item.ma_san_pham)}
             numColumns={2}
             columnWrapperStyle={styles.row}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
             contentContainerStyle={visibleProducts.length ? styles.list : styles.emptyList}
-            ListHeaderComponent={visibleProducts.length ? <Text style={styles.resultCount}>{total} sản phẩm dành cho bạn</Text> : null}
+            ListHeaderComponent={visibleProducts.length ? <Text style={styles.resultCount}>{total} sản phẩm dành cho bạn</Text> : undefined}
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={<EmptyState icon="search-off" title="Chưa tìm thấy sản phẩm" message="Thử từ khóa khác hoặc xem tất cả danh mục." action="Xem tất cả" onAction={() => { setSearch(''); setSelectedCategory(0); }} />}
             renderItem={({ item }) => <View style={styles.productCell}><ProductCard product={item} /></View>}

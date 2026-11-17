@@ -62,7 +62,7 @@ flowchart TD
   - UI Framework: Ant Design 5 (AntD)
   - Biểu đồ & Xuất file: Ant Design Charts, `exceljs` (xuất file báo cáo đa dạng định dạng Excel nhiều sheet).
 - **Ứng dụng Di động (FE/Mobile):**
-  - Nền tảng: React Native, Expo SDK 52, Expo Router v4
+  - Nền tảng: React Native 0.88.1, React 19.3, Expo SDK 58, Expo Router 58
   - Styling: React Native Reanimated, Vector Icons, Lucide Icons
   - Quản lý phiên: AsyncStorage, Context API, Axios client.
 

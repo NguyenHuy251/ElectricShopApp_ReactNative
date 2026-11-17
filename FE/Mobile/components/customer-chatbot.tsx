@@ -1,7 +1,7 @@
 import { Pressable, Text, TextInput } from '@/components/ui';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type ComponentRef } from 'react';
 import { ActivityIndicator, Animated, KeyboardAvoidingView, Modal, PanResponder, Platform, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import type { GestureResponderHandlers } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -28,7 +28,7 @@ export function CustomerChatbot() {
   const lock = useRef(false);
   const request = useRef<AbortController | null>(null);
   const mounted = useRef(true);
-  const scroll = useRef<ScrollView>(null);
+  const scroll = useRef<ComponentRef<typeof ScrollView>>(null);
   const initialPosition = { x: Math.max(12, width - SIZE - 18), y: Math.max(insets.top, height - insets.bottom - SIZE - Math.min(280, height * 0.4)) };
   const position = useRef(initialPosition);
   const bounds = useRef({ width, height, top: insets.top, bottom: insets.bottom });
