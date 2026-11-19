@@ -7,8 +7,8 @@ import 'react-native-reanimated';
 import { shop } from '@/constants/shop-theme';
 import { authService } from '@/services/auth.service';
 import { isStoredMobileStaff } from '@/utils/mobile-access';
-import { ContactReplyNotice } from '@/components/contact-reply-notice';
 import { CustomerChatbot } from '@/components/customer-chatbot';
+import { InboxUnreadNotice } from '@/components/inbox-unread-notice';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 
 export const unstable_settings = {
@@ -55,11 +55,11 @@ export default function RootLayout() {
         <Stack.Screen name="account-tools" options={{ title: 'Đổi mật khẩu' }} />
         <Stack.Screen name="vouchers" options={{ title: 'Voucher của tôi', headerBackTitle: 'Quay lại' }} />
         <Stack.Screen name="orders" options={{ title: 'Đơn hàng của tôi' }} />
+        <Stack.Screen name="contact" options={{ title: 'Hộp thư cửa hàng' }} />
         <Stack.Screen name="rewards" options={{ title: 'Điểm danh & Quà tặng' }} />
         <Stack.Screen name="referral" options={{ title: 'Mời bạn bè nhận 50K' }} />
       </Stack>
-      {routeGroup !== '(auth)' ? <ContactReplyNotice /> : null}
-      {routeGroup !== '(auth)' ? <CustomerChatbot /> : null}
+      {routeGroup !== '(auth)' && !segments.some(segment=>String(segment)==='contact') ? <><CustomerChatbot /><InboxUnreadNotice /></> : null}
       <StatusBar style="dark" />
     </ThemeProvider>
   );

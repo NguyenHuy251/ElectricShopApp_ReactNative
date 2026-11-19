@@ -8,6 +8,7 @@ import uploadRoutes, { uploadDirectory } from './routes/upload.routes.js';
 import shopRoutes from './routes/shop.routes.js';
 import permissionRoutes from './routes/permission.routes.js';
 import chatbotRoutes from './routes/chatbot.routes.js';
+import inboxRoutes from './routes/inbox.routes.js';
 import { rateLimit } from './middleware/rateLimit.middleware.js';
 
 import { testConnection } from './config/database.js';
@@ -55,6 +56,7 @@ app.use('/api/uploads', uploadRoutes);
 app.use('/api/shop', shopRoutes);
 app.use('/api/permissions', permissionRoutes);
 app.use('/api/chatbot', chatbotRoutes);
+app.use('/api/inbox', inboxRoutes);
 app.use('/api/lien-he', (req, res, next) => req.method === 'POST' ? contactLimit(req, res, next) : next());
 
 app.get('/api/health', (_req, res) => {

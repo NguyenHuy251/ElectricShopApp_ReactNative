@@ -14,6 +14,7 @@ import { migrateGamification } from './migrate-gamification.mjs';
 import { migrateVouchers } from './migrate-vouchers.mjs';
 import { migrateMilestones } from './migrate-milestones.mjs';
 import { migrateCleanupSchema } from './migrate-cleanup-schema.mjs';
+import { migrateInbox } from './migrate-inbox.mjs';
 
 try {
   const collationConnection = await pool.getConnection();
@@ -28,6 +29,7 @@ try {
   if (!existing.has('phan_hoi')) await pool.query('ALTER TABLE lien_he ADD COLUMN phan_hoi TEXT NULL AFTER noi_dung');
   if (!existing.has('ngay_phan_hoi')) await pool.query('ALTER TABLE lien_he ADD COLUMN ngay_phan_hoi DATETIME NULL AFTER phan_hoi');
   console.log('lien_he reply columns verified. Existing data preserved.');
+  await migrateInbox();
 
   await pool.query("ALTER TABLE lien_he MODIFY COLUMN trang_thai ENUM('ChuaXuLy', 'DangXuLy', 'DaXuLy', 'ChoPhanHoi', 'DaPhanHoi') DEFAULT 'ChoPhanHoi'");
   await pool.query("UPDATE lien_he SET trang_thai = 'ChoPhanHoi' WHERE trang_thai IN ('ChuaXuLy', 'DangXuLy')");

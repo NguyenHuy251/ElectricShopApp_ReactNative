@@ -19,6 +19,18 @@
 
 ---
 
+## Hộp thư khách hàng – cửa hàng
+
+Mobile gộp gửi liên hệ và phản hồi vào **Tài khoản → Nhắn tin với cửa hàng**. Trên admin, mở **Hộp thư** để đọc và trả lời từng khách hàng; nhân viên cần quyền `contacts`. Lịch sử liên hệ có tài khoản được chuyển sang chat, liên hệ khách vãng lai vẫn được giữ riêng.
+
+Khi cập nhật database hiện có, chạy trong `BE`:
+
+```sh
+npm run migrate:inbox
+```
+
+Khởi động lại BE và tải lại ứng dụng sau khi cập nhật. Xem [hướng dẫn inbox](BE/database/INBOX.md) về migration, API, phân quyền và kiểm thử. Tin nhắn được đồng bộ mỗi 4–5 giây khi mở ứng dụng; thông báo tin chưa đọc trên mobile kiểm tra mỗi 10 giây.
+
 ## 1. GIỚI THIỆU TỔNG QUAN DỰ ÁN
 
 **ElectricShop** là hệ sinh thái thương mại điện tử chuyên biệt cho ngành thiết bị điện gia dụng (Tủ lạnh, Máy giặt, Điều hòa, Nồi cơm điện, Quạt điện, Tivi,...). Hệ thống giải quyết trọn vẹn bài toán vận hành thực tế:

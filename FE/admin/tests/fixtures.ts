@@ -25,6 +25,7 @@ export async function mockApi(page: Page, role = 'Admin', authenticated = true, 
     const reply = (value: unknown, pagination?: unknown) => route.fulfill({ json: { success: true, data: value, pagination } });
     if (expired) return route.fulfill({ status: 401, json: { message: 'Phiên đăng nhập đã hết hạn' } });
     if (resource === 'auth') return reply(id === 'login' ? { token: 'mock-token', user } : user);
+    if (resource === 'inbox') return reply(id === 'threads' && !child ? [] : {messages:[],hasMore:false});
     if (resource === 'permissions') {
       if (method === 'PUT') { const account = data['tai-khoan'].find(account => Number(account.ma_tai_khoan) === Number(id)); if (account) account.permissions = body.permissions; return reply(account); }
       return reply({ groups, presets: [{name:'Bán hàng',permissions:['orders','contacts']},{name:'Kho',permissions:['catalog','inventory']},{name:'Chăm sóc khách hàng',permissions:['contacts','reviews']}], accounts: data['tai-khoan'].filter(account => account.vai_tro === 'NhanVien').map(account => ({...account,permissions:account.permissions || []})) });

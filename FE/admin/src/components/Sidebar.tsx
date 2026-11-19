@@ -6,7 +6,7 @@ import { AppstoreOutlined, BarChartOutlined, DashboardOutlined, GiftOutlined, In
 const icons = [DashboardOutlined, ShoppingCartOutlined, AppstoreOutlined, SettingOutlined, SkinOutlined, InboxOutlined, TeamOutlined, UserOutlined, StarOutlined, MessageOutlined, InboxOutlined, GiftOutlined, UserOutlined, BarChartOutlined];
 export const navigation = [
   ['/dashboard', 'Tổng quan'], ['/products', 'Sản phẩm'], ['/categories', 'Danh mục'], ['/category-specifications', 'Danh mục thông số'], ['/brands', 'Thương hiệu'],
-  ['/orders', 'Đơn hàng'], ['/customers', 'Khách hàng / Tài khoản'], ['/employees', 'Nhân viên'], ['/reviews', 'Đánh giá'], ['/contacts', 'Liên hệ'],
+  ['/orders', 'Đơn hàng'], ['/customers', 'Khách hàng / Tài khoản'], ['/employees', 'Nhân viên'], ['/reviews', 'Đánh giá'], ['/contacts', 'Hộp thư'],
   ['/inventory','Nhập kho'], ['/vouchers','Mã giảm giá'], ['/account','Tài khoản của tôi'],
   ['/reports','Báo cáo'],
 ];

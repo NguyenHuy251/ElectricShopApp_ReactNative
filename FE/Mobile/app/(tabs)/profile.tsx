@@ -152,12 +152,7 @@ export default function ProfileScreen() {
           </Pressable>
           <Pressable style={styles.menuItem} onPress={() => router.push('/contact' as any)}>
             <MaterialIcons name="support-agent" size={22} color={shop.primary} />
-            <Text style={styles.menuText}>Gửi liên hệ cho cửa hàng</Text>
-            <MaterialIcons name="chevron-right" size={23} color={shop.muted} />
-          </Pressable>
-          <Pressable style={styles.menuItem} onPress={() => router.push('/contact-history' as any)}>
-            <MaterialIcons name="forum" size={22} color={shop.primary} />
-            <Text style={styles.menuText}>Phản hồi của tôi</Text>
+            <Text style={styles.menuText}>Nhắn tin với cửa hàng</Text>
             <MaterialIcons name="chevron-right" size={23} color={shop.muted} />
           </Pressable>
           <View style={styles.menuItem}>

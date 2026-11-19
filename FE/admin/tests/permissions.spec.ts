@@ -59,8 +59,9 @@ test('staff sees only assigned modules and cannot open restricted routes', async
   const mock = await mockApi(page, 'NhanVien', true, ['contacts']);
   await page.goto('/');
   await expect(page).toHaveURL(/contacts/);
-  await expect(page.getByRole('link',{name:'Liên hệ',exact:true})).toBeVisible();
+  await expect(page.getByRole('link',{name:'Hộp thư',exact:true})).toBeVisible();
   for (const name of ['Tổng quan','Sản phẩm','Nhập kho','Đơn hàng','Báo cáo','Phân quyền']) await expect(page.getByRole('link',{name,exact:true})).toHaveCount(0);
+  await page.getByRole('tab',{name:'Liên hệ khách vãng lai'}).click();
   await expect(page.getByRole('button',{name:'Xóa',exact:true})).toBeVisible();
   const before = mock.requests.filter(request => request.resource === 'san-pham').length;
   await page.goto('/products');

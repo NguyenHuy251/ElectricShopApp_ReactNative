@@ -6,7 +6,7 @@ export const permissionGroups = [
   { code: 'orders', name: 'Đơn hàng', description: 'Xem đơn hàng của cửa hàng, cập nhật trạng thái và xóa đơn đã giao hoặc đã hủy.' },
   { code: 'inventory', name: 'Nhập kho', description: 'Xem lịch sử nhập kho và tạo phiếu nhập.' },
   { code: 'reviews', name: 'Đánh giá', description: 'Xem và xóa đánh giá của khách hàng.' },
-  { code: 'contacts', name: 'Liên hệ', description: 'Xem, trả lời và xóa liên hệ của khách hàng.' },
+  { code: 'contacts', name: 'Hộp thư khách hàng', description: 'Đọc, trả lời tin nhắn và quản lý liên hệ khách vãng lai.' },
   { code: 'vouchers', name: 'Mã giảm giá', description: 'Xem, tạo và bật/tắt mã giảm giá.' },
   { code: 'reports', name: 'Báo cáo', description: 'Xem, xuất và in báo cáo doanh thu, sản phẩm bán chạy, tồn kho.' },
 ] as const;

@@ -211,6 +211,7 @@ export interface Review {
   ma_danh_gia: number; ma_san_pham: number; ho_ten: string; ten_san_pham: string; so_sao: number; noi_dung?: string; ngay_danh_gia: string;
 }
 export interface Contact {
+  ma_tai_khoan?: number | null;
   ma_lien_he: number; ho_ten: string; email: string; so_dien_thoai?: string; tieu_de: string; noi_dung: string;
   phan_hoi?: string | null; ngay_phan_hoi?: string | null; ngay_gui: string; trang_thai: 'ChoPhanHoi' | 'DaPhanHoi';
 }

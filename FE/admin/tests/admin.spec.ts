@@ -48,7 +48,7 @@ test('account locking, employee CRUD and contact detail/status', async ({ page }
   await page.goto('/employees'); await page.getByRole('button', { name: 'Thêm mới' }).click(); await page.getByLabel('Họ tên', { exact: true }).fill('Nhân viên mới'); await page.getByRole('button', { name: 'Lưu', exact: true }).click();
   const employee = page.getByRole('row').filter({ hasText: 'Nhân viên mới' }); await expect(employee).toBeVisible(); await employee.getByRole('button', { name: 'Sửa', exact: true }).click(); await page.getByLabel('Chức vụ').fill('Thu ngân'); await page.getByRole('button', { name: 'Lưu', exact: true }).click(); await expect(employee).toContainText('Thu ngân');
   await employee.getByRole('button', { name: 'Xóa', exact: true }).click(); await page.getByRole('dialog').getByRole('button', { name: 'Xóa', exact: true }).click(); await expect(employee).toHaveCount(0);
-  await page.goto('/contacts'); await page.getByRole('button', { name: 'Phản hồi', exact: true }).click();
+  await page.goto('/contacts'); await page.getByRole('tab',{name:'Liên hệ khách vãng lai'}).click(); await page.getByRole('button', { name: 'Phản hồi', exact: true }).click();
   await expect(page.getByText('Nội dung liên hệ đầy đủ')).toBeVisible();
   await page.getByLabel('Phản hồi khách hàng').fill('Hướng dẫn bảo hành'); await page.getByRole('button', { name: 'Lưu', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Phản hồi', exact: true })).toHaveCount(0);
