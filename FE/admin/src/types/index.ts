@@ -169,6 +169,9 @@ export interface OrderItem {
 }
 
 export interface Order {
+  ma_tai_khoan_xac_nhan?: number | null;
+  ten_nhan_vien_xac_nhan?: string | null;
+  ngay_xac_nhan?: string | null;
   ma_voucher?: number | null;
   ma_code?: string | null;
   tam_tinh?: number | string;

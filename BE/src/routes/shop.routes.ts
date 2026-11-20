@@ -62,8 +62,21 @@ router.delete('/addresses/:id',run(async(req,res)=>{
 }));
 
 router.get('/notifications', run(async(req,res)=>{
-  const [rows]=await pool.query('SELECT * FROM thong_bao WHERE ma_tai_khoan=? ORDER BY ma_thong_bao DESC LIMIT 100',[req.user!.ma_tai_khoan]);
+  const before = req.query.before === undefined ? null : id(req.query.before);
+  const limit = req.query.limit === undefined ? 100 : id(req.query.limit);
+  if (limit > 100) throw new CheckoutError(400, 'Tối đa 100 thông báo mỗi lượt.');
+  const [rows]=await pool.query(`SELECT * FROM thong_bao WHERE ma_tai_khoan=? ${before ? 'AND ma_thong_bao < ?' : ''} ORDER BY ma_thong_bao DESC LIMIT ?`, before ? [req.user!.ma_tai_khoan,before,limit] : [req.user!.ma_tai_khoan,limit]);
   return sendSuccess(res,'Thông báo',rows);
+}));
+router.get('/notifications/unread-count',run(async(req,res)=>{
+  const [rows]=await pool.query('SELECT COUNT(*) AS count FROM thong_bao WHERE ma_tai_khoan=? AND da_doc=FALSE',[req.user!.ma_tai_khoan]);
+  return sendSuccess(res,'Thông báo chưa đọc',{count:Number((rows as {count:number}[])[0].count)});
+}));
+router.put('/notifications/read-all',run(async(req,res)=>{
+  const upTo=id(req.body?.up_to);
+  // Do not mark notifications arriving after the displayed snapshot as read.
+  await pool.execute('UPDATE thong_bao SET da_doc=TRUE WHERE ma_tai_khoan=? AND ma_thong_bao<=? AND da_doc=FALSE',[req.user!.ma_tai_khoan,upTo]);
+  return sendSuccess(res,'Đã đọc các thông báo',null);
 }));
 router.put('/notifications/:id/read',run(async(req,res)=>{
   await pool.execute('UPDATE thong_bao SET da_doc=TRUE WHERE ma_thong_bao=? AND ma_tai_khoan=?',[id(req.params.id),req.user!.ma_tai_khoan]);

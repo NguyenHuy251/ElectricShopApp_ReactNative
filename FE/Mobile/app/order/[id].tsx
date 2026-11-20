@@ -1,5 +1,6 @@
 import { OrderProgress, Pressable, Text } from '@/components/ui';
-import { shop, layout, radius, space } from '@/constants/shop-theme';
+import { useShopStyles } from '@/components/shop-appearance';
+import { layout, radius, space, type ShopPalette } from '@/constants/shop-theme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
@@ -28,6 +29,7 @@ const paymentLabel: Record<string, string> = {
 };
 
 export default function OrderDetailScreen() {
+  const { shop, styles } = useShopStyles(makeStyles);
   const { id } = useLocalSearchParams<{ id: string }>();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
@@ -74,8 +76,8 @@ export default function OrderDetailScreen() {
             <Text style={styles.title}>Đơn #{order.ma_don_hang}</Text>
             <Text style={styles.date}>{formatDate(order.ngay_dat)}</Text>
           </View>
-          <View style={[styles.status, { backgroundColor: order.trang_thai === 'DaHuy' ? '#FBEDEC' : '#F8EEDB' }]}>
-            <Text style={[styles.statusText, { color: order.trang_thai === 'DaHuy' ? shop.danger : '#916B24' }]}>{statusLabel[order.trang_thai] || order.trang_thai}</Text>
+          <View style={[styles.status, { backgroundColor: order.trang_thai === 'DaHuy' ? shop.dangerSoft : shop.warningSoft }]}>
+            <Text style={[styles.statusText, { color: order.trang_thai === 'DaHuy' ? shop.danger : shop.warning }]}>{statusLabel[order.trang_thai] || order.trang_thai}</Text>
           </View>
         </View>
 
@@ -124,6 +126,7 @@ export default function OrderDetailScreen() {
 }
 
 function OrderedProductDetails({ item }: { item: OrderItem }) {
+  const { shop, styles } = useShopStyles(makeStyles);
   const [expanded, setExpanded] = useState(false);
   const details = item.product_details;
   return <View>
@@ -152,10 +155,12 @@ function OrderedProductDetails({ item }: { item: OrderItem }) {
 }
 
 function DetailRow({ label, value }: { label: string; value: string }) {
+  const { styles } = useShopStyles(makeStyles);
   return <View style={styles.specRow}><Text style={styles.specLabel}>{label}</Text><Text style={styles.specValue}>{value}</Text></View>;
 }
 
 function InfoRow({ icon, label, value }: { icon: any; label: string; value: string }) {
+  const { shop, styles } = useShopStyles(makeStyles);
   return (
     <View style={styles.infoRow}>
       <MaterialIcons name={icon} size={19} color={shop.primary} />
@@ -165,7 +170,7 @@ function InfoRow({ icon, label, value }: { icon: any; label: string; value: stri
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (shop: ShopPalette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: shop.background },
   content: { padding: layout.gutter, paddingBottom: 32, width: '100%', maxWidth: layout.maxWidth, alignSelf: 'center' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: space.sm, marginBottom: 18 },
@@ -186,7 +191,7 @@ const styles = StyleSheet.create({
   detailButtonText: { fontSize: 12, color: shop.primary, fontWeight: '700' },
   productDetails: { padding: 14, borderRadius: 14, backgroundColor: shop.background, marginBottom: 12 },
   specHeading: { color: shop.ink, fontSize: 13, fontWeight: '700', marginTop: 16, marginBottom: 6 },
-  specRow: { flexDirection: 'row', gap: space.sm, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#E4EBE3' },
+  specRow: { flexDirection: 'row', gap: space.sm, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: shop.border },
   specLabel: { flex: 1, color: shop.muted, fontSize: 12 },
   specValue: { flex: 1, textAlign: 'right', color: shop.ink, fontSize: 12, fontWeight: '600' },
   totalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: 16, marginTop: 2 },

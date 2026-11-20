@@ -56,6 +56,7 @@ test('admin cannot delete or lock their own account', async () => {
 });
 
 test('order workflow rejects skips and terminal transitions', async () => {
+  pool.getConnection = async () => ({ beginTransaction: async()=>{}, query: async()=>[[{trang_thai:'DaHuy'}]], rollback:async()=>{}, release(){} });
   for (const [, to] of [['ChoXacNhan', 'DaGiao'], ['DaGiao', 'DaHuy'], ['DaHuy', 'DaXacNhan'], ['DangGiao', 'invalid']]) {
     pool.query = async (sql) => {
       if (sql.includes('sp_don_hang_update_status')) {
@@ -64,7 +65,7 @@ test('order workflow rejects skips and terminal transitions', async () => {
       return [[]];
     };
     const res = response();
-    await updateTrangThaiDonHang({ params: { id: '1' }, body: { trang_thai: to } }, res);
+    await updateTrangThaiDonHang({ params: { id: '1' }, body: { trang_thai: to }, user: { ma_tai_khoan: 1, vai_tro: 'Admin' } }, res);
     assert.equal(res.statusCode, 409);
   }
 });
@@ -85,6 +86,10 @@ test('cancellation restores inventory once and commits atomically', async () => 
   assert.equal(second.statusCode, 409);
 });
 test('management confirms and dispatches orders but cannot mark them delivered', async () => {
+  pool.getConnection = async () => ({
+    beginTransaction:async()=>{}, query:async sql=>sql.includes('FROM don_hang')?[[{trang_thai:'ChoXacNhan'}]]:[[{ten_nhan_vien_xac_nhan:'Quản trị'}]],
+    execute:async()=>[{affectedRows:1}],commit:async()=>{},rollback:async()=>{},release(){},
+  });
   pool.query = async (sql, args) => {
     if (sql.includes('sp_don_hang_update_status')) {
       return [[[{ ma_don_hang: 1, trang_thai: args[1] }]]];
@@ -92,7 +97,7 @@ test('management confirms and dispatches orders but cannot mark them delivered',
     return [[]];
   };
   for (const status of ['DaXacNhan', 'DangGiao']) {
-    const res = response(); await updateTrangThaiDonHang({ params: { id: '1' }, body: { trang_thai: status } }, res); assert.equal(res.statusCode, 200);
+    const res = response(); await updateTrangThaiDonHang({ params: { id: '1' }, body: { trang_thai: status }, user: { ma_tai_khoan: 1, vai_tro: 'Admin' } }, res); assert.equal(res.statusCode, 200);
   }
   pool.query = () => assert.fail('Management must not change delivery status');
   const res = response(); await updateTrangThaiDonHang({params:{id:'1'},body:{trang_thai:'DaGiao'}},res);

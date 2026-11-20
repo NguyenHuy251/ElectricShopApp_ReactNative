@@ -1,6 +1,6 @@
 import { Platform, type TextStyle } from 'react-native';
 
-export const shop = {
+export const lightShop = {
   background: '#F7F8F6',
   surface: '#FFFFFF',
   ink: '#172B2A',
@@ -13,6 +13,49 @@ export const shop = {
   danger: '#B43D3D',
   success: '#28704E', warning: '#98601A', info: '#386C98',
   surfaceMuted: '#F0F3F0',
+  action: '#126B60',
+  inverseSurface: '#172B2A',
+  inverseAccent: '#DCECC4',
+  successSoft: '#EAF8F0',
+  warningSoft: '#FFF2E8',
+  dangerSoft: '#FBEDEC',
+  infoSoft: '#EAF5FF',
+  violet: '#7C3AED',
+  violetSoft: '#F2EEFF',
+  dock: '#FDFFFE',
+  dockBorder: '#ECF1ED',
+  dockShadow: '0 5px 18px rgba(23, 43, 42, 0.10), 0 1px 3px rgba(23, 43, 42, 0.06)',
+};
+
+export type ShopPalette = typeof lightShop;
+
+export const darkShop: ShopPalette = {
+  background: '#101917',
+  surface: '#192522',
+  ink: '#F0F6F2',
+  muted: '#A9BDB4',
+  primary: '#7DDCC5',
+  secondary: '#243A34',
+  soft: '#213B34',
+  border: '#344842',
+  accent: '#374B2F',
+  danger: '#FFACA6',
+  success: '#9EE0B8',
+  warning: '#F4C57E',
+  info: '#9BCFF4',
+  surfaceMuted: '#202F2B',
+  action: '#176C60',
+  inverseSurface: '#142E29',
+  inverseAccent: '#C9EAB3',
+  successSoft: '#213C30',
+  warningSoft: '#3B3022',
+  dangerSoft: '#482A2B',
+  infoSoft: '#233746',
+  violet: '#D3B8FF',
+  violetSoft: '#362C48',
+  dock: '#1B2A26',
+  dockBorder: '#3A5047',
+  dockShadow: '0 5px 18px rgba(0, 0, 0, 0.28), 0 1px 3px rgba(0, 0, 0, 0.18)',
 };
 
 export const space = { xxs: 4, xs: 8, sm: 12, md: 16, lg: 24, xl: 32, xxl: 48 };

@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "migrate:order-confirmation": "npm run build && node scripts/migrate-order-confirmation.mjs",
     "migrate:inbox": "npm run build && node scripts/migrate-inbox.mjs",
     "test": "npm run build && node --test tests/*.test.mjs",
     "dev": "tsx watch src/app.ts",

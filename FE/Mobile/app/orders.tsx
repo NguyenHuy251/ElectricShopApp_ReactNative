@@ -6,7 +6,8 @@ import { FlatList, ScrollView, RefreshControl, StyleSheet, View } from 'react-na
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { EmptyState, LoadingState, ScreenHeading } from '@/components/shop-ui';
 import { CancelOrderButton } from '@/components/cancel-order-button';
-import { shop, layout, radius, space } from '@/constants/shop-theme';
+import { useShopStyles } from '@/components/shop-appearance';
+import { layout, radius, space, type ShopPalette } from '@/constants/shop-theme';
 import { orderService } from '@/services/order.service';
 import type { Order } from '@/types';
 import { formatCurrency, formatDate } from '@/utils/format';
@@ -20,6 +21,7 @@ const statusLabel: Record<string, string> = {
 };
 
 export default function OrdersScreen() {
+  const { shop, styles } = useShopStyles(makeStyles);
   const router = useRouter();
   const [filter, setFilter] = useState('all');
   const [orders, setOrders] = useState<Order[]>([]);
@@ -46,7 +48,7 @@ export default function OrdersScreen() {
   }, [loadOrders]));
 
   const visibleOrders = orders.filter(order => filter === 'all' || order.trang_thai === filter);
-  const statusColors = (status: string) => status === 'DaHuy' ? { background: '#FBEDEC', foreground: shop.danger } : status === 'DaGiao' ? { background: shop.soft, foreground: shop.primary } : status === 'DangGiao' ? { background: '#E8EFF9', foreground: '#3A6295' } : { background: '#F8EEDB', foreground: '#916B24' };
+  const statusColors = (status: string) => status === 'DaHuy' ? { background: shop.dangerSoft, foreground: shop.danger } : status === 'DaGiao' ? { background: shop.soft, foreground: shop.primary } : status === 'DangGiao' ? { background: shop.infoSoft, foreground: shop.info } : { background: shop.warningSoft, foreground: shop.warning };
 
   const refresh = () => {
     setRefreshing(true);
@@ -98,10 +100,10 @@ export default function OrdersScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (shop: ShopPalette) => StyleSheet.create({
   filters: { flexGrow: 0, flexShrink: 0, marginBottom: 22 },
   filter: { paddingHorizontal: 16, minHeight: 44, borderRadius: 12, backgroundColor: shop.surface, borderWidth: 1, borderColor: shop.border, justifyContent: 'center' },
-  activeFilter: { backgroundColor: shop.primary, borderColor: shop.primary },
+  activeFilter: { backgroundColor: shop.action, borderColor: shop.primary },
   filterText: { color: shop.muted, fontSize: 12, fontWeight: '700' },
   totalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 1, borderTopColor: shop.border, marginTop: 18, paddingTop: 15, gap: space.xs },
   totalLabel: { color: shop.muted, fontSize: 12 },
@@ -120,6 +122,6 @@ const styles = StyleSheet.create({
   total: { color: shop.ink, fontSize: 22, fontWeight: '700' },
   detailButton: { minHeight: layout.touch, borderTopWidth: 1, borderColor: shop.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 20, paddingTop: 12 },
   detailButtonText: { color: shop.primary, fontSize: 13, fontWeight: '700' },
-  cancelButton: { minHeight: 42, borderRadius: 12, borderWidth: 1, borderColor: '#F0CACA', backgroundColor: '#FFF7F6', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, marginTop: 16 },
+  cancelButton: { minHeight: 42, borderRadius: 12, borderWidth: 1, borderColor: shop.border, backgroundColor: shop.dangerSoft, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, marginTop: 16 },
   cancelButtonText: { color: shop.danger, fontSize: 13, fontWeight: '700' },
 });

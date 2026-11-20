@@ -9,10 +9,13 @@ import { productService } from '../../services/product.service';
 import { categoryService, type Category } from '../../services/category.service';
 import type { Product } from '../../types';
 import { EmptyState, LoadingState, ProductCard, ScreenHeading } from '@/components/shop-ui';
-import { shop, layout, radius, space } from '@/constants/shop-theme';
+import { TabHeaderActions } from '@/components/tab-header-actions';
+import { useShopStyles } from '@/components/shop-appearance';
+import { layout, radius, space, type ShopPalette } from '@/constants/shop-theme';
 import { getApiMessage } from '@/utils/format';
 
 export default function ProductsScreen() {
+  const { shop, styles } = useShopStyles(makeStyles);
   const { category, categoryId } = useLocalSearchParams<{ category?: string; categoryId?: string }>();
   const router = useRouter();
   const setSelectedCategory = (value: number) => router.setParams({ categoryId: value ? String(value) : undefined, category: undefined });
@@ -86,7 +89,7 @@ export default function ProductsScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.container}>
-        <ScreenHeading eyebrow="KHÁM PHÁ" title="Chọn cho tổ ấm" subtitle="Những tiện ích nhỏ, cho cuộc sống dễ dàng hơn." icon="grid-view" />
+        <ScreenHeading eyebrow="KHÁM PHÁ" title="Chọn cho tổ ấm" subtitle="Những tiện ích nhỏ, cho cuộc sống dễ dàng hơn." action={<TabHeaderActions />} />
         <View style={styles.searchBox}>
           <MaterialIcons name="search" size={21} color={shop.muted} />
           <TextInput
@@ -166,7 +169,7 @@ export default function ProductsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (shop: ShopPalette) => StyleSheet.create({
   filterToggle: { minHeight: layout.touch, flexDirection: 'row', alignItems: 'center', gap: space.xs, marginVertical: 12, paddingHorizontal: 12, borderRadius: 12, backgroundColor: shop.soft },
   filterToggleText: { color: shop.primary, fontSize: 13, fontWeight: '700', flex: 1 },
   filterCount: { color: shop.muted, fontSize: 12 },
@@ -178,11 +181,11 @@ const styles = StyleSheet.create({
   search: { flex: 1, color: shop.ink, fontSize: 14 },
   priceRow: { flexDirection: 'row', alignItems: 'flex-start', gap: space.sm },
   priceField: { flex: 1, minWidth: 0, gap: 6 },
-  priceLabel: { color: '#556B80', fontSize: 12, fontWeight: '600' },
-  priceInput: { minHeight: layout.touch, color: shop.ink, fontSize: 16, backgroundColor: '#fff', borderRadius: 12, borderWidth: 1, borderColor: shop.border, paddingHorizontal: 12, paddingVertical: 10, textAlignVertical: 'center' },
+  priceLabel: { color: shop.muted, fontSize: 12, fontWeight: '600' },
+  priceInput: { minHeight: layout.touch, color: shop.ink, fontSize: 16, backgroundColor: shop.surface, borderRadius: 12, borderWidth: 1, borderColor: shop.border, paddingHorizontal: 12, paddingVertical: 10, textAlignVertical: 'center' },
   categories: { gap: space.xs, paddingVertical: 14 },
   chip: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 16, borderRadius: 12, backgroundColor: shop.surface, borderWidth: 1, borderColor: shop.border },
-  chipActive: { backgroundColor: shop.primary, borderColor: shop.primary },
+  chipActive: { backgroundColor: shop.action, borderColor: shop.primary },
   chipText: { color: shop.muted, fontSize: 12, fontWeight: '700' },
   chipTextActive: { color: '#fff' },
   list: { paddingBottom: 24 },

@@ -1,14 +1,37 @@
 import { callProcedure, firstResult, secondResult } from './procedure.service.js';
 import { pool } from '../config/database.js';
 import { parseJsonField } from './sanPham.service.js';
+import { CheckoutError } from '../utils/checkout.js';
 
 async function withPaymentDetails(orders: unknown[]) {
   const rows = orders as { ma_don_hang: number; [key: string]: unknown }[];
   if (!rows.length) return orders;
   const [payments] = await pool.query(`SELECT ma_don_hang,ma_voucher,ma_code,giam_gia,phi_giao_hang,
+    ma_tai_khoan_xac_nhan,ten_nhan_vien_xac_nhan,ngay_xac_nhan,
     tong_tien+giam_gia-phi_giao_hang AS tam_tinh FROM don_hang WHERE ma_don_hang IN (?)`, [rows.map(row => row.ma_don_hang)]);
   const byId = new Map((payments as typeof rows).map(row => [row.ma_don_hang,row]));
   return rows.map(row => ({ ...row, ...byId.get(row.ma_don_hang) }));
+}
+
+export async function confirmDonHang(orderId: number, accountId: number) {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const [rows] = await connection.query('SELECT trang_thai FROM don_hang WHERE ma_don_hang=? FOR UPDATE', [orderId]);
+    const order = (rows as {trang_thai:string}[])[0];
+    if (!order) throw new CheckoutError(404, 'Không tìm thấy đơn hàng');
+    if (order.trang_thai !== 'ChoXacNhan') throw new CheckoutError(409, 'Chỉ có thể xác nhận đơn đang chờ xác nhận. Hãy tải lại danh sách.');
+    const [accounts] = await connection.query(`SELECT COALESCE(NULLIF(n.ho_ten,''),NULLIF(t.ho_ten,''),t.ten_dang_nhap) AS ten_nhan_vien_xac_nhan
+      FROM tai_khoan t LEFT JOIN nhan_vien n ON n.ma_tai_khoan=t.ma_tai_khoan
+      WHERE t.ma_tai_khoan=? AND t.trang_thai='HoatDong' LIMIT 1`, [accountId]);
+    const actor = (accounts as {ten_nhan_vien_xac_nhan:string}[])[0];
+    if (!actor) throw new CheckoutError(401, 'Tài khoản xác nhận không còn hoạt động.');
+    await connection.execute(`UPDATE don_hang SET trang_thai='DaXacNhan',ma_tai_khoan_xac_nhan=?,ten_nhan_vien_xac_nhan=?,ngay_xac_nhan=NOW()
+      WHERE ma_don_hang=? AND trang_thai='ChoXacNhan'`, [accountId,actor.ten_nhan_vien_xac_nhan,orderId]);
+    await connection.commit();
+    return { ma_don_hang: orderId, trang_thai: 'DaXacNhan', ma_tai_khoan_xac_nhan: accountId, ten_nhan_vien_xac_nhan: actor.ten_nhan_vien_xac_nhan };
+  } catch (error) { await connection.rollback(); throw error; }
+  finally { connection.release(); }
 }
 
 export const donHangProcedures = {

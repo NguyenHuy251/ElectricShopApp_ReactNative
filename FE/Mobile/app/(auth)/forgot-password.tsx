@@ -3,12 +3,14 @@ import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { AuthField, AuthShell } from '@/components/auth-ui';
-import { shop, layout, space } from '@/constants/shop-theme';
+import { useShopStyles } from '@/components/shop-appearance';
+import { layout, space, type ShopPalette } from '@/constants/shop-theme';
 import { authService } from '@/services/auth.service';
 import { getApiMessage } from '@/utils/format';
 import { validateForgotPassword } from '@/utils/forgot-password';
 
 export default function ForgotPasswordScreen() {
+  const { styles } = useShopStyles(makeStyles);
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -51,13 +53,13 @@ export default function ForgotPasswordScreen() {
   </AuthShell>;
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (shop: ShopPalette) => StyleSheet.create({
   title: { fontSize: 27, fontWeight: '700', color: shop.ink, marginBottom: 10 },
   subtitle: { color: shop.muted, fontSize: 14, lineHeight: 22, marginBottom: space.lg },
-  button: { backgroundColor: shop.primary, borderRadius: 15, padding: space.md, alignItems: 'center', marginTop: 14 },
+  button: { backgroundColor: shop.action, borderRadius: 15, padding: space.md, alignItems: 'center', marginTop: 14 },
   buttonText: { color: '#fff', fontWeight: '700', fontSize: 15 },
   disabled: { opacity: 0.6 }, back: { padding: space.md, alignItems: 'center' }, link: { color: shop.primary, fontWeight: '700' },
-  error: { color: '#B33434', fontSize: 13, marginBottom: 12, lineHeight: 20 },
+  error: { color: shop.danger, fontSize: 13, marginBottom: 12, lineHeight: 20 },
   success: { backgroundColor: shop.soft, borderWidth: 1, borderColor: shop.border, padding: layout.gutter, borderRadius: 18, marginVertical: 12 },
   successTitle: { color: shop.primary, fontSize: 18, fontWeight: '700', marginBottom: 12 },
   description: { color: shop.ink, fontSize: 14, lineHeight: 22 },

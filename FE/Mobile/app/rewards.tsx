@@ -1,5 +1,6 @@
 import { Pressable, Text } from '@/components/ui';
-import { shop, layout, radius, space } from '@/constants/shop-theme';
+import { useShopStyles } from '@/components/shop-appearance';
+import { layout, radius, space, type ShopPalette } from '@/constants/shop-theme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -16,6 +17,7 @@ import { formatCurrency, getApiMessage } from '../utils/format';
 const QUANG_CAO_LINK = 'https://vn.shp.ee/q9dFvdJn';
 
 export default function RewardsScreen() {
+  const { shop, styles } = useShopStyles(makeStyles);
   const router = useRouter();
   const [status, setStatus] = useState<RewardsStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -206,7 +208,7 @@ export default function RewardsScreen() {
       reward: 'Thưởng +100 Xu',
       voucherCode: null,
       icon: 'star',
-      bg: '#EAF8F0',
+      bg: shop.successSoft,
       iconColor: shop.primary,
     },
     {
@@ -215,8 +217,8 @@ export default function RewardsScreen() {
       reward: 'Voucher 30K + 300 Xu',
       voucherCode: 'CHECKIN7D',
       icon: 'card-giftcard',
-      bg: '#FFF2E8',
-      iconColor: '#D97706',
+      bg: shop.warningSoft,
+      iconColor: shop.warning,
     },
     {
       moc: 14,
@@ -224,8 +226,8 @@ export default function RewardsScreen() {
       reward: 'Voucher 50K + 500 Xu',
       voucherCode: 'CHECKIN14D',
       icon: 'card-giftcard',
-      bg: '#F2EEFF',
-      iconColor: '#7C3AED',
+      bg: shop.violetSoft,
+      iconColor: shop.violet,
     },
     {
       moc: 21,
@@ -233,8 +235,8 @@ export default function RewardsScreen() {
       reward: 'Voucher 70K + 700 Xu',
       voucherCode: 'CHECKIN21D',
       icon: 'redeem',
-      bg: '#EAF5FF',
-      iconColor: '#0284C7',
+      bg: shop.infoSoft,
+      iconColor: shop.info,
     },
     {
       moc: 30,
@@ -242,8 +244,8 @@ export default function RewardsScreen() {
       reward: 'Siêu Voucher 100K + 1000 Xu',
       voucherCode: 'CHECKIN30D',
       icon: 'emoji-events',
-      bg: '#FEF3C7',
-      iconColor: '#B45309',
+      bg: shop.warningSoft,
+      iconColor: shop.warning,
     },
   ];
 
@@ -260,7 +262,7 @@ export default function RewardsScreen() {
             <View>
               <Text style={styles.heroEyebrow}>KHO XU & TÍCH ĐIỂM THƯỞNG</Text>
               <View style={styles.coinRow}>
-                <MaterialCommunityIcons name="bitcoin" size={32} color={shop.accent} />
+                <MaterialCommunityIcons name="bitcoin" size={32} color={shop.inverseAccent} />
                 <Text style={styles.coinAmount}>{currentPoints.toLocaleString('vi-VN')}</Text>
                 <Text style={styles.coinUnit}>Xu</Text>
               </View>
@@ -292,15 +294,15 @@ export default function RewardsScreen() {
           {/* Legend indicator */}
           <View style={styles.gridLegendRow}>
             <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: shop.primary }]} />
+              <View style={[styles.legendDot, { backgroundColor: shop.action }]} />
               <Text style={styles.legendText}>Đã điểm danh</Text>
             </View>
             <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: '#D97706', borderColor: '#FDE68A', borderWidth: 1 }]} />
+              <View style={[styles.legendDot, { backgroundColor: shop.warning, borderColor: shop.warningSoft, borderWidth: 1 }]} />
               <Text style={styles.legendText}>Mốc quà lớn</Text>
             </View>
             <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: '#E2E8F0' }]} />
+              <View style={[styles.legendDot, { backgroundColor: shop.border }]} />
               <Text style={styles.legendText}>Chưa tới</Text>
             </View>
           </View>
@@ -328,7 +330,7 @@ export default function RewardsScreen() {
                   <MaterialIcons
                     name={(isChecked ? 'check-circle' : item.icon) as any}
                     size={16}
-                    color={isChecked ? '#fff' : isBigMilestone ? '#D97706' : shop.primary}
+                    color={isChecked ? '#fff' : isBigMilestone ? shop.warning : shop.primary}
                   />
                   <Text style={[styles.gridCellPoints, isChecked && styles.gridCellPointsChecked]}>
                     +{item.points >= 1000 ? '1K' : item.points}
@@ -347,7 +349,7 @@ export default function RewardsScreen() {
             <MaterialIcons
               name={status?.da_diem_danh_hom_nay ? 'check' : 'touch-app'}
               size={22}
-              color={status?.da_diem_danh_hom_nay ? '#556A60' : shop.ink}
+              color={status?.da_diem_danh_hom_nay ? shop.muted : shop.ink}
             />
             <Text style={[styles.checkinButtonText, status?.da_diem_danh_hom_nay && styles.checkinButtonTextDone]}>
               {status?.da_diem_danh_hom_nay
@@ -543,11 +545,11 @@ export default function RewardsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (shop: ShopPalette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: shop.background },
   content: { padding: 18, paddingBottom: 36, maxWidth: layout.maxWidth, width: '100%', alignSelf: 'center', gap: 18 },
   heroCard: {
-    backgroundColor: shop.ink,
+    backgroundColor: shop.inverseSurface,
     borderRadius: radius.lg,
     padding: space.lg,
     shadowColor: '#000',
@@ -557,10 +559,10 @@ const styles = StyleSheet.create({
     elevation: 0,
   },
   heroHeader: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: space.md },
-  heroEyebrow: { color: shop.accent, fontSize: 12, fontWeight: '700', letterSpacing: 1.3 },
+  heroEyebrow: { color: shop.inverseAccent, fontSize: 12, fontWeight: '700', letterSpacing: 1.3 },
   coinRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
   coinAmount: { color: '#fff', fontSize: 32, fontWeight: '700', letterSpacing: -0.5 },
-  coinUnit: { color: shop.accent, fontSize: 16, fontWeight: '700', marginTop: 8 },
+  coinUnit: { color: shop.inverseAccent, fontSize: 16, fontWeight: '700', marginTop: 8 },
   inviteBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -572,10 +574,10 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   inviteBadgeText: { color: shop.ink, fontSize: 12, fontWeight: '700' },
-  heroSubtitle: { color: '#C9D8CE', fontSize: 14, lineHeight: 22, marginTop: 12 },
+  heroSubtitle: { color: shop.border, fontSize: 14, lineHeight: 22, marginTop: 12 },
 
   sectionCard: {
-    backgroundColor: '#fff',
+    backgroundColor: shop.surface,
     borderRadius: radius.md,
     padding: layout.gutter,
     borderWidth: 1,
@@ -584,8 +586,8 @@ const styles = StyleSheet.create({
   cardHeader: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: space.xs, flexShrink: 1 },
   cardTitle: { color: shop.ink, fontSize: 18, lineHeight: 25, fontWeight: '700', flexShrink: 1 },
-  streakBadge: { backgroundColor: '#FFF5E5', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
-  streakText: { color: '#B36B00', fontSize: 12, fontWeight: '700' },
+  streakBadge: { backgroundColor: shop.warningSoft, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
+  streakText: { color: shop.warning, fontSize: 12, fontWeight: '700' },
   cardDesc: { color: shop.muted, fontSize: 14, lineHeight: 22, marginBottom: 14 },
 
   gridLegendRow: {
@@ -594,7 +596,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     gap: 14,
     marginBottom: 14,
-    backgroundColor: '#F5FAF5',
+    backgroundColor: shop.surface,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 12,
@@ -628,24 +630,24 @@ const styles = StyleSheet.create({
     backgroundColor: shop.surfaceMuted,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#EDF3EC',
+    borderColor: shop.soft,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 4,
     paddingHorizontal: 1,
   },
   gridCellChecked: {
-    backgroundColor: shop.primary,
+    backgroundColor: shop.action,
     borderColor: shop.primary,
   },
   gridCellToday: {
-    borderColor: '#D97706',
+    borderColor: shop.warning,
     borderWidth: 2,
-    backgroundColor: '#FFFDF5',
+    backgroundColor: shop.warningSoft,
   },
   gridCellMilestone: {
-    backgroundColor: '#FFFBEB',
-    borderColor: '#FDE68A',
+    backgroundColor: shop.warningSoft,
+    borderColor: shop.warningSoft,
   },
   gridCellDay: {
     fontSize: 11,
@@ -663,7 +665,7 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   gridCellPointsChecked: {
-    color: shop.accent,
+    color: shop.inverseAccent,
   },
 
   checkinButton: {
@@ -675,11 +677,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: space.xs,
   },
-  checkinButtonDone: { backgroundColor: '#EDF2EB' },
+  checkinButtonDone: { backgroundColor: shop.soft },
   checkinButtonText: { color: shop.ink, fontSize: 14, fontWeight: '700', letterSpacing: 0.5 },
   checkinButtonTextDone: { color: shop.muted },
 
-  milestonesContainer: { marginTop: 20, paddingTop: 16, borderTopWidth: 1, borderTopColor: '#EDF3EC' },
+  milestonesContainer: { marginTop: 20, paddingTop: 16, borderTopWidth: 1, borderTopColor: shop.soft },
   milestoneHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -693,7 +695,7 @@ const styles = StyleSheet.create({
   milestoneCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FAFCF9',
+    backgroundColor: shop.surface,
     borderRadius: radius.md,
     padding: 12,
     borderWidth: 1,
@@ -702,7 +704,7 @@ const styles = StyleSheet.create({
   },
   milestoneCardCanClaim: {
     borderColor: shop.primary,
-    backgroundColor: '#F5FAF6',
+    backgroundColor: shop.surface,
     shadowColor: shop.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.12,
@@ -710,7 +712,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   milestoneCardClaimed: {
-    backgroundColor: '#F4F7F3',
+    backgroundColor: shop.surfaceMuted,
     opacity: 0.85,
   },
   milestoneIconWrap: {
@@ -724,27 +726,27 @@ const styles = StyleSheet.create({
   milestoneNameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   milestoneNameText: { color: shop.ink, fontSize: 13, fontWeight: '700' },
   codePill: {
-    backgroundColor: '#EAF0E8',
+    backgroundColor: shop.soft,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 6,
   },
-  codePillText: { color: '#556A60', fontSize: 11, fontWeight: '700' },
+  codePillText: { color: shop.muted, fontSize: 11, fontWeight: '700' },
   milestoneRewardText: { color: shop.primary, fontSize: 12, fontWeight: '700' },
 
   progressBarWrap: { marginTop: 4, gap: 2 },
   progressTrack: {
     height: 5,
-    backgroundColor: '#E3EBE1',
+    backgroundColor: shop.border,
     borderRadius: 3,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: shop.primary,
+    backgroundColor: shop.action,
     borderRadius: 3,
   },
-  progressLabel: { fontSize: 11, color: '#74877F', fontWeight: '600' },
+  progressLabel: { fontSize: 11, color: shop.muted, fontWeight: '600' },
 
   milestoneActionWrap: {
     alignItems: 'flex-end',
@@ -758,7 +760,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#C6E87A',
+    borderColor: shop.inverseAccent,
   },
   btnClaimNowText: {
     color: shop.ink,
@@ -783,7 +785,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#EDF2EB',
+    backgroundColor: shop.soft,
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: radius.sm,
@@ -798,9 +800,9 @@ const styles = StyleSheet.create({
   },
 
   spinPreview: {
-    backgroundColor: '#FFFDF0',
+    backgroundColor: shop.warningSoft,
     borderWidth: 1,
-    borderColor: '#FEE8A2',
+    borderColor: shop.warningSoft,
     borderRadius: radius.md,
     padding: 14,
     flexDirection: 'row',
@@ -808,8 +810,8 @@ const styles = StyleSheet.create({
     gap: space.sm,
     marginBottom: 14,
   },
-  spinPrizeTitle: { color: '#8A5C00', fontSize: 13, fontWeight: '700' },
-  spinPrizeList: { color: '#997300', fontSize: 12, marginTop: 4, lineHeight: 16 },
+  spinPrizeTitle: { color: shop.warning, fontSize: 13, fontWeight: '700' },
+  spinPrizeList: { color: shop.warning, fontSize: 12, marginTop: 4, lineHeight: 16 },
   spinButton: {
     backgroundColor: shop.accent,
     borderRadius: radius.md,
@@ -819,7 +821,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: space.xs,
   },
-  spinButtonDisabled: { backgroundColor: '#EDF2EB' },
+  spinButtonDisabled: { backgroundColor: shop.soft },
   spinButtonText: { color: shop.ink, fontSize: 13, fontWeight: '700' },
   spinButtonTextDone: { color: shop.muted },
 
@@ -840,26 +842,26 @@ const styles = StyleSheet.create({
     width: 42,
     minHeight: 44,
     borderRadius: 14,
-    backgroundColor: '#EAF8F0',
+    backgroundColor: shop.successSoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
   voucherItemTitle: { color: shop.ink, fontSize: 13, fontWeight: '700' },
-  voucherItemMeta: { color: '#74877F', fontSize: 12, marginTop: 2 },
+  voucherItemMeta: { color: shop.muted, fontSize: 12, marginTop: 2 },
   costBadge: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 4 },
   costText: { color: shop.primary, fontSize: 12, fontWeight: '700' },
   exchangeButton: {
-    backgroundColor: shop.primary,
+    backgroundColor: shop.action,
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 12,
   },
-  exchangeButtonDisabled: { backgroundColor: '#D8E2D7' },
+  exchangeButtonDisabled: { backgroundColor: shop.border },
   exchangeButtonText: { color: '#fff', fontSize: 12, fontWeight: '700' },
   exchangeButtonTextDisabled: { color: shop.muted },
 
   inviteBanner: {
-    backgroundColor: shop.ink,
+    backgroundColor: shop.inverseSurface,
     borderRadius: 20,
     padding: space.md,
     flexDirection: 'row',
@@ -870,10 +872,10 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: radius.md,
-    backgroundColor: '#23455E',
+    backgroundColor: shop.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
   inviteTitle: { color: '#fff', fontSize: 13, fontWeight: '700' },
-  inviteText: { color: '#C9D8CE', fontSize: 12, marginTop: 3 },
+  inviteText: { color: shop.border, fontSize: 12, marginTop: 3 },
 });

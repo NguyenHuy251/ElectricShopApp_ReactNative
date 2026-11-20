@@ -1,5 +1,6 @@
 import { Pressable, Text, TextInput } from '@/components/ui';
-import { shop, layout, radius, space } from '@/constants/shop-theme';
+import { useShopStyles } from '@/components/shop-appearance';
+import { layout, radius, space, type ShopPalette } from '@/constants/shop-theme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import * as Clipboard from 'expo-clipboard';
@@ -15,6 +16,7 @@ import {
 import { getApiMessage } from '../utils/format';
 
 export default function ReferralScreen() {
+  const { shop, styles } = useShopStyles(makeStyles);
   const router = useRouter();
   const [status, setStatus] = useState<RewardsStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -156,7 +158,7 @@ export default function ReferralScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="Nhập mã giới thiệu (VD: ESHOP123)"
-                  placeholderTextColor="#8C9E95"
+                  placeholderTextColor={shop.muted}
                   autoCapitalize="characters"
                   value={referralInput}
                   onChangeText={setReferralInput}
@@ -181,7 +183,7 @@ export default function ReferralScreen() {
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <MaterialCommunityIcons name="bitcoin" size={26} color="#B58000" />
+              <MaterialCommunityIcons name="bitcoin" size={26} color={shop.warning} />
               <Text style={styles.statNumber}>+{(status?.tong_thuong_gioi_thieu || 0).toLocaleString('vi-VN')}</Text>
               <Text style={styles.statLabel}>Xu đã tích lũy</Text>
             </View>
@@ -194,7 +196,7 @@ export default function ReferralScreen() {
 
             {(status?.danh_sach_da_moi || []).length === 0 ? (
               <View style={styles.emptyInvitedBox}>
-                <MaterialIcons name="group-add" size={30} color="#9DB3A8" />
+                <MaterialIcons name="group-add" size={30} color={shop.border} />
                 <Text style={styles.emptyInvitedText}>Chưa có bạn bè nào nhập mã mời. Hãy chia sẻ mã ngay nhé!</Text>
               </View>
             ) : (
@@ -265,12 +267,12 @@ export default function ReferralScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (shop: ShopPalette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: shop.background },
   content: { padding: 18, paddingBottom: 36, maxWidth: layout.maxWidth, width: '100%', alignSelf: 'center', gap: 18 },
 
   heroCard: {
-    backgroundColor: shop.ink,
+    backgroundColor: shop.inverseSurface,
     borderRadius: radius.lg,
     padding: space.lg,
     shadowColor: '#000',
@@ -287,12 +289,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 10,
   },
-  heroBadgeText: { color: shop.accent, fontSize: 12, fontWeight: '700', letterSpacing: 1 },
+  heroBadgeText: { color: shop.inverseAccent, fontSize: 12, fontWeight: '700', letterSpacing: 1 },
   heroTitle: { color: '#fff', fontSize: 30, fontWeight: '700', lineHeight: 39, letterSpacing: -0.5 },
-  heroSubtitle: { color: '#C8D7CE', fontSize: 14, lineHeight: 22, marginTop: 10 },
+  heroSubtitle: { color: shop.border, fontSize: 14, lineHeight: 22, marginTop: 10 },
 
   sectionCard: {
-    backgroundColor: '#fff',
+    backgroundColor: shop.surface,
     borderRadius: radius.md,
     padding: layout.gutter,
     borderWidth: 1,
@@ -306,7 +308,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: shop.surfaceMuted,
     borderWidth: 2,
-    borderColor: '#CBE0D1',
+    borderColor: shop.border,
     borderStyle: 'dashed',
     borderRadius: radius.md,
     paddingVertical: 14,
@@ -324,7 +326,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   copyBtnText: { color: shop.ink, fontSize: 12, fontWeight: '700' },
-  copyBtnDone: { backgroundColor: '#A8E063' },
+  copyBtnDone: { backgroundColor: shop.soft },
 
   shareBtn: {
     backgroundColor: shop.soft,
@@ -335,7 +337,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: space.xs,
     borderWidth: 1,
-    borderColor: '#C7E2D1',
+    borderColor: shop.soft,
   },
   shareBtnText: { color: shop.primary, fontSize: 13, fontWeight: '700', letterSpacing: 0.5 },
 
@@ -347,13 +349,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     borderWidth: 1,
-    borderColor: '#E2ECE4',
+    borderColor: shop.soft,
     color: shop.ink,
     fontSize: 14,
     fontWeight: '700',
   },
   submitBtn: {
-    backgroundColor: shop.primary,
+    backgroundColor: shop.action,
     paddingHorizontal: 18,
     borderRadius: 14,
     alignItems: 'center',
@@ -370,13 +372,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: space.sm,
     borderWidth: 1,
-    borderColor: '#C1E0CC',
+    borderColor: shop.soft,
   },
   alreadyEnteredTitle: { color: shop.primary, fontSize: 13, fontWeight: '700' },
-  alreadyEnteredDesc: { color: '#4F6C5E', fontSize: 12, marginTop: 2 },
+  alreadyEnteredDesc: { color: shop.muted, fontSize: 12, marginTop: 2 },
 
   statsCard: {
-    backgroundColor: '#fff',
+    backgroundColor: shop.surface,
     borderRadius: radius.md,
     padding: layout.gutter,
     flexDirection: 'row',
@@ -385,7 +387,7 @@ const styles = StyleSheet.create({
     borderColor: shop.border,
   },
   statItem: { flex: 1, alignItems: 'center' },
-  statDivider: { width: 1, minHeight: 44, backgroundColor: '#E4ECE5' },
+  statDivider: { width: 1, minHeight: 44, backgroundColor: shop.border },
   statNumber: { color: shop.ink, fontSize: 20, fontWeight: '700', marginTop: 4 },
   statLabel: { color: shop.muted, fontSize: 12, marginTop: 2 },
 
@@ -437,16 +439,16 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: shop.primary,
+    backgroundColor: shop.action,
     alignItems: 'center',
     justifyContent: 'center',
   },
   stepNumberText: { color: '#fff', fontSize: 12, fontWeight: '700' },
   stepTitle: { color: shop.ink, fontSize: 13, fontWeight: '700' },
-  stepDesc: { color: '#687B72', fontSize: 12, lineHeight: 17, marginTop: 2 },
+  stepDesc: { color: shop.muted, fontSize: 12, lineHeight: 17, marginTop: 2 },
 
   rewardsLink: {
-    backgroundColor: '#E8F2EC',
+    backgroundColor: shop.soft,
     borderRadius: radius.md,
     padding: 14,
     flexDirection: 'row',

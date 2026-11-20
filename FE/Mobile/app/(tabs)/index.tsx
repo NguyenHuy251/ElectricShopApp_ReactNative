@@ -5,22 +5,23 @@ import { Link, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { cartService } from '../../services/cart.service';
+import { TabHeaderActions } from '@/components/tab-header-actions';
 import { productService } from '../../services/product.service';
 import { categoryService, type Category } from '../../services/category.service';
 import type { Product } from '../../types';
 import { EmptyState, LoadingState, ProductImage, ProductCard } from '@/components/shop-ui';
-import { shop, layout, radius, space } from '@/constants/shop-theme';
+import { useShopStyles } from '@/components/shop-appearance';
+import { layout, radius, space, type ShopPalette } from '@/constants/shop-theme';
 import { getApiMessage } from '@/utils/format';
 import { getCategoryIcon } from '@/constants/category-icons';
 
-const categoryColors = ['#EAF5FF', '#FFF2E8', '#F2EEFF', '#EAF8F0'];
 
 export default function HomeScreen() {
+  const { shop, styles } = useShopStyles(makeStyles);
+  const categoryColors = [shop.infoSoft, shop.warningSoft, shop.violetSoft, shop.successSoft];
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryError, setCategoryError] = useState('');
-  const [cartCount, setCartCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -40,13 +41,6 @@ export default function HomeScreen() {
       setLoading(false);
     }
 
-    try {
-      const cart = await cartService.getCart();
-      const count = (cart.data?.items || []).reduce((sum: number, item: any) => sum + Number(item.so_luong || 0), 0);
-      setCartCount(count);
-    } catch {
-      setCartCount(0);
-    }
     await categoriesRequest;
   }, []);
 
@@ -62,12 +56,7 @@ export default function HomeScreen() {
             <View style={styles.brandRow}><View style={styles.brandBolt}><MaterialIcons name="bolt" size={21} color={shop.primary} /></View><Text style={styles.eyebrow}>ElectricShop</Text></View>
             <Text style={styles.heading}>Nhà tiện nghi, sống thảnh thơi.</Text>
           </View>
-          <Link href="/cart" asChild>
-            <Pressable accessibilityLabel="Mở giỏ hàng" style={styles.iconButton}>
-              <MaterialIcons name="shopping-bag" size={23} color={shop.ink} />
-              {cartCount > 0 ? <View style={styles.badge}><Text style={styles.badgeText}>{cartCount > 9 ? '9+' : cartCount}</Text></View> : null}
-            </Pressable>
-          </Link>
+          <TabHeaderActions />
         </View>
 
         <Link href="/products" asChild><Pressable style={styles.searchBar}><MaterialIcons name="search" size={22} color={shop.muted} /><Text style={styles.searchText}>Bạn đang tìm thiết bị gì?</Text><View style={styles.searchArrow}><MaterialIcons name="tune" size={18} color={shop.primary} /></View></Pressable></Link>
@@ -110,7 +99,7 @@ export default function HomeScreen() {
         <View style={styles.rewardStrip}>
           <Link href={'/rewards' as any} asChild>
             <Pressable style={styles.rewardActionBtn}>
-              <View style={[styles.rewardIconWrap, { backgroundColor: '#EAF8F0' }]}>
+              <View style={[styles.rewardIconWrap, { backgroundColor: shop.successSoft }]}>
                 <MaterialIcons name="event-available" size={24} color={shop.primary} />
                 <View style={styles.miniBadge}><Text style={styles.miniBadgeText}>+100X</Text></View>
               </View>
@@ -120,8 +109,8 @@ export default function HomeScreen() {
 
           <Link href={'/referral' as any} asChild>
             <Pressable style={styles.rewardActionBtn}>
-              <View style={[styles.rewardIconWrap, { backgroundColor: '#FFF2E8' }]}>
-                <MaterialIcons name="group-add" size={24} color="#D97706" />
+              <View style={[styles.rewardIconWrap, { backgroundColor: shop.warningSoft }]}>
+                <MaterialIcons name="group-add" size={24} color={shop.warning} />
                 <View style={[styles.miniBadge, { backgroundColor: '#EA580C' }]}><Text style={styles.miniBadgeText}>50K</Text></View>
               </View>
               <Text style={styles.rewardActionText}>Mời bạn bè</Text>
@@ -130,8 +119,8 @@ export default function HomeScreen() {
 
           <Link href={'/rewards' as any} asChild>
             <Pressable style={styles.rewardActionBtn}>
-              <View style={[styles.rewardIconWrap, { backgroundColor: '#F2EEFF' }]}>
-                <MaterialIcons name="attractions" size={24} color="#7C3AED" />
+              <View style={[styles.rewardIconWrap, { backgroundColor: shop.violetSoft }]}>
+                <MaterialIcons name="attractions" size={24} color={shop.violet} />
                 <View style={[styles.miniBadge, { backgroundColor: '#8B5CF6' }]}><Text style={styles.miniBadgeText}>Hot</Text></View>
               </View>
               <Text style={styles.rewardActionText}>Vòng quay</Text>
@@ -140,8 +129,8 @@ export default function HomeScreen() {
 
           <Link href="/vouchers" asChild>
             <Pressable style={styles.rewardActionBtn}>
-              <View style={[styles.rewardIconWrap, { backgroundColor: '#EAF5FF' }]}>
-                <MaterialIcons name="local-offer" size={24} color="#0284C7" />
+              <View style={[styles.rewardIconWrap, { backgroundColor: shop.infoSoft }]}>
+                <MaterialIcons name="local-offer" size={24} color={shop.info} />
               </View>
               <Text style={styles.rewardActionText}>Voucher</Text>
             </Pressable>
@@ -152,7 +141,7 @@ export default function HomeScreen() {
         <Link href={'/rewards' as any} asChild>
           <Pressable style={styles.retentionBanner}>
             <View style={styles.retentionIconWrap}>
-              <MaterialIcons name="stars" size={30} color={shop.accent} />
+              <MaterialIcons name="stars" size={30} color={shop.inverseAccent} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.retentionTitle}>Tích lũy mỗi ngày, thêm ưu đãi</Text>
@@ -172,6 +161,7 @@ export default function HomeScreen() {
 }
 
 function SectionHeader({ title, action, href }: { title: string; action: string; href: '/products' }) {
+  const { styles } = useShopStyles(makeStyles);
   return (
     <View style={styles.sectionHeader}>
       <Text style={styles.sectionTitle}>{title}</Text>
@@ -180,7 +170,7 @@ function SectionHeader({ title, action, href }: { title: string; action: string;
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (shop: ShopPalette) => StyleSheet.create({
   heroDetails: { flexDirection: 'row', alignItems: 'center', gap: space.md, marginTop: space.sm },
   featureVisual: { width: 80, height: 80, alignItems: 'center', justifyContent: 'center', backgroundColor: shop.surface, borderRadius: radius.md, overflow: 'hidden' },
   featureImage: { width: '100%', height: '100%' },
@@ -188,19 +178,16 @@ const styles = StyleSheet.create({
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: space.xs },
   brandBolt: { width: 30, height: 34, borderRadius: radius.sm, backgroundColor: shop.soft, alignItems: 'center', justifyContent: 'center' },
   applianceScene: { position: 'absolute', right: 12, bottom: 25, width: 116, height: 146, opacity: 0.6 },
-  applianceTall: { position: 'absolute', top: 0, right: 0, height: 120, width: 78, backgroundColor: '#315873', borderWidth: 1, borderColor: '#7195A9', borderRadius: 14, alignItems: 'center', justifyContent: 'center', transform: [{ rotate: '7deg' }] },
-  applianceBase: { width: 36, height: 3, backgroundColor: '#7195A9', marginTop: 4, borderRadius: 3 },
-  applianceSmall: { position: 'absolute', bottom: 0, left: 0, width: 70, height: 79, borderRadius: 14, borderWidth: 1, borderColor: '#7195A9', backgroundColor: '#254962', alignItems: 'center', justifyContent: 'center', transform: [{ rotate: '-8deg' }] },
+  applianceTall: { position: 'absolute', top: 0, right: 0, height: 120, width: 78, backgroundColor: '#315873', borderWidth: 1, borderColor: shop.border, borderRadius: 14, alignItems: 'center', justifyContent: 'center', transform: [{ rotate: '7deg' }] },
+  applianceBase: { width: 36, height: 3, backgroundColor: shop.border, marginTop: 4, borderRadius: 3 },
+  applianceSmall: { position: 'absolute', bottom: 0, left: 0, width: 70, height: 79, borderRadius: 14, borderWidth: 1, borderColor: shop.border, backgroundColor: '#254962', alignItems: 'center', justifyContent: 'center', transform: [{ rotate: '-8deg' }] },
   sceneDot: { position: 'absolute', width: 9, height: 9, backgroundColor: shop.accent, borderRadius: 5, left: 3, top: 15 },
   safeArea: { flex: 1, backgroundColor: shop.background },
   content: { paddingHorizontal: layout.gutter, paddingBottom: 28, width: '100%', maxWidth: layout.maxWidth, alignSelf: 'center' },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm, paddingTop: 18, paddingBottom: 22 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm, paddingTop: 20, paddingBottom: 22 },
   eyebrow: { color: shop.ink, fontSize: 22, fontWeight: '700', letterSpacing: -0.8 },
   heading: { color: shop.muted, fontSize: 12, marginTop: 8 },
-  iconButton: { width: 46, height: 46, borderRadius: 17, backgroundColor: '#fff', borderWidth: 1, borderColor: shop.border, alignItems: 'center', justifyContent: 'center' },
-  badge: { position: 'absolute', right: -3, top: -3, minWidth: 20, height: 20, borderRadius: 15, backgroundColor: shop.primary, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4, borderWidth: 2, borderColor: shop.background },
-  badgeText: { color: '#fff', fontSize: 11, fontWeight: '700' },
-  searchBar: { backgroundColor: '#fff', borderRadius: 18, borderWidth: 1, borderColor: shop.border, minHeight: 54, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 15, marginBottom: 20 },
+  searchBar: { backgroundColor: shop.surface, borderRadius: 18, borderWidth: 1, borderColor: shop.border, minHeight: 54, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 15, marginBottom: 20 },
   searchText: { color: shop.muted, fontSize: 13, flex: 1 },
   searchArrow: { backgroundColor: shop.soft, width: 32, height: 32, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
   hero: { backgroundColor: shop.soft, minHeight: 285, borderRadius: radius.lg, padding: space.lg, overflow: 'hidden' },
@@ -209,7 +196,7 @@ const styles = StyleSheet.create({
   heroKicker: { color: shop.primary, fontSize: 10, fontWeight: '700', letterSpacing: 0.8 },
   heroTitle: { color: shop.ink, fontSize: 30, lineHeight: 39, fontWeight: '700', letterSpacing: -1, marginTop: 18 },
   heroText: { flex: 1, color: shop.muted, fontSize: 14, lineHeight: 22 },
-  heroButton: { alignSelf: 'flex-start', flexDirection: 'row', gap: 10, alignItems: 'center', backgroundColor: shop.primary, paddingHorizontal: 16, minHeight: layout.touch, borderRadius: 14, marginTop: 20 },
+  heroButton: { alignSelf: 'flex-start', flexDirection: 'row', gap: 10, alignItems: 'center', backgroundColor: shop.action, paddingHorizontal: 16, minHeight: layout.touch, borderRadius: 14, marginTop: 20 },
   heroButtonText: { color: '#fff', fontSize: 13, fontWeight: '700' },
   heroIcon: { position: 'absolute', right: -18, bottom: 24, transform: [{ rotate: '-12deg' }], opacity: 0.35 },
   promise: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, marginTop: 16 },
@@ -233,9 +220,9 @@ const styles = StyleSheet.create({
   miniBadgeText: { color: '#fff', fontSize: 11, fontWeight: '700' },
   rewardActionText: { color: shop.ink, fontSize: 12, fontWeight: '700', marginTop: 6 },
   retentionBanner: { backgroundColor: shop.surface, borderRadius: radius.md, padding: space.md, flexDirection: 'row', alignItems: 'center', gap: space.sm, marginTop: 16, borderWidth: 1, borderColor: shop.border },
-  retentionIconWrap: { width: 38, minHeight: 44, borderRadius: 12, backgroundColor: '#23455E', alignItems: 'center', justifyContent: 'center' },
+  retentionIconWrap: { width: 38, minHeight: 44, borderRadius: 12, backgroundColor: shop.border, alignItems: 'center', justifyContent: 'center' },
   retentionTitle: { color: shop.ink, fontSize: 12, fontWeight: '700' },
   retentionSub: { color: shop.muted, fontSize: 12, marginTop: 3 },
-  retentionCta: { backgroundColor: '#FFFFFF', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 2 },
+  retentionCta: { backgroundColor: shop.surface, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 2 },
   retentionCtaText: { color: shop.ink, fontSize: 12, fontWeight: '700' },
 });

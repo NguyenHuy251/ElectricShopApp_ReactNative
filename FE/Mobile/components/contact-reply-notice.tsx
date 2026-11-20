@@ -1,5 +1,6 @@
 import { Pressable, Text } from '@/components/ui';
-import { shop, radius, space } from '@/constants/shop-theme';
+import { useShopStyles } from '@/components/shop-appearance';
+import { radius, space, type ShopPalette } from '@/constants/shop-theme';
 import { useEffect, useRef, useState } from 'react';
 import { AppState, StyleSheet, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -10,6 +11,7 @@ import api from '@/services/api';
 type ReplyNotification = { ma_thong_bao: number; tieu_de: string; noi_dung: string; da_doc: boolean | number };
 
 export function ContactReplyNotice() {
+  const { styles } = useShopStyles(makeStyles);
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [notice, setNotice] = useState<ReplyNotification | null>(null);
@@ -61,12 +63,12 @@ export function ContactReplyNotice() {
     </View>
   </View>;
 }
-const styles = StyleSheet.create({
-  banner: { position:'absolute',left:16,right:16,zIndex:1000,elevation:12,maxWidth:700,alignSelf:'center',padding: space.md,borderRadius: radius.md,backgroundColor:shop.soft,borderWidth:1,borderColor:'#BCD6C6',gap: space.xs },
+const makeStyles = (shop: ShopPalette) => StyleSheet.create({
+  banner: { position:'absolute',left:16,right:16,zIndex:1000,elevation:12,maxWidth:700,alignSelf:'center',padding: space.md,borderRadius: radius.md,backgroundColor:shop.soft,borderWidth:1,borderColor:shop.border,gap: space.xs },
   title: { color:shop.primary,fontSize:14,fontWeight: '700' },
   body: { color:shop.ink,fontSize:13,lineHeight:20 },
   actions: { flexDirection:'row',justifyContent:'space-between',gap: space.md },
   button: { paddingVertical:8,paddingHorizontal:4 },
   link: { color:shop.primary,fontSize:13,fontWeight:'700' },
-  error: { color:'#A52D2D',fontSize:12 },
+  error: { color:shop.danger,fontSize:12 },
 });

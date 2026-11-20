@@ -1,6 +1,41 @@
 import { test, expect } from '@playwright/test';
 import { mockApi } from './fixtures';
 
+test('orders show the actual confirmer instead of the purchasing account, including unknown legacy attribution', async ({ page }) => {
+  const mock = await mockApi(page);
+  const original = mock.data['don-hang'][0];
+  Object.assign(original, { trang_thai: 'DaXacNhan', ma_tai_khoan_xac_nhan: 3, ten_nhan_vien_xac_nhan: 'Nhân viên xác nhận thật', ngay_xac_nhan: '2026-11-19T10:00:00Z' });
+  mock.data['don-hang'].push({ ...original, ma_don_hang: 11, trang_thai: 'ChoXacNhan', ma_tai_khoan_xac_nhan: null, ten_nhan_vien_xac_nhan: null, ngay_xac_nhan: null });
+  mock.data['don-hang'].push({ ...original, ma_don_hang: 12, trang_thai: 'DaGiao', ma_tai_khoan_xac_nhan: null, ten_nhan_vien_xac_nhan: null, ngay_xac_nhan: null });
+  await page.goto('/orders');
+  await expect(page.getByRole('columnheader', { name: 'Tài khoản đặt', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('columnheader', { name: 'Nhân viên xác nhận đơn', exact: true })).toBeVisible();
+  const headers = await page.getByRole('columnheader').allTextContents();
+  expect(headers[headers.indexOf('Ngày đặt') + 1]).toBe('Nhân viên xác nhận đơn');
+  await expect(page.getByRole('cell', { name: 'Nhân viên xác nhận thật', exact: true })).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'Chưa xác nhận', exact: true })).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'Chưa ghi nhận', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Xem chi tiết', exact: true }).first().click();
+  await expect(page.getByRole('dialog').getByText('Nhân viên xác nhận thật', { exact: true })).toBeVisible();
+  await expect(page.getByRole('dialog').getByText('Ngày xác nhận', { exact: true })).toBeVisible();
+});
+
+test('confirming a pending order reloads the confirmer from the server', async ({ page }) => {
+  const mock = await mockApi(page, 'NhanVien', true, ['orders']);
+  await page.route('**/api/don-hang/10/trang-thai', async route => {
+    const body = route.request().postDataJSON();
+    expect(body).toEqual({ trang_thai: 'DaXacNhan' });
+    Object.assign(mock.data['don-hang'][0], { trang_thai: 'DaXacNhan', ma_tai_khoan_xac_nhan: 1, ten_nhan_vien_xac_nhan: 'Người xác nhận hiện tại', ngay_xac_nhan: '2026-11-19T10:00:00Z' });
+    await route.fulfill({ json: { success: true, data: mock.data['don-hang'][0] } });
+  });
+  await page.goto('/orders');
+  await page.getByRole('button', { name: 'Cập nhật đơn 10', exact: true }).click();
+  await page.getByRole('combobox', { name: 'Đổi trạng thái đơn 10' }).click();
+  await page.locator('.ant-select-item-option').filter({ hasText: 'Đã xác nhận' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Xác nhận', exact: true }).click();
+  await expect(page.getByRole('cell', { name: 'Người xác nhận hiện tại', exact: true })).toBeVisible();
+});
+
 test('staff with orders permission can inspect each ordered variant without catalog permission', async ({ page }) => {
   const mock = await mockApi(page, 'NhanVien', true, ['orders']);
   mock.data['don-hang'][0].items = [700, 900].map((power, index) => ({

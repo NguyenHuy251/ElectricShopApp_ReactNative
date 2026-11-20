@@ -1,11 +1,13 @@
 import { Pressable, Text } from '@/components/ui';
-import { shop, space } from '@/constants/shop-theme';
+import { useShopStyles } from '@/components/shop-appearance';
+import { space, type ShopPalette } from '@/constants/shop-theme';
 import { useRef, useState } from 'react';
 import { Modal, StyleSheet, View } from 'react-native';
 import { orderService } from '@/services/order.service';
 import { getApiMessage } from '@/utils/format';
 
 export function CancelOrderButton({ orderId, onCanceled }: { orderId: number; onCanceled: () => void | Promise<void> }) {
+  const { styles } = useShopStyles(makeStyles);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -31,7 +33,7 @@ export function CancelOrderButton({ orderId, onCanceled }: { orderId: number; on
     </Modal>
   </>;
 }
-const styles = StyleSheet.create({
-  cancel: { padding: 14, borderRadius: 12, borderWidth: 1, borderColor: '#EACACA', alignItems: 'center', marginTop: 8 }, danger: { color: '#A52D2D', fontSize: 14, fontWeight: '700', lineHeight: 21 },
-  overlay: { flex: 1, backgroundColor: '#00000066', alignItems: 'center', justifyContent: 'center', padding: space.lg }, card: { backgroundColor: '#fff', padding: space.lg, borderRadius: 22, width: '100%', maxWidth: 440, gap: space.md }, title: { color: shop.ink, fontSize: 21, fontWeight: '700' }, message: { color: shop.muted, fontSize: 14, lineHeight: 22 }, keep: { backgroundColor: shop.primary, padding: space.md, borderRadius: 12, alignItems: 'center' },
+const makeStyles = (shop: ShopPalette) => StyleSheet.create({
+  cancel: { padding: 14, borderRadius: 12, borderWidth: 1, borderColor: shop.border, alignItems: 'center', marginTop: 8 }, danger: { color: shop.danger, fontSize: 14, fontWeight: '700', lineHeight: 21 },
+  overlay: { flex: 1, backgroundColor: '#00000066', alignItems: 'center', justifyContent: 'center', padding: space.lg }, card: { backgroundColor: shop.surface, padding: space.lg, borderRadius: 22, width: '100%', maxWidth: 440, gap: space.md }, title: { color: shop.ink, fontSize: 21, fontWeight: '700' }, message: { color: shop.muted, fontSize: 14, lineHeight: 22 }, keep: { backgroundColor: shop.action, padding: space.md, borderRadius: 12, alignItems: 'center' },
 });

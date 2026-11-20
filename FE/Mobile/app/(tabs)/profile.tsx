@@ -1,16 +1,19 @@
 import { Pressable, Text, TextInput } from '@/components/ui';
-import { shop, layout, radius, space } from '@/constants/shop-theme';
+import { useShopStyles } from '@/components/shop-appearance';
+import { layout, radius, space, type ShopPalette } from '@/constants/shop-theme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LoadingState, ScreenHeading } from '@/components/shop-ui';
+import { TabHeaderActions } from '@/components/tab-header-actions';
 import { authService } from '../../services/auth.service';
 import type { User } from '../../types';
 import { getApiMessage, getInitials } from '../../utils/format';
 
 export default function ProfileScreen() {
+  const { shop, styles } = useShopStyles(makeStyles);
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -69,16 +72,18 @@ export default function ProfileScreen() {
     Alert.alert('Thông báo', 'Đã đăng xuất');
   };
 
-  if (loading) {
-    return <SafeAreaView style={styles.safe}><LoadingState message="Đang tải tài khoản..." /></SafeAreaView>;
-  }
-
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <KeyboardAvoidingView style={styles.keyboard} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        <ScreenHeading eyebrow="GÓC RIÊNG CỦA BẠN" title="Xin chào, bạn!" subtitle="Mọi thông tin mua sắm, trong tầm tay." icon="person-outline" />
+        <ScreenHeading
+          eyebrow="GÓC RIÊNG CỦA BẠN"
+          title="Xin chào, bạn!"
+          subtitle="Mọi thông tin mua sắm, trong tầm tay."
+          action={<TabHeaderActions />}
+        />
 
+        {loading ? <LoadingState message="Đang tải tài khoản..." /> : <>
         {user ? (
           <View style={styles.card}>
             <View style={styles.avatar}><Text style={styles.avatarText}>{getInitials(user.ho_ten)}</Text></View>
@@ -114,7 +119,7 @@ export default function ProfileScreen() {
           <View style={styles.rewardSummaryCard}>
             <View style={styles.rewardSummaryLeft}>
               <View style={styles.coinCircle}>
-                <MaterialIcons name="monetization-on" size={24} color={shop.accent} />
+                <MaterialIcons name="monetization-on" testID="wallet-coin" size={26} color={shop.warning} />
               </View>
               <View>
                 <Text style={styles.rewardSummarySub}>Ví Xu tích lũy</Text>
@@ -164,13 +169,13 @@ export default function ProfileScreen() {
         <Text style={styles.menuLabel}>QUÀ TẶNG & GIỚI THIỆU</Text>
         <View style={styles.menu}>
           <Pressable accessibilityRole="button" style={styles.giftMenuItem} onPress={() => router.push('/rewards' as any)}>
-            <View style={[styles.giftIconWrap, { backgroundColor: '#EAF8F0' }]}>
+            <View style={[styles.giftIconWrap, { backgroundColor: shop.successSoft }]}>
               <MaterialIcons name="event-available" size={22} color={shop.primary} />
             </View>
             <View style={styles.giftItemContent}>
               <View style={styles.giftTitleRow}>
                 <Text style={styles.giftItemTitle}>Điểm danh & Quà tặng</Text>
-                <View style={[styles.giftTagPill, { backgroundColor: '#EAF8F0' }]}>
+                <View style={[styles.giftTagPill, { backgroundColor: shop.successSoft }]}>
                   <Text style={[styles.giftTagText, { color: shop.primary }]}>+100 Xu</Text>
                 </View>
               </View>
@@ -179,14 +184,14 @@ export default function ProfileScreen() {
             <MaterialIcons name="chevron-right" size={22} color={shop.muted} />
           </Pressable>
           <Pressable accessibilityRole="button" style={[styles.giftMenuItem, styles.giftMenuItemLast]} onPress={() => router.push('/referral' as any)}>
-            <View style={[styles.giftIconWrap, { backgroundColor: '#FFF5EB' }]}>
-              <MaterialIcons name="card-giftcard" size={22} color="#D97706" />
+            <View style={[styles.giftIconWrap, { backgroundColor: shop.warningSoft }]}>
+              <MaterialIcons name="card-giftcard" size={22} color={shop.warning} />
             </View>
             <View style={styles.giftItemContent}>
               <View style={styles.giftTitleRow}>
                 <Text style={styles.giftItemTitle}>Mời bạn bè nhận 50.000đ</Text>
-                <View style={[styles.giftTagPill, { backgroundColor: '#FFF2E8' }]}>
-                  <Text style={[styles.giftTagText, { color: '#D97706' }]}>50K + 500X</Text>
+                <View style={[styles.giftTagPill, { backgroundColor: shop.warningSoft }]}>
+                  <Text style={[styles.giftTagText, { color: shop.warning }]}>50K + 500X</Text>
                 </View>
               </View>
               <Text style={styles.giftItemSub}>Chia sẻ mã nhận 500 Xu + Voucher cho cả hai</Text>
@@ -200,22 +205,23 @@ export default function ProfileScreen() {
           <MaterialIcons name="logout" size={20} color={shop.danger} />
           <Text style={styles.logoutText}>Đăng xuất</Text>
         </Pressable>
+        </>}
       </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (shop: ShopPalette) => StyleSheet.create({
   memberLabel: { color: shop.primary, fontSize: 11, letterSpacing: 1, fontWeight: '700', marginBottom: 6 },
   menuLabel: { color: shop.muted, fontSize: 12, fontWeight: '700', letterSpacing: 1.4, marginTop: 30 },
   profileNote: { backgroundColor: shop.soft, borderRadius: 22, padding: layout.gutter, flexDirection: 'row', gap: space.sm, alignItems: 'center', marginVertical: 24 },
-  profileNoteText: { flex: 1, color: '#556B80', fontSize: 13, lineHeight: 21 },
+  profileNoteText: { flex: 1, color: shop.muted, fontSize: 13, lineHeight: 21 },
   safe: { flex: 1, backgroundColor: shop.background },
-  container: { flexGrow: 1, padding: layout.gutter, width: '100%', maxWidth: layout.maxWidth, alignSelf: 'center' },
+  container: { flexGrow: 1, padding: layout.gutter, paddingTop: 12, width: '100%', maxWidth: layout.maxWidth, alignSelf: 'center' },
   muted: { color: shop.muted },
   card: { flexDirection: 'column', alignItems: 'center', gap: space.md, backgroundColor: shop.surface, borderRadius: radius.lg, padding: 28, borderWidth: 1, borderColor: shop.border },
-  avatar: { width: 76, height: 76, borderRadius: 38, backgroundColor: shop.primary, alignItems: 'center', justifyContent: 'center' },
+  avatar: { width: 76, height: 76, borderRadius: 38, backgroundColor: shop.action, alignItems: 'center', justifyContent: 'center' },
   avatarText: { color: '#fff', fontSize: 20, fontWeight: '700' },
   profileInfo: { alignItems: 'center', gap: 4 },
   name: { color: shop.ink, fontSize: 24, fontWeight: '700', textAlign: 'center' },
@@ -223,25 +229,25 @@ const styles = StyleSheet.create({
   menu: { backgroundColor: shop.surface, borderRadius: radius.md, marginTop: 12, overflow: 'hidden' },
   menuItem: { minHeight: 64, flexDirection: 'row', alignItems: 'center', gap: space.md, paddingHorizontal: 18, borderBottomWidth: 1, borderBottomColor: shop.border },
   menuText: { color: shop.ink, fontSize: 14, fontWeight: '700', flex: 1 },
-  logout: { marginTop: 'auto', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.xs, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: shop.border, borderRadius: radius.md, padding: 17 },
+  logout: { marginTop: 'auto', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.xs, backgroundColor: shop.surface, borderWidth: 1, borderColor: shop.border, borderRadius: radius.md, padding: 17 },
   logoutText: { color: shop.danger, fontWeight: '700' },
   keyboard: { flex: 1 },
   editButton: { position: 'absolute', right: 16, top: 16, width: 44, minHeight: 44, borderRadius: 22, backgroundColor: shop.soft, alignItems: 'center', justifyContent: 'center' },
-  editForm: { backgroundColor: '#fff', borderRadius: 22, padding: space.md, marginTop: 14, borderWidth: 1, borderColor: shop.border },
+  editForm: { backgroundColor: shop.surface, borderRadius: 22, padding: space.md, marginTop: 14, borderWidth: 1, borderColor: shop.border },
   formTitle: { color: shop.ink, fontSize: 16, fontWeight: '700', marginBottom: 12 },
-  input: { minHeight: 46, borderWidth: 1, borderColor: shop.border, borderRadius: 14, paddingHorizontal: 12, color: shop.ink, marginBottom: 10, backgroundColor: '#fff' },
+  input: { minHeight: 46, borderWidth: 1, borderColor: shop.border, borderRadius: 14, paddingHorizontal: 12, color: shop.ink, marginBottom: 10, backgroundColor: shop.surface },
   addressInput: { minHeight: 72, paddingTop: 12, textAlignVertical: 'top' },
   formActions: { flexDirection: 'row', gap: 10, marginTop: 4 },
   cancelButton: { flex: 1, minHeight: 46, borderRadius: 14, backgroundColor: shop.surfaceMuted, alignItems: 'center', justifyContent: 'center' },
   cancelText: { color: shop.ink, fontWeight: '700' },
-  saveButton: { flex: 1, minHeight: 46, borderRadius: 14, backgroundColor: shop.primary, alignItems: 'center', justifyContent: 'center' },
+  saveButton: { flex: 1, minHeight: 46, borderRadius: 14, backgroundColor: shop.action, alignItems: 'center', justifyContent: 'center' },
   saveText: { color: '#fff', fontWeight: '700' },
   disabled: { opacity: 0.6 },
-  rewardSummaryCard: { backgroundColor: shop.ink, borderRadius: 20, padding: space.md, marginTop: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderColor: '#23455E' },
+  rewardSummaryCard: { backgroundColor: shop.inverseSurface, borderRadius: 20, padding: space.md, marginTop: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderColor: shop.border },
   rewardSummaryLeft: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  coinCircle: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#23455E', alignItems: 'center', justifyContent: 'center' },
+  coinCircle: { width: 44, height: 44, borderRadius: 22, backgroundColor: shop.warningSoft, alignItems: 'center', justifyContent: 'center' },
   rewardSummarySub: { color: '#CAD8E4', fontSize: 12, fontWeight: '600' },
-  rewardSummaryValue: { color: shop.accent, fontSize: 18, fontWeight: '700', marginTop: 2 },
+  rewardSummaryValue: { color: shop.inverseAccent, fontSize: 18, fontWeight: '700', marginTop: 2 },
   rewardSummaryBtn: { backgroundColor: shop.accent, flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 14 },
   rewardSummaryBtnText: { color: shop.ink, fontSize: 12, fontWeight: '700' },
   menuSubText: { color: shop.muted, fontSize: 12, marginTop: 2 },

@@ -1,5 +1,6 @@
 import { OrderProgress, Pressable, Text } from '@/components/ui';
-import { shop, space } from '@/constants/shop-theme';
+import { useShopStyles } from '@/components/shop-appearance';
+import { space, type ShopPalette } from '@/constants/shop-theme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
@@ -11,6 +12,7 @@ import type { Order } from '../types';
 import { formatCurrency, getApiMessage } from '../utils/format';
 
 export default function CheckoutSuccessScreen() {
+  const { styles } = useShopStyles(makeStyles);
   const { orderId } = useLocalSearchParams<{ orderId: string }>();
   const router = useRouter();
   const [order, setOrder] = useState<Order | null>(null);
@@ -43,9 +45,9 @@ export default function CheckoutSuccessScreen() {
   </ScrollView></SafeAreaView>;
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (shop: ShopPalette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: shop.background }, content: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: space.lg, gap: 18, maxWidth: 620, width: '100%', alignSelf: 'center' },
-  icon: { width: 96, height: 96, borderRadius: 32, backgroundColor: shop.primary, alignItems: 'center', justifyContent: 'center' }, title: { color: shop.ink, fontSize: 27, fontWeight: '700', textAlign: 'center' }, message: { color: shop.muted, fontSize: 14, lineHeight: 22, textAlign: 'center' },
-  card: { backgroundColor: '#fff', padding: space.lg, borderRadius: 22, width: '100%', alignItems: 'center', gap: space.sm }, label: { color: shop.muted, fontSize: 12, letterSpacing: 1, fontWeight: '700' }, order: { color: shop.ink, fontWeight: '700', textAlign: 'center', fontSize: 15 }, total: { color: shop.primary, fontSize: 28, fontWeight: '700' }, divider: { height: 1, backgroundColor: shop.border, width: '100%', marginVertical: 8 },
-  button: { backgroundColor: shop.primary, minHeight: 52, padding: space.md, borderRadius: 14, width: '100%', alignItems: 'center' }, buttonText: { color: '#fff', fontWeight: '700' }, secondary: { color: shop.primary, fontWeight: '700', padding: 14 },
+  icon: { width: 96, height: 96, borderRadius: 32, backgroundColor: shop.action, alignItems: 'center', justifyContent: 'center' }, title: { color: shop.ink, fontSize: 27, fontWeight: '700', textAlign: 'center' }, message: { color: shop.muted, fontSize: 14, lineHeight: 22, textAlign: 'center' },
+  card: { backgroundColor: shop.surface, padding: space.lg, borderRadius: 22, width: '100%', alignItems: 'center', gap: space.sm }, label: { color: shop.muted, fontSize: 12, letterSpacing: 1, fontWeight: '700' }, order: { color: shop.ink, fontWeight: '700', textAlign: 'center', fontSize: 15 }, total: { color: shop.primary, fontSize: 28, fontWeight: '700' }, divider: { height: 1, backgroundColor: shop.border, width: '100%', marginVertical: 8 },
+  button: { backgroundColor: shop.action, minHeight: 52, padding: space.md, borderRadius: 14, width: '100%', alignItems: 'center' }, buttonText: { color: '#fff', fontWeight: '700' }, secondary: { color: shop.primary, fontWeight: '700', padding: 14 },
 });

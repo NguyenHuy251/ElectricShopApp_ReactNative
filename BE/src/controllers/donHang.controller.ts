@@ -4,6 +4,7 @@ import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth.middleware.js';
 import { sendError, sendSuccess } from '../utils/response.js';
 import * as donHangService from '../services/donHang.service.js';
+import { CheckoutError } from '../utils/checkout.js';
 
 export { createDonHang } from './checkout.controller.js';
 
@@ -53,14 +54,21 @@ export async function getDonHangById(req: AuthRequest, res: Response) {
   }
 }
 
-export async function updateTrangThaiDonHang(req: Request, res: Response) {
+export async function updateTrangThaiDonHang(req: AuthRequest, res: Response) {
   try {
     const { id } = req.params;
     const { trang_thai } = req.body;
     if (trang_thai === 'DaGiao') return sendError(res, 409, 'Chỉ người đặt đơn được xác nhận đã nhận hàng trên ứng dụng.');
+    if (trang_thai === 'DaXacNhan') {
+      if (!req.user) return sendError(res, 401, 'Bạn chưa đăng nhập');
+      const orderId = Number(id);
+      if (!Number.isSafeInteger(orderId) || orderId < 1) return sendError(res, 400, 'Mã đơn hàng không hợp lệ');
+      return sendSuccess(res, 'Đã xác nhận đơn hàng', await donHangService.confirmDonHang(orderId, req.user.ma_tai_khoan));
+    }
     const result = await donHangService.donHangService.updateStatus([Number(id), trang_thai]);
     return sendSuccess(res, 'Cập nhật trạng thái đơn hàng thành công', result[0] || { ma_don_hang: Number(id), trang_thai });
   } catch (error) {
+    if (error instanceof CheckoutError) return sendError(res, error.status, error.message);
     if ((error as { sqlMessage?: string }).sqlMessage?.includes('Khong tim thay')) return sendError(res, 404, 'Không tìm thấy đơn hàng');
     if ((error as { sqlMessage?: string }).sqlMessage?.includes('khong hop le')) return sendError(res, 409, 'Không thể chuyển trạng thái đơn hàng theo luồng này. Hãy tải lại danh sách.');
     return sendError(res, 500, 'Lỗi khi cập nhật trạng thái đơn hàng', [(error as Error).message]);

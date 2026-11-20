@@ -1,11 +1,13 @@
 import { Pressable, Text } from '@/components/ui';
-import { shop, space } from '@/constants/shop-theme';
+import { useShopStyles } from '@/components/shop-appearance';
+import { space, type ShopPalette } from '@/constants/shop-theme';
 import { useRef, useState } from 'react';
 import { Modal, StyleSheet, View } from 'react-native';
 import { orderService } from '@/services/order.service';
 import { getApiMessage } from '@/utils/format';
 
 export function ConfirmReceiptButton({ orderId, onConfirmed }: { orderId: number; onConfirmed: () => void }) {
+  const { styles } = useShopStyles(makeStyles);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -34,14 +36,14 @@ export function ConfirmReceiptButton({ orderId, onConfirmed }: { orderId: number
   </>;
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (shop: ShopPalette) => StyleSheet.create({
   hint: { color:shop.muted,fontSize:13,lineHeight:21,marginBottom:12 },
-  primary: { backgroundColor:shop.primary,padding: space.md,borderRadius:12,alignItems:'center' },
+  primary: { backgroundColor: shop.action,padding: space.md,borderRadius:12,alignItems:'center' },
   buttonText: { color:'#fff',fontWeight:'700',fontSize:14 },
-  secondary: { padding:14,alignItems:'center',borderWidth:1,borderColor:'#DAE5DD',borderRadius:12 },
+  secondary: { padding:14,alignItems:'center',borderWidth:1,borderColor:shop.border,borderRadius:12 },
   secondaryText: { color:shop.primary,fontWeight:'700' },
   overlay: { flex:1,backgroundColor:'#00000066',alignItems:'center',justifyContent:'center',padding: space.lg },
-  card: { backgroundColor:'#fff',padding: space.lg,borderRadius:22,width:'100%',maxWidth:440,gap: space.sm },
+  card: { backgroundColor:shop.surface,padding: space.lg,borderRadius:22,width:'100%',maxWidth:440,gap: space.sm },
   title: { color:shop.ink,fontSize:21,fontWeight: '700' },
-  error: { color:'#A52D2D',fontSize:13,lineHeight:20 },
+  error: { color:shop.danger,fontSize:13,lineHeight:20 },
 });

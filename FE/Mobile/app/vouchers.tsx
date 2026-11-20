@@ -1,5 +1,6 @@
 import { Pressable, Text, TextInput } from '@/components/ui';
-import { shop, layout, radius, space } from '@/constants/shop-theme';
+import { useShopStyles } from '@/components/shop-appearance';
+import { layout, radius, space, type ShopPalette } from '@/constants/shop-theme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
@@ -13,6 +14,7 @@ import { getApiMessage } from '../utils/format';
 type TabType = 'all' | 'usable' | 'wallet';
 
 export default function VouchersScreen() {
+  const { shop, styles } = useShopStyles(makeStyles);
   const router = useRouter();
   const [vouchers, setVouchers] = useState<CustomerVoucher[]>([]);
   const [loading, setLoading] = useState(true);
@@ -155,7 +157,7 @@ export default function VouchersScreen() {
           </View>
         ) : (
           <View style={styles.empty}>
-            <MaterialIcons name="local-offer" size={40} color="#BAC6BF" />
+            <MaterialIcons name="local-offer" size={40} color={shop.border} />
             <Text style={styles.emptyTitle}>
               {activeTab === 'wallet' ? 'Ví voucher riêng của bạn đang trống' : 'Chưa có voucher phù hợp'}
             </Text>
@@ -186,7 +188,7 @@ export default function VouchersScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (shop: ShopPalette) => StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: shop.background,
@@ -222,7 +224,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    backgroundColor: '#fff',
+    backgroundColor: shop.surface,
     borderRadius: radius.md,
     padding: 8,
     paddingLeft: 12,
@@ -243,7 +245,7 @@ const styles = StyleSheet.create({
     minHeight: 40,
   },
   claimBtn: {
-    backgroundColor: shop.primary,
+    backgroundColor: shop.action,
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 12,
@@ -258,7 +260,7 @@ const styles = StyleSheet.create({
   },
   tabRow: {
     flexDirection: 'row',
-    backgroundColor: '#EAF0E8',
+    backgroundColor: shop.soft,
     borderRadius: 14,
     padding: 4,
     gap: 4,
@@ -270,7 +272,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
   },
   tabItemActive: {
-    backgroundColor: '#fff',
+    backgroundColor: shop.surface,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
@@ -310,12 +312,12 @@ const styles = StyleSheet.create({
     gap: space.sm,
   },
   error: {
-    color: '#A52D2D',
+    color: shop.danger,
     fontSize: 13,
   },
   empty: {
     padding: space.lg,
-    backgroundColor: '#fff',
+    backgroundColor: shop.surface,
     borderRadius: 18,
     alignItems: 'center',
     gap: space.xs,
@@ -338,7 +340,7 @@ const styles = StyleSheet.create({
   },
   earnBtn: {
     marginTop: 8,
-    backgroundColor: '#EAF8F0',
+    backgroundColor: shop.successSoft,
     paddingHorizontal: 16,
     paddingVertical: 9,
     borderRadius: 12,
@@ -351,7 +353,7 @@ const styles = StyleSheet.create({
   button: {
     padding: space.md,
     alignItems: 'center',
-    backgroundColor: shop.primary,
+    backgroundColor: shop.action,
     borderRadius: radius.md,
     marginTop: 10,
   },

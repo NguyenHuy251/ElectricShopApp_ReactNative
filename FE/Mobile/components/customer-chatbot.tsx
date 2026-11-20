@@ -6,7 +6,8 @@ import { ActivityIndicator, Animated, KeyboardAvoidingView, Modal, PanResponder,
 import type { GestureResponderHandlers } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { chatbotService, type ChatMessage, type ChatProduct } from '@/services/chatbot.service';
-import { shop, radius, space } from '@/constants/shop-theme';
+import { useShopStyles } from '@/components/shop-appearance';
+import { radius, space, type ShopPalette } from '@/constants/shop-theme';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { formatCurrency, getApiMessage } from '@/utils/format';
 
@@ -15,6 +16,7 @@ const welcome: Message = { id: 0, role: 'assistant', text: 'Chào bạn! Mình l
 const SIZE = 58;
 
 export function CustomerChatbot() {
+  const { shop, styles } = useShopStyles(makeStyles);
   const reducedMotion = useReducedMotion();
   const router = useRouter();
   const { width, height } = useWindowDimensions();
@@ -96,26 +98,26 @@ export function CustomerChatbot() {
   </>;
 }
 
-const styles = StyleSheet.create({
-  bubble: { position: 'absolute', left: 0, top: 0, width: SIZE, height: SIZE, borderRadius: SIZE / 2, backgroundColor: shop.primary, alignItems: 'center', justifyContent: 'center', zIndex: 100, elevation: 9, shadowColor: shop.ink, shadowOpacity: 0.2, shadowRadius: 12, shadowOffset: { width: 0, height: 4 } },
+const makeStyles = (shop: ShopPalette) => StyleSheet.create({
+  bubble: { position: 'absolute', left: 0, top: 0, width: SIZE, height: SIZE, borderRadius: SIZE / 2, backgroundColor: shop.action, alignItems: 'center', justifyContent: 'center', zIndex: 100, elevation: 9, shadowColor: shop.ink, shadowOpacity: 0.2, shadowRadius: 12, shadowOffset: { width: 0, height: 4 } },
   online: { position: 'absolute', bottom: 3, right: 3, width: 12, height: 12, backgroundColor: shop.accent, borderRadius: 6, borderWidth: 2, borderColor: '#fff' },
   overlay: { flex: 1, backgroundColor: '#10263B66', alignItems: 'flex-end', justifyContent: 'flex-end', paddingHorizontal: 12 },
   panel: { backgroundColor: shop.background, borderRadius: radius.lg, overflow: 'hidden', alignSelf: 'flex-end', maxHeight: '94%' },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: space.md, backgroundColor: shop.ink },
+  header: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: space.md, backgroundColor: shop.inverseSurface },
   logo: { backgroundColor: '#FFFFFF15', width: 40, minHeight: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 13 },
   title: { color: '#fff', fontSize: 16, fontWeight: '700' }, caption: { color: '#BCD6E1', fontSize: 12, marginTop: 4 },
   iconButton: { minWidth: 40, minHeight: 40, alignItems: 'center', justifyContent: 'center' },
   disclaimer: { color: shop.muted, fontSize: 12, lineHeight: 16, padding: 12, backgroundColor: shop.soft },
   thread: { padding: 14, gap: space.sm }, message: { maxWidth: '92%', borderRadius: radius.md, padding: 12 },
-  mine: { alignSelf: 'flex-end', backgroundColor: shop.primary, borderBottomRightRadius: 4 },
-  theirs: { alignSelf: 'flex-start', backgroundColor: '#fff', borderWidth: 1, borderColor: shop.border, borderBottomLeftRadius: 4 },
+  mine: { alignSelf: 'flex-end', backgroundColor: shop.action, borderBottomRightRadius: 4 },
+  theirs: { alignSelf: 'flex-start', backgroundColor: shop.surface, borderWidth: 1, borderColor: shop.border, borderBottomLeftRadius: 4 },
   messageText: { color: shop.ink, fontSize: 15, lineHeight: 23 },
   typing: { flexDirection: 'row', alignItems: 'center', gap: space.xs }, muted: { color: shop.muted, fontSize: 12 },
   error: { color: shop.danger, fontSize: 12, lineHeight: 19, padding: 10 },
-  suggestions: { gap: space.xs, alignItems: 'flex-start' }, chip: { padding: 10, borderRadius: 12, borderWidth: 1, borderColor: shop.border, backgroundColor: '#fff' }, chipText: { color: shop.primary, fontSize: 12 },
-  composer: { flexDirection: 'row', alignItems: 'flex-end', gap: space.xs, padding: 12, borderTopWidth: 1, borderColor: shop.border, backgroundColor: '#fff' },
+  suggestions: { gap: space.xs, alignItems: 'flex-start' }, chip: { padding: 10, borderRadius: 12, borderWidth: 1, borderColor: shop.border, backgroundColor: shop.surface }, chipText: { color: shop.primary, fontSize: 12 },
+  composer: { flexDirection: 'row', alignItems: 'flex-end', gap: space.xs, padding: 12, borderTopWidth: 1, borderColor: shop.border, backgroundColor: shop.surface },
   input: { flex: 1, minHeight: 44, maxHeight: 100, padding: 10, color: shop.ink, backgroundColor: shop.background, borderRadius: 12, fontSize: 14 },
-  send: { height: 44, width: 44, borderRadius: 13, backgroundColor: shop.primary, alignItems: 'center', justifyContent: 'center' },
-  footer: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 16, paddingBottom: 14, backgroundColor: '#fff' }, link: { color: shop.primary, fontSize: 12, fontWeight: '700' },
+  send: { height: 44, width: 44, borderRadius: 13, backgroundColor: shop.action, alignItems: 'center', justifyContent: 'center' },
+  footer: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 16, paddingBottom: 14, backgroundColor: shop.surface }, link: { color: shop.primary, fontSize: 12, fontWeight: '700' },
   product: { padding: 10, marginTop: 10, backgroundColor: shop.soft, borderRadius: radius.sm }, productTitle: { color: shop.ink, fontSize: 12, fontWeight: '700' }, productPrice: { color: shop.primary, marginTop: 5, fontSize: 12 },
 });

@@ -1,80 +1,168 @@
-import { Tabs } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { Tabs, type BottomTabBarProps } from 'expo-router/js-tabs';
+import { useLinkBuilder } from 'expo-router/react-navigation';
+import { SymbolView, type SFSymbol } from 'expo-symbols';
+import { useEffect, useState, type ComponentProps } from 'react';
+import { Animated, Easing, I18nManager, Platform, StyleSheet, View } from 'react-native';
 
 import { HapticTab } from '@/components/haptic-tab';
-import { shop } from '@/constants/shop-theme';
-import { Animated, StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Text } from '@/components/ui';
+import { useShopStyles, useShopAppearance } from '@/components/shop-appearance';
+import { type ShopPalette } from '@/constants/shop-theme';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 
+type IconName = ComponentProps<typeof MaterialCommunityIcons>['name'];
+type TabArtwork = { ios: [SFSymbol, SFSymbol]; fallback: [IconName, IconName] };
 
-function TabIcon({ name, focused, reducedMotion }: { name: React.ComponentProps<typeof MaterialIcons>['name']; focused: boolean; reducedMotion: boolean }) {
-  const [lift] = useState(() => new Animated.Value(focused ? -12 : 0));
+const artwork: Record<string, TabArtwork> = {
+  index: { ios: ['house', 'house.fill'], fallback: ['home-outline', 'home'] },
+  products: { ios: ['square.grid.2x2', 'square.grid.2x2.fill'], fallback: ['view-grid-outline', 'view-grid'] },
+  cart: { ios: ['cart', 'cart.fill'], fallback: ['cart-outline', 'cart'] },
+  profile: { ios: ['person.crop.circle', 'person.crop.circle.fill'], fallback: ['account-circle-outline', 'account-circle'] },
+};
+
+function FloatingTabBar({ state, descriptors, emitter, navigateToTab, insets }: BottomTabBarProps) {
+  const { shop, styles } = useShopStyles(makeStyles);
+  const { buildHref } = useLinkBuilder();
+  const reducedMotion = useReducedMotion();
+  const [width, setWidth] = useState(0);
+  const [selection] = useState(() => new Animated.Value(state.index));
+
   useEffect(() => {
-    if (reducedMotion) { lift.setValue(focused ? -12 : 0); return; }
-    const transition = Animated.timing(lift, { toValue: focused ? -12 : 0, duration: 180, useNativeDriver: true });
-    transition.start();
-    return () => transition.stop();
-  }, [focused, reducedMotion, lift]);
-  return <View pointerEvents="none" accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={styles.iconSlot}>
-    <Animated.View style={[styles.iconCircle, focused && styles.activeCircle, { transform: [{ translateY: lift }] }]}>
-      <MaterialIcons size={focused ? 26 : 24} name={name} color={focused ? shop.surface : shop.muted} />
-    </Animated.View>
-  </View>;
+    if (reducedMotion) {
+      selection.setValue(state.index);
+      return;
+    }
+
+    const slide = Animated.timing(selection, {
+      toValue: state.index,
+      duration: 240,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: Platform.OS !== 'web',
+    });
+    slide.start();
+    return () => slide.stop();
+  }, [reducedMotion, selection, state.index]);
+
+  const tabWidth = width / state.routes.length;
+  const translateX = selection.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, I18nManager.isRTL ? -tabWidth : tabWidth],
+  });
+
+  return (
+    <View style={[styles.frame, {
+      paddingLeft: Math.max(14, insets.left),
+      paddingRight: Math.max(14, insets.right),
+      paddingBottom: Math.max(10, insets.bottom),
+    }]}>
+      <View style={styles.dock}>
+        <View role="tablist" style={styles.row} onLayout={({ nativeEvent }) => setWidth(nativeEvent.layout.width)}>
+          {tabWidth > 0 && (
+            <Animated.View
+              pointerEvents="none"
+              style={[styles.selection, { width: tabWidth - 4, transform: [{ translateX }] }]}
+            />
+          )}
+          {state.routes.map((route, index) => {
+            const { options } = descriptors[route.key];
+            const focused = state.index === index;
+            const label = options.title ?? route.name;
+            const color = focused ? shop.primary : shop.muted;
+            const icons = artwork[route.name] ?? artwork.index;
+            const variant = focused ? 1 : 0;
+
+            return (
+              <HapticTab
+                key={route.key}
+                href={buildHref(route.name, route.params)}
+                role={Platform.OS === 'ios' ? 'button' : 'tab'}
+                accessibilityLabel={options.tabBarAccessibilityLabel ?? label}
+                aria-selected={focused}
+                accessibilityShowsLargeContentViewer
+                accessibilityLargeContentTitle={label}
+                onPress={() => {
+                  const event = emitter.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
+                  if (!focused && !event.defaultPrevented) navigateToTab(route.key);
+                }}
+                onLongPress={() => emitter.emit({ type: 'tabLongPress', target: route.key })}
+                pressOpacity={0.65}
+                pressColor="rgba(18, 107, 96, 0.10)"
+                style={styles.tab}
+              >
+                <View aria-hidden accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+                  {Platform.OS === 'ios' ? (
+                    <SymbolView name={icons.ios[variant]} size={23} style={styles.icon} weight="medium" tintColor={color} />
+                  ) : (
+                    <MaterialCommunityIcons name={icons.fallback[variant]} size={24} color={color} />
+                  )}
+                </View>
+                <Text maxFontSizeMultiplier={1.3} style={[styles.label, { color }, focused && styles.selectedLabel]}>
+                  {label}
+                </Text>
+              </HapticTab>
+            );
+          })}
+        </View>
+      </View>
+    </View>
+  );
 }
 
 export default function TabLayout() {
-  const insets = useSafeAreaInsets();
-  const reducedMotion = useReducedMotion();
-
+  const { shop } = useShopAppearance();
   return (
     <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: shop.primary,
-        tabBarInactiveTintColor: shop.muted,
-        tabBarStyle: { backgroundColor: shop.surface, borderTopColor: shop.border, borderTopLeftRadius: 24, borderTopRightRadius: 24, height: 70 + Math.max(insets.bottom, 10), paddingBottom: Math.max(insets.bottom, 10), paddingTop: 8, elevation: 4, shadowColor: shop.ink, shadowOffset: { width: 0, height: -3 }, shadowOpacity: 0.08, shadowRadius: 16, overflow: 'visible' },
-        tabBarItemStyle: { overflow: 'visible' },
-        tabBarIconStyle: { width: 60, height: 36, overflow: 'visible' },
-        tabBarLabelStyle: { fontSize: 12, lineHeight: 18, minHeight: 18, flexShrink: 0, fontWeight: '700', marginTop: 4 },
-        sceneStyle: { backgroundColor: shop.background },
-        headerShown: false,
-        tabBarButton: HapticTab as any,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Trang chủ',
-          tabBarIcon: ({ focused }) => <TabIcon name="home" focused={focused} reducedMotion={reducedMotion} />,
-        }}
-      />
-      <Tabs.Screen
-        name="products"
-        options={{
-          title: 'Sản phẩm',
-          tabBarIcon: ({ focused }) => <TabIcon name="grid-view" focused={focused} reducedMotion={reducedMotion} />,
-        }}
-      />
-      <Tabs.Screen
-        name="cart"
-        options={{
-          title: 'Giỏ hàng',
-          tabBarIcon: ({ focused }) => <TabIcon name="shopping-cart" focused={focused} reducedMotion={reducedMotion} />,
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Tài khoản',
-          tabBarIcon: ({ focused }) => <TabIcon name="person-outline" focused={focused} reducedMotion={reducedMotion} />,
-        }}
-      />
+      tabBar={(props) => <FloatingTabBar {...props} />}
+      screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: shop.background } }}
+    >
+      <Tabs.Screen name="index" options={{ title: 'Trang chủ' }} />
+      <Tabs.Screen name="products" options={{ title: 'Sản phẩm' }} />
+      <Tabs.Screen name="cart" options={{ title: 'Giỏ hàng' }} />
+      <Tabs.Screen name="profile" options={{ title: 'Tài khoản' }} />
     </Tabs>
   );
 }
 
-const styles = StyleSheet.create({
-  iconSlot: { width: 60, height: 36, alignItems: 'center', justifyContent: 'center', overflow: 'visible' },
-  iconCircle: { width: 56, height: 56, borderRadius: 28, borderWidth: 4, borderColor: 'transparent', alignItems: 'center', justifyContent: 'center' },
-  activeCircle: { backgroundColor: shop.primary, borderColor: shop.surface, shadowColor: shop.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 5 },
+const makeStyles = (shop: ShopPalette) => StyleSheet.create({
+  frame: {
+    alignItems: 'center',
+    backgroundColor: shop.background,
+    paddingTop: 8,
+  },
+  dock: {
+    width: '100%',
+    maxWidth: 460,
+    paddingHorizontal: 5,
+    paddingVertical: 4,
+    borderRadius: 38,
+    borderCurve: 'continuous',
+    borderWidth: 1,
+    borderColor: shop.dockBorder,
+    backgroundColor: shop.dock,
+    boxShadow: shop.dockShadow,
+  },
+  row: { flexDirection: 'row', position: 'relative' },
+  selection: {
+    position: 'absolute',
+    start: 2,
+    top: 0,
+    bottom: 0,
+    borderRadius: 30,
+    borderCurve: 'continuous',
+    backgroundColor: shop.soft,
+  },
+  tab: {
+    flex: 1,
+    minHeight: 56,
+    paddingVertical: 6,
+    paddingHorizontal: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3,
+    borderRadius: 30,
+  },
+  icon: { width: 24, height: 24 },
+  label: { fontSize: 11, fontWeight: '500', textAlign: 'center' },
+  selectedLabel: { fontWeight: '700' },
 });

@@ -3,9 +3,11 @@ import { AppState, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Pressable, Text } from './ui';
 import api from '@/services/api';
-import { shop } from '@/constants/shop-theme';
+import { useShopStyles } from '@/components/shop-appearance';
+import { type ShopPalette } from '@/constants/shop-theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 export function InboxUnreadNotice() {
+  const { shop, styles } = useShopStyles(makeStyles);
   const router = useRouter(),
     insets = useSafeAreaInsets();
   const [count, setCount] = useState(0);
@@ -60,7 +62,7 @@ export function InboxUnreadNotice() {
     </View>
   );
 }
-const styles = StyleSheet.create({
+const makeStyles = (shop: ShopPalette) => StyleSheet.create({
   notice: {
     position: 'absolute',
     left: 12,

@@ -13,7 +13,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Pressable, Text, TextInput } from './ui';
 import api from '@/services/api';
-import { shop } from '@/constants/shop-theme';
+import { useShopStyles } from '@/components/shop-appearance';
+import { type ShopPalette } from '@/constants/shop-theme';
 import { getApiMessage } from '@/utils/format';
 
 type Message = {
@@ -24,6 +25,7 @@ type Message = {
   ngay_doc: string | null;
 };
 export default function StoreInbox() {
+  const { shop, styles } = useShopStyles(makeStyles);
   const headerHeight = useHeaderHeight();
   const [messages, setMessages] = useState<Message[]>([]),
     [text, setText] = useState(''),
@@ -300,7 +302,7 @@ export default function StoreInbox() {
     </KeyboardAvoidingView>
   );
 }
-const styles = StyleSheet.create({
+const makeStyles = (shop: ShopPalette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: shop.background },
   header: {
     flexDirection: 'row',
@@ -332,7 +334,7 @@ const styles = StyleSheet.create({
   message: { maxWidth: '88%', padding: 14, borderRadius: 18, gap: 7 },
   mine: {
     alignSelf: 'flex-end',
-    backgroundColor: shop.primary,
+    backgroundColor: shop.action,
     borderBottomRightRadius: 4,
   },
   theirs: {
@@ -367,13 +369,13 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: shop.primary,
+    backgroundColor: shop.action,
   },
   error: {
     padding: 12,
     flexDirection: 'row',
     gap: 12,
-    backgroundColor: '#fff0ee',
+    backgroundColor: shop.dangerSoft,
   },
   link: { color: shop.primary, fontWeight: '600' },
   older: { textAlign: 'center', padding: 12, color: shop.primary },

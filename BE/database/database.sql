@@ -179,6 +179,9 @@ CREATE TABLE don_hang (
 
     ghi_chu TEXT,
     ngay_dat DATETIME DEFAULT CURRENT_TIMESTAMP,
+    ma_tai_khoan_xac_nhan INT NULL,
+    ten_nhan_vien_xac_nhan VARCHAR(100) NULL,
+    ngay_xac_nhan DATETIME NULL,
 
     FOREIGN KEY (ma_tai_khoan)
         REFERENCES tai_khoan(ma_tai_khoan)
@@ -466,22 +469,22 @@ VALUES
 INSERT INTO don_hang
 (ma_tai_khoan, ho_ten_nguoi_nhan, so_dien_thoai,
  dia_chi_giao_hang, tong_tien, phuong_thuc_thanh_toan,
- trang_thai, ghi_chu)
+ trang_thai, ghi_chu, ma_tai_khoan_xac_nhan, ten_nhan_vien_xac_nhan)
 VALUES
 (3, 'Nguyen Duc Huy', '0900000003',
  'Hung Yen - My Hao - Nhan Hoa',
  8990000, 'ThanhToanKhiNhanHang', 'DaGiao',
- 'Giao gio hanh chinh'),
+ 'Giao gio hanh chinh', 2, 'Nguyen Van An'),
 
 (4, 'Tran Thi Ngoc', '0900000004',
  'Ha Noi - Cau Giay',
  7990000, 'ChuyenKhoan', 'DangGiao',
- 'Goi truoc khi giao'),
+ 'Goi truoc khi giao', 2, 'Nguyen Van An'),
 
 (5, 'Le Van Nam', '0900000005',
  'Hai Phong - Le Chan',
  3290000, 'TienMat', 'ChoXacNhan',
- '');
+ '', NULL, NULL);
 
 INSERT INTO chi_tiet_don_hang
 (ma_don_hang, ma_san_pham, ten_san_pham, so_luong, don_gia)

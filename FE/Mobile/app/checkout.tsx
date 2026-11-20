@@ -1,5 +1,6 @@
 import { Pressable, Text, TextInput } from '@/components/ui';
-import { shop, layout, radius, space } from '@/constants/shop-theme';
+import { useShopStyles } from '@/components/shop-appearance';
+import { layout, radius, space, type ShopPalette } from '@/constants/shop-theme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -29,6 +30,7 @@ export default function CheckoutScreen() {
 }
 
 function CheckoutContent({ initialSelection }: { initialSelection: CheckoutSelection }) {
+  const { shop, styles } = useShopStyles(makeStyles);
   const router = useRouter();
   const [selection, setSelection] = useState(initialSelection);
   const [code,setCode]=useState('');
@@ -231,18 +233,18 @@ function CheckoutContent({ initialSelection }: { initialSelection: CheckoutSelec
   </SafeAreaView>;
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (shop: ShopPalette) => StyleSheet.create({
   checkoutSteps: { flexDirection: 'row', gap: space.xs, marginVertical: 8 },
   checkoutStep: { flex: 1, minHeight: 52, padding: 12, borderRadius: 12, flexDirection: 'row', gap: space.xs, alignItems: 'center', backgroundColor: shop.soft },
-  currentStep: { backgroundColor: shop.primary }, stepNumber: { fontSize: 14, color: shop.primary, fontWeight: '700' }, stepLabel: { flex: 1, fontSize: 12, color: shop.primary, fontWeight: '600' },
+  currentStep: { backgroundColor: shop.action }, stepNumber: { fontSize: 14, color: shop.primary, fontWeight: '700' }, stepLabel: { flex: 1, fontSize: 12, color: shop.primary, fontWeight: '600' },
   safe: { flex: 1, backgroundColor: shop.background }, content: { padding: layout.gutter, gap: space.md, width: '100%', maxWidth: 820, alignSelf: 'center', paddingBottom: 40 },
   eyebrow: { color: shop.primary, fontSize: 12, fontWeight: '700', letterSpacing: 2 }, title: { color: shop.ink, fontSize: 28, fontWeight: '700' },
-  card: { backgroundColor: '#fff', borderWidth: 1, borderColor: shop.border, borderRadius: radius.md, padding: layout.gutter, gap: 20 }, sectionTitle: { color: shop.ink, fontSize: 19, fontWeight: '700', flexShrink: 1 },
+  card: { backgroundColor: shop.surface, borderWidth: 1, borderColor: shop.border, borderRadius: radius.md, padding: layout.gutter, gap: 20 }, sectionTitle: { color: shop.ink, fontSize: 19, fontWeight: '700', flexShrink: 1 },
   field: { gap: 7 }, label: { color: shop.ink, fontSize: 13, fontWeight: '700' }, input: { minHeight: 50, paddingHorizontal: 14, borderWidth: 1, borderColor: shop.border, borderRadius: 12, color: shop.ink, fontSize: 15, backgroundColor: shop.surfaceMuted },
-  multiline: { minHeight: 80, paddingTop: 12, textAlignVertical: 'top' }, invalid: { borderColor: shop.danger }, errorText: { color: '#A52D2D', fontSize: 13, lineHeight: 20 }, errorBox: { backgroundColor: '#FBEDEC', padding: space.md, borderRadius: 12 },
+  multiline: { minHeight: 80, paddingTop: 12, textAlignVertical: 'top' }, invalid: { borderColor: shop.danger }, errorText: { color: shop.danger, fontSize: 13, lineHeight: 20 }, errorBox: { backgroundColor: shop.dangerSoft, padding: space.md, borderRadius: 12 },
   muted: { color: shop.muted, fontSize: 13, lineHeight: 21 }, hint: { color: shop.muted, fontSize: 12, lineHeight: 19 }, link: { color: shop.primary, fontSize: 13, fontWeight: '700', paddingVertical: 6 },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm, flexWrap: 'wrap' }, name: { color: shop.ink, fontSize: 14, fontWeight: '700', lineHeight: 21 },
   product: { flexDirection: 'row', gap: space.sm, alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderColor: shop.border, flexWrap: 'wrap' }, image: { width: 56, height: 56, borderRadius: radius.sm }, amount: { color: shop.ink, fontWeight: '700', fontSize: 13 },
   payment: { flexDirection: 'row', gap: space.sm, alignItems: 'center', paddingVertical: 10 }, notice: { padding: 14, backgroundColor: shop.soft, borderRadius: 12, gap: space.xs }, total: { borderTopWidth: 1, borderColor: shop.border, paddingTop: 16 }, totalAmount: { color: shop.primary, fontSize: 24, fontWeight: '700' },
-  button: { minHeight: 54, backgroundColor: shop.primary, borderRadius: 14, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 10, padding: 14 }, buttonText: { color: '#fff', fontWeight: '700', fontSize: 15 }, disabled: { opacity: 0.5 },
+  button: { minHeight: 54, backgroundColor: shop.action, borderRadius: 14, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 10, padding: 14 }, buttonText: { color: '#fff', fontWeight: '700', fontSize: 15 }, disabled: { opacity: 0.5 },
 });

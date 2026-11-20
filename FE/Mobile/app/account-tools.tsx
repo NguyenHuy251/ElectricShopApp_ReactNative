@@ -1,7 +1,8 @@
 import { SectionIntro, Pressable, Text, TextInput } from '@/components/ui';
-import { shop, layout, radius, space } from '@/constants/shop-theme';
+import { useShopStyles } from '@/components/shop-appearance';
+import { layout, radius, space, type ShopPalette } from '@/constants/shop-theme';
 import { authService } from '@/services/auth.service';
-import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { Redirect, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,11 +15,14 @@ type Notification={ma_thong_bao:number;noi_dung:string;ma_don_hang?:number;da_do
 const blank={ho_ten:'',so_dien_thoai:'',dia_chi:'',mac_dinh:false};
 export default function AccountToolsScreen(){
   const {section}=useLocalSearchParams<{section?:string}>();
+  if (section === 'notifications') return <Redirect href="/notifications" />;
   const key = section === 'password' ? 'password' : 'password';
   return <Tools key={key} section={key}/>;
 }
-function ToolsButton({label,action,disabled}:{label:string;action:()=>void;disabled:boolean}){return <Pressable disabled={disabled} style={styles.button} onPress={action}><Text style={styles.buttonText}>{label}</Text></Pressable>;}
+function ToolsButton({label,action,disabled}:{label:string;action:()=>void;disabled:boolean}){
+  const { styles } = useShopStyles(makeStyles);return <Pressable disabled={disabled} style={styles.button} onPress={action}><Text style={styles.buttonText}>{label}</Text></Pressable>;}
 function Tools({section}:{section:string}){
+  const { styles } = useShopStyles(makeStyles);
   const router=useRouter();
   const [rows,setRows]=useState<any[]>([]),[loading,setLoading]=useState(true),[error,setError]=useState(''),[busy,setBusy]=useState(false);
   const [address,setAddress]=useState(blank),[editing,setEditing]=useState<number>();
@@ -58,4 +62,4 @@ function Tools({section}:{section:string}){
     {!rows.length && section!=='password' && !error ? <Text style={styles.text}>Chưa có dữ liệu.</Text> : null}
   </ScrollView></KeyboardAvoidingView></SafeAreaView>;
 }
-const styles=StyleSheet.create({safe:{flex:1,backgroundColor:shop.background},content:{padding: layout.gutter,gap: space.md,maxWidth: layout.maxWidth,width:'100%',alignSelf:'center'},title:{fontSize:24,fontWeight: '700',color:shop.ink},card:{padding: layout.gutter,borderRadius: radius.md,backgroundColor:shop.surface,gap: space.md},text:{color:shop.ink,lineHeight:22},input:{padding:12,borderWidth:1,borderColor:shop.border,borderRadius:12,color:shop.ink},button:{padding:12,backgroundColor:shop.primary,borderRadius:12,alignItems:'center'},buttonText:{color:'#fff',fontWeight:'700'}});
+const makeStyles = (shop: ShopPalette) => StyleSheet.create({safe:{flex:1,backgroundColor:shop.background},content:{padding: layout.gutter,gap: space.md,maxWidth: layout.maxWidth,width:'100%',alignSelf:'center'},title:{fontSize:24,fontWeight: '700',color:shop.ink},card:{padding: layout.gutter,borderRadius: radius.md,backgroundColor:shop.surface,gap: space.md},text:{color:shop.ink,lineHeight:22},input:{padding:12,borderWidth:1,borderColor:shop.border,borderRadius:12,color:shop.ink},button:{padding:12,backgroundColor: shop.action,borderRadius:12,alignItems:'center'},buttonText:{color:'#fff',fontWeight:'700'}});

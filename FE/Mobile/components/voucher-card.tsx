@@ -1,5 +1,6 @@
 import { Pressable, Text } from '@/components/ui';
-import { shop, layout, space } from '@/constants/shop-theme';
+import { useShopStyles } from '@/components/shop-appearance';
+import { layout, space, type ShopPalette } from '@/constants/shop-theme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { StyleSheet, View } from 'react-native';
 import type { CustomerVoucher } from '../services/voucher.service';
@@ -11,6 +12,7 @@ export function VoucherCard({ voucher, selected, disabled, onSelect }: {
   disabled?: boolean;
   onSelect?: () => void;
 }) {
+  const { shop, styles } = useShopStyles(makeStyles);
   const isPercent = voucher.loai === 'PhanTram';
   const discountText = isPercent
     ? `Giảm ${voucher.giam_tien}%`
@@ -62,7 +64,7 @@ export function VoucherCard({ voucher, selected, disabled, onSelect }: {
 
         {voucher.ly_do ? (
           <View style={styles.reasonWrap}>
-            <MaterialIcons name="info-outline" size={14} color="#A52D2D" />
+            <MaterialIcons name="info-outline" size={14} color={shop.danger} />
             <Text style={styles.reasonText}>{voucher.ly_do}</Text>
           </View>
         ) : null}
@@ -101,10 +103,10 @@ export function VoucherCard({ voucher, selected, disabled, onSelect }: {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (shop: ShopPalette) => StyleSheet.create({
   card: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: shop.surface,
     borderRadius: 18,
     borderWidth: 1,
     borderColor: shop.border,
@@ -119,11 +121,11 @@ const styles = StyleSheet.create({
   selectedCard: {
     borderColor: shop.primary,
     borderWidth: 1.5,
-    backgroundColor: '#FAFCFA',
+    backgroundColor: shop.surface,
   },
   cardDisabled: {
     opacity: 0.85,
-    backgroundColor: '#FAFBF9',
+    backgroundColor: shop.surface,
   },
   couponStub: {
     width: 64,
@@ -136,10 +138,10 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
   },
   stubDiscount: {
-    backgroundColor: '#EAF8F0',
+    backgroundColor: shop.successSoft,
   },
   stubFreeship: {
-    backgroundColor: '#EAF5FF',
+    backgroundColor: shop.infoSoft,
   },
   stubLabel: {
     fontSize: 11,
@@ -176,10 +178,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   badgePublic: {
-    backgroundColor: '#EDF5EB',
+    backgroundColor: shop.soft,
   },
   badgePrivate: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: shop.warningSoft,
   },
   badgeText: {
     fontSize: 12,
@@ -190,7 +192,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 8,
-    backgroundColor: '#D7F0E4',
+    backgroundColor: shop.successSoft,
   },
   badgeQtyText: {
     fontSize: 12,
@@ -204,7 +206,7 @@ const styles = StyleSheet.create({
   },
   descText: {
     fontSize: 12,
-    color: '#556B80',
+    color: shop.muted,
     lineHeight: 17,
   },
   conditionRow: {
@@ -220,13 +222,13 @@ const styles = StyleSheet.create({
   dot: {
     display: 'none',
     fontSize: 12,
-    color: '#BAC6BF',
+    color: shop.border,
   },
   reasonWrap: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    backgroundColor: '#FEF2F2',
+    backgroundColor: shop.dangerSoft,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
@@ -234,7 +236,7 @@ const styles = StyleSheet.create({
   },
   reasonText: {
     fontSize: 12,
-    color: '#A52D2D',
+    color: shop.danger,
     fontWeight: '600',
     flex: 1,
   },
@@ -246,15 +248,15 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   buttonNormal: {
-    backgroundColor: shop.primary,
+    backgroundColor: shop.action,
   },
   buttonSelected: {
-    backgroundColor: '#EAF8F0',
+    backgroundColor: shop.successSoft,
     borderWidth: 1,
     borderColor: shop.primary,
   },
   buttonDisabled: {
-    backgroundColor: '#E5ECE7',
+    backgroundColor: shop.border,
   },
   buttonText: {
     color: '#fff',

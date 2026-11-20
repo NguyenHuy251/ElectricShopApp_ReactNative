@@ -14,7 +14,7 @@ test('checkout transactions against an isolated MySQL database', { skip: process
     await admin.query(`USE \`${database}\``);
     const schema = await readFile(new URL('../database/database.sql', import.meta.url), 'utf8');
     await admin.query(schema.slice(schema.indexOf('CREATE TABLE tai_khoan'), schema.indexOf('INSERT INTO tai_khoan')));
-    const productSchema = await readFile(new URL('../database/upgrade_product_management_migration_fixed.sql', import.meta.url), 'utf8');
+    const productSchema = schema;
     for (const table of ['nhom_thong_so','thong_so','danh_muc_thong_so','thong_so_san_pham']) {
       const definition = productSchema.match(new RegExp('CREATE TABLE ' + table + ' \\([\\s\\S]*?ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'))?.[0];
       assert.ok(definition); await admin.query(definition);
@@ -44,11 +44,18 @@ test('checkout transactions against an isolated MySQL database', { skip: process
       assert.ok(start >= 0); await admin.query(schema.slice(start,schema.indexOf('$$',start)));
     }
     await migrateLocal();
+    await admin.query('ALTER TABLE don_hang ADD COLUMN ma_nhan_vien INT NULL');
+    const { migrateVouchers } = await import('../scripts/migrate-vouchers.mjs');
+    await migrateVouchers();
+    await admin.query(`CREATE TABLE voucher_su_dung (
+      ma_don_hang INT PRIMARY KEY,ma_voucher INT NOT NULL,ma_tai_khoan INT NOT NULL,
+      code VARCHAR(40) NOT NULL,tam_tinh DECIMAL(15,2),tien_giam DECIMAL(15,2),hoan_luot BOOLEAN NOT NULL DEFAULT 0)`);
     const { createDonHang, previewCheckout } = await import('../dist/controllers/checkout.controller.js');
     const { cancelDonHang, getDonHangById } = await import('../dist/controllers/donHang.controller.js');
     const { addToCart, updateCartItem, selectCartVariant } = await import('../dist/controllers/gioHang.controller.js');
     const response = () => ({ statusCode: 200, body: null, status(code) { this.statusCode = code; return this; }, json(body) { this.body = body; return this; } });
     const user = id => ({ ma_tai_khoan: id, vai_tro: 'KhachHang' });
+    await admin.query("INSERT INTO tai_khoan (ma_tai_khoan,ten_dang_nhap,mat_khau,ho_ten,vai_tro) VALUES (900001,'order-admin','unused','Order Admin','Admin')");
     const invoke = async (fn, req) => { const res = response(); await fn(req, res); return res; };
     await admin.query("INSERT INTO tai_khoan (ma_tai_khoan, ten_dang_nhap, mat_khau, ho_ten) VALUES (1, 'test1', 'unused', 'Test One'), (2, 'test2', 'unused', 'Test Two'); INSERT INTO danh_muc (ma_danh_muc, ten_danh_muc) VALUES (1, 'Test'); INSERT INTO thuong_hieu (ma_thuong_hieu, ten_thuong_hieu) VALUES (1, 'Test'); INSERT INTO san_pham (ma_san_pham, ma_danh_muc, ma_thuong_hieu, ma_san_pham_code, ten_san_pham, gia_ban, so_luong) VALUES (1, 1, 1, 'TEST', 'Test product', 100000, 10); INSERT INTO gio_hang (ma_gio_hang, ma_tai_khoan) VALUES (1, 1), (2, 2)");
     const reset = async () => admin.query("DELETE FROM checkout_requests; DELETE FROM chi_tiet_don_hang; DELETE FROM don_hang; DELETE FROM chi_tiet_gio_hang; DELETE FROM san_pham_bien_the; INSERT IGNORE INTO gio_hang (ma_gio_hang,ma_tai_khoan) VALUES (1,1),(2,2); UPDATE san_pham SET so_luong = 10, gia_ban = 100000, trang_thai = 'DangBan'; INSERT INTO chi_tiet_gio_hang (ma_gio_hang,ma_san_pham,so_luong) VALUES (1, 1, 2)");
@@ -191,9 +198,13 @@ test('checkout transactions against an isolated MySQL database', { skip: process
       await reset();
       const {updateTrangThaiDonHang,confirmOrderReceipt}=await import('../dist/controllers/donHang.controller.js');
       const order=await invoke(createDonHang,{user:user(1),body:await direct()});const id=order.body.data.ma_don_hang;
-      const set=state=>invoke(updateTrangThaiDonHang,{params:{id},body:{trang_thai:state}});
+      const set=state=>invoke(updateTrangThaiDonHang,{params:{id},body:{trang_thai:state},user:{ma_tai_khoan:900001,vai_tro:'Admin'}});
       assert.equal((await set('DaGiao')).statusCode,409);
       assert.equal((await set('DaXacNhan')).statusCode,200);
+      const confirmed = (await invoke(getDonHangById,{user:user(1),params:{id}})).body.data;
+      assert.equal(confirmed.ma_tai_khoan_xac_nhan,900001);
+      assert.equal(confirmed.ten_nhan_vien_xac_nhan,'Order Admin');
+      assert.ok(confirmed.ngay_xac_nhan);
       assert.equal((await invoke(cancelDonHang,{user:user(1),params:{id}})).statusCode,400);
       assert.equal((await invoke(confirmOrderReceipt,{user:user(1),params:{id}})).statusCode,409);
       assert.equal((await set('DangGiao')).statusCode,200);assert.equal((await set('DaGiao')).statusCode,409);
@@ -201,6 +212,7 @@ test('checkout transactions against an isolated MySQL database', { skip: process
       const receipts=await Promise.all([1,2].map(()=>invoke(confirmOrderReceipt,{user:user(1),params:{id}})));
       assert.deepEqual(receipts.map(r=>r.statusCode),[200,200]);
       assert.equal((await admin.query('SELECT trang_thai FROM don_hang WHERE ma_don_hang=?',[id]))[0][0].trang_thai,'DaGiao');
+      assert.equal((await admin.query('SELECT ma_tai_khoan_xac_nhan FROM don_hang WHERE ma_don_hang=?',[id]))[0][0].ma_tai_khoan_xac_nhan,900001);
       assert.equal((await set('DaHuy')).statusCode,409);assert.equal(await stock(),9);
       await reset();
       await admin.query("DELETE FROM chi_tiet_gio_hang; INSERT INTO san_pham_bien_the (ma_bien_the,ma_san_pham,ma_sku,ten_bien_the,gia_ban,so_luong) VALUES (101,1,'TEST-A','A',120000,3)");
@@ -208,7 +220,7 @@ test('checkout transactions against an isolated MySQL database', { skip: process
       const quote=(await invoke(previewCheckout,{user:user(1),query:selection})).body.data;
       const created=await invoke(createDonHang,{user:user(1),body:{...await payload(),...selection,snapshot:quote.snapshot}});
       const variantOrder=created.body.data.ma_don_hang;
-      for(const state of ['DaXacNhan','DangGiao','DaHuy'])assert.equal((await invoke(updateTrangThaiDonHang,{params:{id:variantOrder},body:{trang_thai:state}})).statusCode,200);
+      for(const state of ['DaXacNhan','DangGiao','DaHuy'])assert.equal((await invoke(updateTrangThaiDonHang,{params:{id:variantOrder},body:{trang_thai:state},user:{ma_tai_khoan:900001,vai_tro:'Admin'}})).statusCode,200);
       assert.equal((await invoke(updateTrangThaiDonHang,{params:{id:variantOrder},body:{trang_thai:'DaHuy'}})).statusCode,409);
       assert.equal(await stock(),10);assert.equal((await admin.query('SELECT so_luong FROM san_pham_bien_the WHERE ma_bien_the=101'))[0][0].so_luong,3);
     });

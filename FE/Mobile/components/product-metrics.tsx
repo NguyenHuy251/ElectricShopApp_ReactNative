@@ -1,10 +1,12 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { StyleSheet, View } from 'react-native';
 import { Text } from '@/components/ui';
-import { shop, space, typography } from '@/constants/shop-theme';
+import { useShopStyles } from '@/components/shop-appearance';
+import { space, typography, type ShopPalette } from '@/constants/shop-theme';
 import type { Product } from '@/types';
 
 export function ProductMetrics({ product, compact = false }: { product: Product; compact?: boolean }) {
+  const { shop, styles } = useShopStyles(makeStyles);
   const count = Number(product.so_luong_danh_gia || 0);
   const rating = Number(product.diem_danh_gia);
   const hasRating = count > 0 && Number.isFinite(rating) && rating >= 1 && rating <= 5;
@@ -20,7 +22,7 @@ export function ProductMetrics({ product, compact = false }: { product: Product;
   </View>;
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (shop: ShopPalette) => StyleSheet.create({
   container: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: space.md, rowGap: space.xxs, marginTop: space.xs },
   compact: { flexDirection: 'column', alignItems: 'flex-start', gap: space.xxs },
   rating: { flexDirection: 'row', alignItems: 'center', gap: space.xxs, flexShrink: 1 },
