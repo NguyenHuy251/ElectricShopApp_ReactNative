@@ -1,9 +1,10 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { Tabs, type BottomTabBarProps } from 'expo-router/js-tabs';
+import { BottomTabBarHeightCallbackContext, Tabs, type BottomTabBarProps } from 'expo-router/js-tabs';
 import { useLinkBuilder } from 'expo-router/react-navigation';
 import { SymbolView, type SFSymbol } from 'expo-symbols';
-import { useEffect, useState, type ComponentProps } from 'react';
+import { useContext, useEffect, useState, type ComponentProps } from 'react';
 import { Animated, Easing, I18nManager, Platform, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { Text } from '@/components/ui';
@@ -21,10 +22,15 @@ const artwork: Record<string, TabArtwork> = {
   profile: { ios: ['person.crop.circle', 'person.crop.circle.fill'], fallback: ['account-circle-outline', 'account-circle'] },
 };
 
+function dockBottomSpacing(inset: number) {
+  return Math.max(12, inset + 4);
+}
+
 function FloatingTabBar({ state, descriptors, emitter, navigateToTab, insets }: BottomTabBarProps) {
   const { shop, styles } = useShopStyles(makeStyles);
   const { buildHref } = useLinkBuilder();
   const reducedMotion = useReducedMotion();
+  const reportHeight = useContext(BottomTabBarHeightCallbackContext);
   const [width, setWidth] = useState(0);
   const [selection] = useState(() => new Animated.Value(state.index));
 
@@ -51,11 +57,15 @@ function FloatingTabBar({ state, descriptors, emitter, navigateToTab, insets }: 
   });
 
   return (
-    <View style={[styles.frame, {
-      paddingLeft: Math.max(14, insets.left),
-      paddingRight: Math.max(14, insets.right),
-      paddingBottom: Math.max(10, insets.bottom),
-    }]}>
+    <View
+      pointerEvents="box-none"
+      onLayout={({ nativeEvent }) => reportHeight?.(nativeEvent.layout.height)}
+      style={[styles.frame, {
+        paddingLeft: Math.max(14, insets.left),
+        paddingRight: Math.max(14, insets.right),
+        paddingBottom: dockBottomSpacing(insets.bottom),
+      }]}
+    >
       <View style={styles.dock}>
         <View role="tablist" style={styles.row} onLayout={({ nativeEvent }) => setWidth(nativeEvent.layout.width)}>
           {tabWidth > 0 && (
@@ -111,10 +121,16 @@ function FloatingTabBar({ state, descriptors, emitter, navigateToTab, insets }: 
 
 export default function TabLayout() {
   const { shop } = useShopAppearance();
+  const insets = useSafeAreaInsets();
   return (
     <Tabs
       tabBar={(props) => <FloatingTabBar {...props} />}
-      screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: shop.background } }}
+      screenOptions={{
+        headerShown: false,
+        sceneStyle: { backgroundColor: shop.background },
+        // Use the minimum dock height until the floating bar reports its layout.
+        tabBarStyle: { height: 66 + dockBottomSpacing(insets.bottom) },
+      }}
     >
       <Tabs.Screen name="index" options={{ title: 'Trang chủ' }} />
       <Tabs.Screen name="products" options={{ title: 'Sản phẩm' }} />
@@ -126,9 +142,12 @@ export default function TabLayout() {
 
 const makeStyles = (shop: ShopPalette) => StyleSheet.create({
   frame: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1,
     alignItems: 'center',
-    backgroundColor: shop.background,
-    paddingTop: 8,
   },
   dock: {
     width: '100%',
@@ -141,6 +160,7 @@ const makeStyles = (shop: ShopPalette) => StyleSheet.create({
     borderColor: shop.dockBorder,
     backgroundColor: shop.dock,
     boxShadow: shop.dockShadow,
+    ...Platform.select({ web: { backdropFilter: 'blur(14px)' } }),
   },
   row: { flexDirection: 'row', position: 'relative' },
   selection: {

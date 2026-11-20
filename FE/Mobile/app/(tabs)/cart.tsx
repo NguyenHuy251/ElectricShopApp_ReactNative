@@ -3,6 +3,7 @@ import { useShopStyles } from '@/components/shop-appearance';
 import { layout, radius, space, type ShopPalette } from '@/constants/shop-theme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useFocusEffect, useRouter } from 'expo-router';
+import { useBottomTabBarHeight } from 'expo-router/js-tabs';
 import { useCallback, useRef, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,6 +16,7 @@ import { formatCurrency, getApiMessage } from '@/utils/format';
 
 export default function CartScreen() {
   const { shop, styles } = useShopStyles(makeStyles);
+  const dockHeight = useBottomTabBarHeight();
   const router = useRouter();
   const [items, setItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,7 +70,10 @@ export default function CartScreen() {
     finally { busy.current = false; setUpdating(false); }
   };
   return <SafeAreaView style={styles.safe} edges={['top']}>
-    <ScrollView contentContainerStyle={styles.content} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); void loadCart(); }} />}>
+    <ScrollView
+      contentContainerStyle={[styles.content, { paddingBottom: dockHeight + space.md }]}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); void loadCart(); }} />}
+    >
       <ScreenHeading eyebrow="GIỎ HÀNG CỦA BẠN" title="Sắp về với tổ ấm" subtitle="Kiểm tra sản phẩm rồi tiếp tục đến bước thanh toán." action={<TabHeaderActions />} />
       {error ? <View accessibilityRole="alert" style={styles.errorBox}><Text style={styles.error}>{error}</Text><Pressable onPress={loadCart}><Text style={styles.link}>Tải lại giỏ hàng</Text></Pressable></View> : null}
       {loading ? <LoadingState message="Đang tải giỏ hàng..." /> : !items.length ? <EmptyState icon="shopping-bag" title="Giỏ hàng chờ bạn chọn" action="Khám phá sản phẩm" onAction={() => router.push('/products')} /> : <>
@@ -95,8 +100,7 @@ export default function CartScreen() {
         </View>)}
 
       </>}
-    </ScrollView>
-    {items.length > 0 ? (<View style={styles.summary}>
+      {items.length > 0 ? (<View style={styles.summary}>
           <View style={styles.summaryTop}><Text style={styles.name}>Tạm tính ({items.reduce((sum, item) => sum + item.so_luong, 0)} sản phẩm)</Text>
           <Text style={styles.total}>{formatCurrency(total)}</Text></View>
           <Text style={styles.muted}>Phí giao hàng và ưu đãi được tính ở bước thanh toán.</Text>
@@ -105,16 +109,17 @@ export default function CartScreen() {
             <Text style={styles.buttonText}>{updating ? 'Đang cập nhật...' : 'Tiến hành thanh toán'}</Text><MaterialIcons name="arrow-forward" color="#fff" size={20} />
           </Pressable>
         </View>) : null}
+    </ScrollView>
   </SafeAreaView>;
 }
 
 const makeStyles = (shop: ShopPalette) => StyleSheet.create({
   summaryTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: space.xs, flexWrap: 'wrap' },
-  safe: { flex: 1, backgroundColor: shop.background }, content: { paddingHorizontal: layout.gutter, paddingTop: 12, paddingBottom: 30, width: '100%', maxWidth: layout.maxWidth, alignSelf: 'center' },
+  safe: { flex: 1, backgroundColor: shop.background }, content: { flexGrow: 1, paddingHorizontal: layout.gutter, paddingTop: 12, width: '100%', maxWidth: layout.maxWidth, alignSelf: 'center' },
   item: { flexDirection: 'row', gap: space.sm, alignItems: 'flex-start', padding: space.md, borderRadius: radius.md, backgroundColor: shop.surface, marginBottom: 12, borderWidth: 1, borderColor: shop.border },
   image: { width: 70, height: 70, borderRadius: 12 }, info: { flex: 1, gap: 6 }, name: { color: shop.ink, fontWeight: '700', fontSize: 14 }, price: { color: shop.primary, fontWeight: '700' },
   quantity: { flexDirection: 'row', alignItems: 'center', gap: 14, marginTop: 4 }, qtyButton: { width: 44, minHeight: 44, backgroundColor: shop.surfaceMuted, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   error: { color: shop.danger, fontSize: 13, lineHeight: 20 }, errorBox: { backgroundColor: shop.dangerSoft, padding: space.md, borderRadius: 12, marginBottom: 12 }, link: { color: shop.primary, paddingTop: 10, fontWeight: '700' },
-  summary: { backgroundColor: shop.surface, padding: layout.gutter, gap: space.sm, borderTopWidth: 1, borderColor: shop.border, maxWidth: layout.maxWidth, width: '100%', alignSelf: 'center' }, total: { color: shop.primary, fontSize: 26, fontWeight: '700' }, muted: { color: shop.muted, lineHeight: 22, fontSize: 13 },
+  summary: { backgroundColor: shop.surface, padding: layout.gutter, gap: space.sm, borderWidth: 1, borderColor: shop.border, borderRadius: radius.md, marginTop: 'auto' }, total: { color: shop.primary, fontSize: 26, fontWeight: '700' }, muted: { color: shop.muted, lineHeight: 22, fontSize: 13 },
   button: { minHeight: 54, backgroundColor: shop.action, borderRadius: 14, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 10 }, buttonText: { color: '#fff', fontWeight: '700', fontSize: 15 },
 });

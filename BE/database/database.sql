@@ -27,6 +27,16 @@ CREATE TABLE tai_khoan (
     ngay_tao DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE dia_chi_giao_hang (
+    ma_dia_chi INT AUTO_INCREMENT PRIMARY KEY,
+    ma_tai_khoan INT NOT NULL,
+    ho_ten VARCHAR(100) NOT NULL,
+    so_dien_thoai VARCHAR(15) NOT NULL,
+    dia_chi VARCHAR(255) NOT NULL,
+    mac_dinh BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (ma_tai_khoan) REFERENCES tai_khoan(ma_tai_khoan) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- =========================================================
 -- 2. NHAN VIEN
 -- =========================================================

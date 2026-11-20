@@ -1,6 +1,7 @@
 import { listVouchers, createVoucher, setVoucherActive, customerVouchers, grantVoucherToUser, claimVoucherByCode } from '../services/voucher.service.js';
 import { voucherCode } from '../services/pricing.service.js';
 import { Router, type RequestHandler, type Response } from 'express';
+import type { PoolConnection, RowDataPacket } from 'mysql2/promise';
 import { pool } from '../config/database.js';
 import { authenticate, type AuthRequest } from '../middleware/auth.middleware.js';
 import { authorizePermission } from '../middleware/role.middleware.js';
@@ -28,37 +29,88 @@ const text = (value: unknown, min: number, max: number) => {
   return value.trim();
 };
 
-router.get('/addresses', run(async (req, res) => {
-  const [rows] = await pool.query('SELECT * FROM dia_chi_giao_hang WHERE ma_tai_khoan = ? ORDER BY mac_dinh DESC, ma_dia_chi DESC', [req.user!.ma_tai_khoan]);
-  return sendSuccess(res, 'Sổ địa chỉ', rows);
-}));
-const saveAddress = run(async (req, res) => {
-  const name = text(req.body.ho_ten,2,100), phone = text(req.body.so_dien_thoai,10,15).replace(/^\+84/,'0'), address = text(req.body.dia_chi,10,255);
-  if (!/^0[35789]\d{8}$/.test(phone)) throw new CheckoutError(400, 'Số điện thoại không hợp lệ.');
+interface AddressRow extends RowDataPacket {
+  ma_dia_chi: number;
+  mac_dinh: number;
+}
+
+async function listAddresses(db: typeof pool | PoolConnection, accountId: number) {
+  const [rows] = await db.query<AddressRow[]>(
+    'SELECT * FROM dia_chi_giao_hang WHERE ma_tai_khoan = ? ORDER BY mac_dinh DESC, ma_dia_chi DESC', [accountId],
+  );
+  return rows;
+}
+
+async function changeAddresses(accountId: number, change: (connection: PoolConnection, rows: AddressRow[]) => Promise<void>) {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
-    // Account lock serializes default-address changes, including the first address.
-    await connection.query('SELECT ma_tai_khoan FROM tai_khoan WHERE ma_tai_khoan = ? FOR UPDATE',[req.user!.ma_tai_khoan]);
-    if (req.params.id) {
-      const [rows] = await connection.query('SELECT ma_dia_chi FROM dia_chi_giao_hang WHERE ma_dia_chi = ? AND ma_tai_khoan = ?', [id(req.params.id),req.user!.ma_tai_khoan]);
-      if (!(rows as unknown[]).length) throw new CheckoutError(404,'Địa chỉ không tồn tại.');
-    }
-    const [existing] = await connection.query('SELECT ma_dia_chi FROM dia_chi_giao_hang WHERE ma_tai_khoan = ?',[req.user!.ma_tai_khoan]);
-    if (!req.params.id && (existing as unknown[]).length >= 20) throw new CheckoutError(409, 'Tối đa 20 địa chỉ.');
-    const isDefault = req.body.mac_dinh === true || !(existing as unknown[]).length;
-    if (isDefault) await connection.execute('UPDATE dia_chi_giao_hang SET mac_dinh = FALSE WHERE ma_tai_khoan = ?',[req.user!.ma_tai_khoan]);
-    if (req.params.id) await connection.execute('UPDATE dia_chi_giao_hang SET ho_ten=?,so_dien_thoai=?,dia_chi=?,mac_dinh=? WHERE ma_dia_chi=? AND ma_tai_khoan=?',[name,phone,address,isDefault,id(req.params.id),req.user!.ma_tai_khoan]);
-    else await connection.execute('INSERT INTO dia_chi_giao_hang (ma_tai_khoan,ho_ten,so_dien_thoai,dia_chi,mac_dinh) VALUES (?,?,?,?,?)',[req.user!.ma_tai_khoan,name,phone,address,isDefault]);
+    // Serialize address writes even when the account has no address yet.
+    await connection.query('SELECT ma_tai_khoan FROM tai_khoan WHERE ma_tai_khoan = ? FOR UPDATE', [accountId]);
+    await change(connection, await listAddresses(connection, accountId));
     await connection.commit();
-    return sendSuccess(res,'Đã lưu địa chỉ',null);
-  } catch (error) {await connection.rollback();throw error;} finally {connection.release();}
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+
+async function setDefaultAddress(connection: PoolConnection, accountId: number, addressId: number) {
+  await connection.execute('UPDATE dia_chi_giao_hang SET mac_dinh = (ma_dia_chi = ?) WHERE ma_tai_khoan = ?', [addressId, accountId]);
+}
+
+router.get('/addresses', run(async (req, res) => {
+  return sendSuccess(res, 'Sổ địa chỉ', await listAddresses(pool, req.user!.ma_tai_khoan));
+}));
+
+const saveAddress = run(async (req, res) => {
+  const accountId = req.user!.ma_tai_khoan;
+  const addressId = req.params.id === undefined ? undefined : id(req.params.id);
+  const name = text(req.body?.ho_ten, 2, 100);
+  const phone = text(req.body?.so_dien_thoai, 10, 20).replace(/[\s().-]/g, '').replace(/^\+84/, '0');
+  const address = text(req.body?.dia_chi, 10, 255);
+  if (!/^0[35789]\d{8}$/.test(phone)) throw new CheckoutError(400, 'Số điện thoại không hợp lệ.');
+
+  await changeAddresses(accountId, async (connection, rows) => {
+    const current = rows.find(row => row.ma_dia_chi === addressId);
+    if (addressId !== undefined && !current) throw new CheckoutError(404, 'Địa chỉ không tồn tại.');
+    if (addressId === undefined && rows.length >= 20) throw new CheckoutError(409, 'Tối đa 20 địa chỉ.');
+    const isDefault = req.body?.mac_dinh === true || Boolean(current?.mac_dinh) || !rows.some(row => row.mac_dinh);
+
+    if (isDefault) await connection.execute('UPDATE dia_chi_giao_hang SET mac_dinh = FALSE WHERE ma_tai_khoan = ?', [accountId]);
+    if (addressId === undefined) {
+      await connection.execute('INSERT INTO dia_chi_giao_hang (ma_tai_khoan, ho_ten, so_dien_thoai, dia_chi, mac_dinh) VALUES (?, ?, ?, ?, ?)', [accountId, name, phone, address, isDefault]);
+    } else {
+      await connection.execute('UPDATE dia_chi_giao_hang SET ho_ten = ?, so_dien_thoai = ?, dia_chi = ?, mac_dinh = ? WHERE ma_dia_chi = ? AND ma_tai_khoan = ?', [name, phone, address, isDefault, addressId, accountId]);
+    }
+  });
+  return sendSuccess(res, 'Đã lưu địa chỉ', null);
 });
-router.post('/addresses',saveAddress);
-router.put('/addresses/:id',saveAddress);
-router.delete('/addresses/:id',run(async(req,res)=>{
-  await pool.execute('DELETE FROM dia_chi_giao_hang WHERE ma_dia_chi=? AND ma_tai_khoan=?',[id(req.params.id),req.user!.ma_tai_khoan]);
-  return sendSuccess(res,'Đã xóa địa chỉ',null);
+router.post('/addresses', saveAddress);
+router.put('/addresses/:id', saveAddress);
+router.put('/addresses/:id/default', run(async (req, res) => {
+  const accountId = req.user!.ma_tai_khoan;
+  const addressId = id(req.params.id);
+  await changeAddresses(accountId, async (connection, rows) => {
+    if (!rows.some(row => row.ma_dia_chi === addressId)) throw new CheckoutError(404, 'Địa chỉ không tồn tại.');
+    await setDefaultAddress(connection, accountId, addressId);
+  });
+  return sendSuccess(res, 'Đã đặt địa chỉ mặc định', null);
+}));
+router.delete('/addresses/:id', run(async (req, res) => {
+  const accountId = req.user!.ma_tai_khoan;
+  const addressId = id(req.params.id);
+  await changeAddresses(accountId, async (connection, rows) => {
+    if (!rows.some(row => row.ma_dia_chi === addressId)) return;
+    const remaining = rows.filter(row => row.ma_dia_chi !== addressId);
+    await connection.execute('DELETE FROM dia_chi_giao_hang WHERE ma_dia_chi = ? AND ma_tai_khoan = ?', [addressId, accountId]);
+    if (remaining.length && !remaining.some(row => row.mac_dinh)) {
+      await setDefaultAddress(connection, accountId, remaining[0].ma_dia_chi);
+    }
+  });
+  return sendSuccess(res, 'Đã xóa địa chỉ', null);
 }));
 
 router.get('/notifications', run(async(req,res)=>{

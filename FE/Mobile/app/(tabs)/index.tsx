@@ -2,6 +2,7 @@ import { Pressable, Text } from '@/components/ui';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Link, useFocusEffect } from 'expo-router';
+import { useBottomTabBarHeight } from 'expo-router/js-tabs';
 import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,6 +19,7 @@ import { getCategoryIcon } from '@/constants/category-icons';
 
 export default function HomeScreen() {
   const { shop, styles } = useShopStyles(makeStyles);
+  const dockHeight = useBottomTabBarHeight();
   const categoryColors = [shop.infoSoft, shop.warningSoft, shop.violetSoft, shop.successSoft];
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -50,7 +52,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: dockHeight + space.md }]} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View style={{ flex: 1 }}>
             <View style={styles.brandRow}><View style={styles.brandBolt}><MaterialIcons name="bolt" size={21} color={shop.primary} /></View><Text style={styles.eyebrow}>ElectricShop</Text></View>
@@ -183,7 +185,7 @@ const makeStyles = (shop: ShopPalette) => StyleSheet.create({
   applianceSmall: { position: 'absolute', bottom: 0, left: 0, width: 70, height: 79, borderRadius: 14, borderWidth: 1, borderColor: shop.border, backgroundColor: '#254962', alignItems: 'center', justifyContent: 'center', transform: [{ rotate: '-8deg' }] },
   sceneDot: { position: 'absolute', width: 9, height: 9, backgroundColor: shop.accent, borderRadius: 5, left: 3, top: 15 },
   safeArea: { flex: 1, backgroundColor: shop.background },
-  content: { paddingHorizontal: layout.gutter, paddingBottom: 28, width: '100%', maxWidth: layout.maxWidth, alignSelf: 'center' },
+  content: { paddingHorizontal: layout.gutter, width: '100%', maxWidth: layout.maxWidth, alignSelf: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm, paddingTop: 20, paddingBottom: 22 },
   eyebrow: { color: shop.ink, fontSize: 22, fontWeight: '700', letterSpacing: -0.8 },
   heading: { color: shop.muted, fontSize: 12, marginTop: 8 },
@@ -208,8 +210,8 @@ const makeStyles = (shop: ShopPalette) => StyleSheet.create({
   category: { alignItems: 'center', width: 72 },
   categoryIcon: { width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center' },
   categoryLabel: { color: shop.ink, fontSize: 12, fontWeight: '600', textAlign: 'center', marginTop: 10 },
-  productRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
-  productCell: { width: '48%', flexGrow: 1, maxWidth: '49%' },
+  productRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.xs },
+  productCell: { width: '47%', flexGrow: 1, maxWidth: '49%' },
   bottomBanner: { backgroundColor: shop.soft, padding: layout.gutter, borderRadius: 22, flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 24 },
   bottomTitle: { color: shop.ink, fontSize: 14, fontWeight: '700' },
   bottomText: { color: shop.muted, fontSize: 12, marginTop: 5 },

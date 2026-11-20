@@ -14,6 +14,7 @@ export const lightShop = {
   success: '#28704E', warning: '#98601A', info: '#386C98',
   surfaceMuted: '#F0F3F0',
   action: '#126B60',
+  productPrice: '#A93E1C',
   inverseSurface: '#172B2A',
   inverseAccent: '#DCECC4',
   successSoft: '#EAF8F0',
@@ -22,7 +23,7 @@ export const lightShop = {
   infoSoft: '#EAF5FF',
   violet: '#7C3AED',
   violetSoft: '#F2EEFF',
-  dock: '#FDFFFE',
+  dock: 'rgba(253, 255, 254, 0.88)',
   dockBorder: '#ECF1ED',
   dockShadow: '0 5px 18px rgba(23, 43, 42, 0.10), 0 1px 3px rgba(23, 43, 42, 0.06)',
 };
@@ -45,6 +46,7 @@ export const darkShop: ShopPalette = {
   info: '#9BCFF4',
   surfaceMuted: '#202F2B',
   action: '#176C60',
+  productPrice: '#FFAD88',
   inverseSurface: '#142E29',
   inverseAccent: '#C9EAB3',
   successSoft: '#213C30',
@@ -53,7 +55,7 @@ export const darkShop: ShopPalette = {
   infoSoft: '#233746',
   violet: '#D3B8FF',
   violetSoft: '#362C48',
-  dock: '#1B2A26',
+  dock: 'rgba(27, 42, 38, 0.90)',
   dockBorder: '#3A5047',
   dockShadow: '0 5px 18px rgba(0, 0, 0, 0.28), 0 1px 3px rgba(0, 0, 0, 0.18)',
 };

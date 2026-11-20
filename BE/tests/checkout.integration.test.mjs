@@ -276,12 +276,30 @@ test('checkout transactions against an isolated MySQL database', { skip: process
         return {status:r.status,body:await r.json()};
       };
       try {
-        const address={ho_ten:'Test Customer',so_dien_thoai:'0912345678',dia_chi:'12 Nguyen Trai, Ha Noi',mac_dinh:true};
-        assert.equal((await request('/addresses',1,'POST',address)).status,200);
-        const addressId=(await request('/addresses')).body.data[0].ma_dia_chi;
-        assert.equal((await request(`/addresses/${addressId}`,2,'PUT',address)).status,404);
-        await request(`/addresses/${addressId}`,2,'DELETE');
-        assert.equal((await request('/addresses')).body.data.length,1);
+        const address = { ho_ten: 'Test Customer', so_dien_thoai: '+84 912 345 678', dia_chi: '12 Nguyen Trai, Ha Noi', mac_dinh: false };
+        const otherAddress = { ...address, dia_chi: '15 Le Loi, Ha Noi' };
+        const created = await Promise.all([
+          request('/addresses', 1, 'POST', address),
+          request('/addresses', 1, 'POST', otherAddress),
+        ]);
+        assert.deepEqual(created.map(result => result.status), [200, 200]);
+        const [primary, secondary] = (await request('/addresses')).body.data;
+        assert.deepEqual([primary.mac_dinh, secondary.mac_dinh], [1, 0]);
+        assert.equal(primary.so_dien_thoai, '0912345678');
+        assert.equal((await request(`/addresses/${primary.ma_dia_chi}`, 2, 'PUT', address)).status, 404);
+        assert.equal((await request(`/addresses/${secondary.ma_dia_chi}/default`, 2, 'PUT')).status, 404);
+        await request(`/addresses/${primary.ma_dia_chi}`, 2, 'DELETE');
+        assert.deepEqual((await request('/addresses', 2)).body.data, []);
+        assert.equal((await request(`/addresses/${primary.ma_dia_chi}`, 1, 'PUT', { ...address, ho_ten: 'Edited recipient' })).status, 200);
+        const afterEdit = (await request('/addresses')).body.data;
+        assert.equal(afterEdit[0].ho_ten, 'Edited recipient');
+        assert.equal(afterEdit[0].mac_dinh, 1);
+        assert.equal((await request(`/addresses/${secondary.ma_dia_chi}/default`, 1, 'PUT')).status, 200);
+        const afterSwitch = (await request('/addresses')).body.data;
+        assert.deepEqual(afterSwitch.map(row => [row.ma_dia_chi, row.mac_dinh]), [[secondary.ma_dia_chi, 1], [primary.ma_dia_chi, 0]]);
+        assert.equal((await request(`/addresses/${secondary.ma_dia_chi}`, 1, 'DELETE')).status, 200);
+        const afterDelete = (await request('/addresses')).body.data;
+        assert.deepEqual(afterDelete.map(row => [row.ma_dia_chi, row.mac_dinh]), [[primary.ma_dia_chi, 1]]);
         const notifications=(await request('/notifications',1)).body.data;
         assert.ok(notifications.length>0);
         await request(`/notifications/${notifications[0].ma_thong_bao}/read`,2,'PUT');

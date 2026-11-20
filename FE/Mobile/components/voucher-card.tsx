@@ -19,6 +19,7 @@ export function VoucherCard({ voucher, selected, disabled, onSelect }: {
     : `Giảm ${formatCurrency(voucher.giam_tien)}`;
   const capText = voucher.giam_toi_da != null ? ` (Tối đa ${formatCurrency(voucher.giam_toi_da)})` : '';
   const isFreeship = voucher.ma_code.includes('FREESHIP');
+  const canUseVoucher = voucher.co_the_dung;
 
   return (
     <View style={[styles.card, selected && styles.selectedCard, !voucher.co_the_dung && styles.cardDisabled]}>
@@ -79,11 +80,11 @@ export function VoucherCard({ voucher, selected, disabled, onSelect }: {
             style={[
               styles.button,
               selected ? styles.buttonSelected : styles.buttonNormal,
-              (disabled || !voucher.co_the_dung) && styles.buttonDisabled,
+              !canUseVoucher && styles.buttonUnavailable,
             ]}
           >
-            <Text style={[styles.buttonText, selected && styles.buttonTextSelected]}>
-              {selected ? 'Đang áp dụng' : 'Áp dụng mã'}
+            <Text style={[styles.buttonText, selected && styles.buttonTextSelected, !canUseVoucher && styles.buttonTextUnavailable]}>
+              {selected ? 'Đang áp dụng' : canUseVoucher ? 'Áp dụng mã' : 'Chưa đủ điều kiện'}
             </Text>
           </Pressable>
         ) : (
@@ -255,8 +256,8 @@ const makeStyles = (shop: ShopPalette) => StyleSheet.create({
     borderWidth: 1,
     borderColor: shop.primary,
   },
-  buttonDisabled: {
-    backgroundColor: shop.border,
+  buttonUnavailable: {
+    backgroundColor: shop.surfaceMuted,
   },
   buttonText: {
     color: '#fff',
@@ -265,6 +266,9 @@ const makeStyles = (shop: ShopPalette) => StyleSheet.create({
   },
   buttonTextSelected: {
     color: shop.primary,
+  },
+  buttonTextUnavailable: {
+    color: shop.ink,
   },
   statusFooter: {
     flexDirection: 'row',

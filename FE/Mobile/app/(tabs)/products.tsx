@@ -10,12 +10,14 @@ import { categoryService, type Category } from '../../services/category.service'
 import type { Product } from '../../types';
 import { EmptyState, LoadingState, ProductCard, ScreenHeading } from '@/components/shop-ui';
 import { TabHeaderActions } from '@/components/tab-header-actions';
+import { useBottomTabBarHeight } from 'expo-router/js-tabs';
 import { useShopStyles } from '@/components/shop-appearance';
 import { layout, radius, space, type ShopPalette } from '@/constants/shop-theme';
 import { getApiMessage } from '@/utils/format';
 
 export default function ProductsScreen() {
   const { shop, styles } = useShopStyles(makeStyles);
+  const dockHeight = useBottomTabBarHeight();
   const { category, categoryId } = useLocalSearchParams<{ category?: string; categoryId?: string }>();
   const router = useRouter();
   const setSelectedCategory = (value: number) => router.setParams({ categoryId: value ? String(value) : undefined, category: undefined });
@@ -157,7 +159,7 @@ export default function ProductsScreen() {
             numColumns={2}
             columnWrapperStyle={styles.row}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
-            contentContainerStyle={visibleProducts.length ? styles.list : styles.emptyList}
+            contentContainerStyle={[!visibleProducts.length && styles.emptyList, { paddingBottom: dockHeight + space.md }]}
             ListHeaderComponent={visibleProducts.length ? <Text style={styles.resultCount}>{total} sản phẩm dành cho bạn</Text> : undefined}
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={<EmptyState icon="search-off" title="Chưa tìm thấy sản phẩm" message="Thử từ khóa khác hoặc xem tất cả danh mục." action="Xem tất cả" onAction={() => { setSearch(''); setSelectedCategory(0); }} />}
@@ -174,7 +176,7 @@ const makeStyles = (shop: ShopPalette) => StyleSheet.create({
   filterToggleText: { color: shop.primary, fontSize: 13, fontWeight: '700', flex: 1 },
   filterCount: { color: shop.muted, fontSize: 12 },
   resultCount: { color: shop.muted, fontSize: 13, marginBottom: 16, marginTop: 8 },
-  productCell: { flex: 1, maxWidth: '49%', marginBottom: 14 },
+  productCell: { flex: 1, maxWidth: '49%', marginBottom: space.xs },
   safe: { flex: 1, backgroundColor: shop.background },
   container: { flex: 1, paddingHorizontal: layout.gutter, paddingTop: 12, width: '100%', maxWidth: layout.maxWidth, alignSelf: 'center' },
   searchBox: { minHeight: 54, flexDirection: 'row', alignItems: 'center', gap: space.sm, backgroundColor: shop.surface, borderRadius: radius.md, borderWidth: 1, borderColor: shop.border, paddingHorizontal: 16 },
@@ -188,7 +190,6 @@ const makeStyles = (shop: ShopPalette) => StyleSheet.create({
   chipActive: { backgroundColor: shop.action, borderColor: shop.primary },
   chipText: { color: shop.muted, fontSize: 12, fontWeight: '700' },
   chipTextActive: { color: '#fff' },
-  list: { paddingBottom: 24 },
   emptyList: { flexGrow: 1, alignItems: 'center', justifyContent: 'center' },
-  row: { gap: space.sm },
+  row: { gap: space.xs },
 });

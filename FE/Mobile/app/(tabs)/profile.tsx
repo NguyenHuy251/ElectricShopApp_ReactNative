@@ -3,19 +3,23 @@ import { useShopStyles } from '@/components/shop-appearance';
 import { layout, radius, space, type ShopPalette } from '@/constants/shop-theme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useFocusEffect, useRouter } from 'expo-router';
+import { useBottomTabBarHeight } from 'expo-router/js-tabs';
 import { useCallback, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LoadingState, ScreenHeading } from '@/components/shop-ui';
 import { TabHeaderActions } from '@/components/tab-header-actions';
+import { addressService } from '@/services/address.service';
 import { authService } from '../../services/auth.service';
 import type { User } from '../../types';
 import { getApiMessage, getInitials } from '../../utils/format';
 
 export default function ProfileScreen() {
   const { shop, styles } = useShopStyles(makeStyles);
+  const dockHeight = useBottomTabBarHeight();
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
+  const [defaultAddressText, setDefaultAddressText] = useState('Đang tải địa chỉ...');
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -39,8 +43,16 @@ export default function ProfileScreen() {
   }, []);
 
   useFocusEffect(useCallback(() => {
+    let active = true;
     setLoading(true);
-    loadProfile();
+    setDefaultAddressText('Đang tải địa chỉ...');
+    void loadProfile();
+    void addressService.list().then(addresses => {
+      if (active) setDefaultAddressText(addresses.find(address => address.mac_dinh)?.dia_chi || 'Chưa có địa chỉ mặc định');
+    }).catch(() => {
+      if (active) setDefaultAddressText('Chưa tải được địa chỉ mặc định');
+    });
+    return () => { active = false; };
   }, [loadProfile]));
 
   const updateField = (key: keyof typeof form, value: string) => {
@@ -75,7 +87,7 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <KeyboardAvoidingView style={styles.keyboard} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.container, { paddingBottom: dockHeight + space.md }]} showsVerticalScrollIndicator={false}>
         <ScreenHeading
           eyebrow="GÓC RIÊNG CỦA BẠN"
           title="Xin chào, bạn!"
@@ -85,13 +97,20 @@ export default function ProfileScreen() {
 
         {loading ? <LoadingState message="Đang tải tài khoản..." /> : <>
         {user ? (
-          <View style={styles.card}>
+          <View testID="profile-info" style={styles.card}>
             <View style={styles.avatar}><Text style={styles.avatarText}>{getInitials(user.ho_ten)}</Text></View>
             <View style={styles.profileInfo}>
               <Text style={styles.memberLabel}>THÀNH VIÊN ELECTRIC SHOP</Text>
               <Text style={styles.name}>{user.ho_ten}</Text>
               <Text style={styles.meta}>{user.email}</Text>
               <Text style={styles.meta}>{user.so_dien_thoai || 'Chưa có số điện thoại'}</Text>
+            </View>
+            <View style={styles.defaultAddress}>
+              <MaterialIcons name="location-on" size={21} color={shop.primary} />
+              <View style={styles.defaultAddressDetails}>
+                <Text style={styles.defaultAddressLabel}>Địa chỉ giao hàng mặc định</Text>
+                <Text style={styles.defaultAddressText}>{defaultAddressText}</Text>
+              </View>
             </View>
             <Pressable accessibilityLabel="Chỉnh sửa thông tin tài khoản" onPress={() => setEditing(true)} style={styles.editButton}>
               <MaterialIcons name="edit" size={20} color={shop.ink} />
@@ -137,6 +156,9 @@ export default function ProfileScreen() {
 
         <Text style={styles.menuLabel}>MUA SẮM & GIAO NHẬN</Text>
         <View style={styles.menu}>
+          <Pressable accessibilityLabel="Sổ địa chỉ" style={styles.menuItem} onPress={() => router.push('/addresses')}>
+            <MaterialIcons name="location-on" size={22} color={shop.primary} /><Text style={styles.menuText}>Sổ địa chỉ</Text><MaterialIcons name="chevron-right" size={23} color={shop.muted} />
+          </Pressable>
           <Pressable accessibilityRole="button" accessibilityLabel="Voucher của tôi" style={styles.menuItem} onPress={() => router.push('/vouchers')}>
             <MaterialIcons name="local-offer" size={22} color={shop.primary} /><Text style={styles.menuText}>Voucher của tôi</Text><MaterialIcons name="chevron-right" size={23} color={shop.muted} />
           </Pressable>
@@ -160,10 +182,6 @@ export default function ProfileScreen() {
             <Text style={styles.menuText}>Nhắn tin với cửa hàng</Text>
             <MaterialIcons name="chevron-right" size={23} color={shop.muted} />
           </Pressable>
-          <View style={styles.menuItem}>
-            <MaterialIcons name="location-on" size={22} color={shop.primary} />
-            <Text style={styles.menuText}>{user?.dia_chi || 'Chưa có địa chỉ giao hàng'}</Text>
-          </View>
         </View>
 
         <Text style={styles.menuLabel}>QUÀ TẶNG & GIỚI THIỆU</Text>
@@ -226,6 +244,10 @@ const makeStyles = (shop: ShopPalette) => StyleSheet.create({
   profileInfo: { alignItems: 'center', gap: 4 },
   name: { color: shop.ink, fontSize: 24, fontWeight: '700', textAlign: 'center' },
   meta: { color: shop.muted, fontSize: 14, marginTop: 4, textAlign: 'center' },
+  defaultAddress: { alignSelf: 'stretch', flexDirection: 'row', alignItems: 'flex-start', gap: space.xs, padding: space.sm, backgroundColor: shop.soft, borderRadius: radius.sm },
+  defaultAddressDetails: { flex: 1, minWidth: 0, gap: space.xxs },
+  defaultAddressLabel: { color: shop.primary, fontSize: 12, lineHeight: 18, fontWeight: '700' },
+  defaultAddressText: { color: shop.ink, fontSize: 14, lineHeight: 20 },
   menu: { backgroundColor: shop.surface, borderRadius: radius.md, marginTop: 12, overflow: 'hidden' },
   menuItem: { minHeight: 64, flexDirection: 'row', alignItems: 'center', gap: space.md, paddingHorizontal: 18, borderBottomWidth: 1, borderBottomColor: shop.border },
   menuText: { color: shop.ink, fontSize: 14, fontWeight: '700', flex: 1 },

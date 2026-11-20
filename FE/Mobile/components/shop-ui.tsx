@@ -29,18 +29,34 @@ export function ProductImage({ uri, style }: { uri?: string | null; style?: Styl
 
 export function ProductCard({ product }: { product: Product }) {
   const { shop, styles } = useShopStyles(makeStyles);
-  return <Link href={{ pathname: '/product/[id]', params: { id: String(product.ma_san_pham) } }} asChild>
-    <Pressable accessibilityLabel={`Xem ${product.ten_san_pham}`} accessibilityRole="button" style={styles.product} android_ripple={{ color: shop.soft }}>
-      <View style={styles.imageWrap}><ProductImage uri={product.hinh_anh} style={styles.productImage} /><View style={styles.productArrow}><MaterialIcons name="north-east" size={16} color={shop.ink} /></View></View>
-      <View style={styles.productCopy}>
-        <Text numberOfLines={1} style={styles.productCategory}>{product.ten_thuong_hieu || product.ten_danh_muc || 'ĐIỆN GIA DỤNG'}</Text>
-        <Text numberOfLines={2} style={styles.productName}>{product.ten_san_pham}</Text>
-        <Text style={styles.price}>{formatCurrency(product.gia_ban)}</Text>
-        <ProductMetrics product={product} compact />
-        <View style={styles.stockRow}><View style={[styles.dot, Number(product.so_luong) <= 0 && { backgroundColor: shop.danger }]} /><Text style={styles.stock}>{Number(product.so_luong) > 0 ? 'Có sẵn' : 'Hết hàng'}</Text></View>
-      </View>
-    </Pressable>
-  </Link>;
+  const metadata = product.ten_thuong_hieu || product.ten_danh_muc;
+  const warranty = Number(product.bao_hanh);
+  const inStock = Number(product.so_luong) > 0 && product.trang_thai !== 'HetHang' && product.trang_thai !== 'NgungBan';
+  const badgeLabel = inStock ? (warranty > 0 ? `Bảo hành ${warranty} tháng` : 'Có sẵn') : (product.trang_thai === 'NgungBan' ? 'Ngừng bán' : 'Hết hàng');
+
+  return (
+    <Link href={{ pathname: '/product/[id]', params: { id: String(product.ma_san_pham) } }} asChild>
+      <Pressable accessibilityLabel={`Xem ${product.ten_san_pham}`} accessibilityRole="button" style={styles.product} android_ripple={{ color: shop.soft }}>
+        <View style={styles.imageWrap}>
+          <ProductImage uri={product.hinh_anh} style={styles.productImage} />
+          <View style={[styles.productBadge, !inStock && styles.unavailableBadge]}>
+            <MaterialIcons name={inStock ? 'check-circle-outline' : 'inventory-2'} size={13} color={inStock ? shop.primary : shop.danger} />
+            <Text style={[styles.badgeLabel, !inStock && styles.unavailableLabel]}>{badgeLabel}</Text>
+          </View>
+        </View>
+        <View style={styles.productCopy}>
+          <View style={styles.productHeading}>
+            {metadata ? <Text numberOfLines={1} style={styles.productCategory}>{metadata}</Text> : null}
+            <Text numberOfLines={2} style={styles.productName}>{product.ten_san_pham}</Text>
+          </View>
+          <View>
+            <Text style={styles.price}>{formatCurrency(product.gia_ban)}</Text>
+            <ProductMetrics product={product} compact />
+          </View>
+        </View>
+      </Pressable>
+    </Link>
+  );
 }
 
 export function EmptyState({ icon, title, message, action, onAction }: { icon: IconName; title: string; message?: string; action?: string; onAction?: () => void }) {
@@ -60,17 +76,21 @@ const makeStyles = (shop: ShopPalette) => StyleSheet.create({
   title: { ...typography.heading, color: shop.ink, marginTop: space.xs },
   subtitle: { ...typography.body, color: shop.muted, marginTop: space.xxs },
   headingIcon: { width: 48, height: 48, borderRadius: radius.lg, borderWidth: 1, borderColor: shop.border, backgroundColor: shop.surface, alignItems: 'center', justifyContent: 'center' },
-  product: { flex: 1, overflow: 'hidden', borderRadius: 18, backgroundColor: shop.surface, borderWidth: 1, borderColor: shop.border, ...cardShadow },
-  imageWrap: { backgroundColor: shop.surfaceMuted, overflow: 'hidden' },
-  productImage: { width: '100%', aspectRatio: 1.05 },
-  productArrow: { position: 'absolute', right: 8, bottom: 8, width: 28, height: 28, borderRadius: 14, backgroundColor: shop.surface, justifyContent: 'center', alignItems: 'center' },
-  productCopy: { padding: 14, gap: 2 },
-  productCategory: { color: shop.muted, fontSize: 12, fontWeight: '700', letterSpacing: 0.8, textTransform: 'uppercase' },
-  productName: { color: shop.ink, fontSize: 14, fontWeight: '700', lineHeight: 21, minHeight: 42, marginTop: 6 },
-  price: { color: shop.ink, fontSize: 18, fontWeight: '700', marginTop: 12, letterSpacing: -0.4 },
-  stockRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 8 },
-  dot: { width: 5, height: 5, borderRadius: 3, backgroundColor: shop.action },
-  stock: { color: shop.muted, fontSize: 12 },
+  product: { flex: 1, overflow: 'hidden', borderRadius: 12, backgroundColor: shop.surface, borderWidth: 1, borderColor: shop.border, ...cardShadow },
+  imageWrap: { backgroundColor: shop.surfaceMuted, borderBottomWidth: 1, borderColor: shop.border, overflow: 'hidden' },
+  productImage: { width: '100%', aspectRatio: 1 },
+  productBadge: {
+    position: 'absolute', start: 6, bottom: 6, maxWidth: '92%', flexDirection: 'row', alignItems: 'center', gap: space.xxs,
+    paddingVertical: space.xxs, paddingHorizontal: 6, borderRadius: radius.sm, backgroundColor: shop.soft,
+  },
+  unavailableBadge: { backgroundColor: shop.dangerSoft },
+  badgeLabel: { color: shop.primary, fontSize: 11, lineHeight: 14, fontWeight: '700', flexShrink: 1 },
+  unavailableLabel: { color: shop.danger },
+  productCopy: { flex: 1, justifyContent: 'space-between', padding: 10, gap: space.xs },
+  productHeading: { gap: 3 },
+  productCategory: { color: shop.muted, fontSize: 11, lineHeight: 15, fontWeight: '600' },
+  productName: { color: shop.ink, fontSize: 14, fontWeight: '600', lineHeight: 19, minHeight: 38 },
+  price: { color: shop.productPrice, fontSize: 19, fontWeight: '800', letterSpacing: -0.4 },
   imageFallback: { alignItems: 'center', justifyContent: 'center', backgroundColor: shop.soft, gap: space.xs },
   fallbackText: { color: shop.muted, fontSize: 12, letterSpacing: 1 },
   empty: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 48, paddingHorizontal: layout.gutter, gap: 14 },

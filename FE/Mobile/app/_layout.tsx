@@ -100,6 +100,7 @@ function ShopNavigation() {
             options={{ title: 'Chi tiết đơn hàng' }}
           />
           <Stack.Screen name="checkout" options={{ title: 'Thanh toán' }} />
+          <Stack.Screen name="addresses" options={{ title: 'Sổ địa chỉ' }} />
           <Stack.Screen
             name="checkout-success"
             options={{ title: 'Đơn hàng của bạn', headerBackVisible: false }}
