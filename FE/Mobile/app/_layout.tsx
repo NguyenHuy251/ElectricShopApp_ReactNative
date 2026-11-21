@@ -18,6 +18,7 @@ import { CustomerChatbot } from '@/components/customer-chatbot';
 import { InboxUnreadNotice } from '@/components/inbox-unread-notice';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { NotificationProvider } from '@/components/notification-provider';
+import { CartProvider } from '@/components/cart-provider';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -34,6 +35,7 @@ function ShopNavigation() {
   const reducedMotion = useReducedMotion();
   const segments = useSegments();
   const routeGroup = segments[0];
+  const customerRoutes = Boolean(routeGroup && routeGroup !== '(auth)');
 
   useEffect(() => {
     let active = true;
@@ -63,9 +65,9 @@ function ShopNavigation() {
   return (
     <NotificationProvider
       key={routeGroup === '(auth)' ? 'guest' : 'customer'}
-      enabled={Boolean(routeGroup && routeGroup !== '(auth)')}
+      enabled={customerRoutes}
     >
-      <ThemeProvider
+      <CartProvider enabled={customerRoutes}><ThemeProvider
         value={{
           ...navigationTheme,
           colors: {
@@ -138,7 +140,7 @@ function ShopNavigation() {
           </>
         ) : null}
         <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-      </ThemeProvider>
+      </ThemeProvider></CartProvider>
     </NotificationProvider>
   );
 }

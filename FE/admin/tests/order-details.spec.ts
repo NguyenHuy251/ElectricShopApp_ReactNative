@@ -29,11 +29,14 @@ test('confirming a pending order reloads the confirmer from the server', async (
     await route.fulfill({ json: { success: true, data: mock.data['don-hang'][0] } });
   });
   await page.goto('/orders');
+  const orderLink = page.getByRole('link', { name: 'Đơn hàng', exact: true });
+  await expect(orderLink).toHaveAccessibleDescription('1 đơn chờ xác nhận');
   await page.getByRole('button', { name: 'Cập nhật đơn 10', exact: true }).click();
   await page.getByRole('combobox', { name: 'Đổi trạng thái đơn 10' }).click();
   await page.locator('.ant-select-item-option').filter({ hasText: 'Đã xác nhận' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Xác nhận', exact: true }).click();
   await expect(page.getByRole('cell', { name: 'Người xác nhận hiện tại', exact: true })).toBeVisible();
+  await expect(orderLink.locator('.nav-pending')).toHaveCount(0);
 });
 
 test('staff with orders permission can inspect each ordered variant without catalog permission', async ({ page }) => {

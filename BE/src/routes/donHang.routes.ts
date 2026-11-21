@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { cancelDonHang, confirmOrderReceipt, createDonHang, deleteDonHang, getDonHang, getDonHangById, updateTrangThaiDonHang } from '../controllers/donHang.controller.js';
+import { cancelDonHang, confirmOrderReceipt, createDonHang, deleteDonHang, getDonHang, getDonHangById, getPendingOrderCount, updateTrangThaiDonHang } from '../controllers/donHang.controller.js';
 import { authenticate } from '../middleware/auth.middleware.js';
 import { authorize, authorizePermission } from '../middleware/role.middleware.js';
 import { previewCheckout } from '../controllers/checkout.controller.js';
@@ -9,6 +9,7 @@ router.get('/checkout', authenticate, authorize('Admin', 'NhanVien', 'KhachHang'
 
 router.post('/', authenticate, authorize('Admin', 'NhanVien', 'KhachHang'), createDonHang);
 router.get('/', authenticate, authorize('Admin', 'NhanVien', 'KhachHang'), getDonHang);
+router.get('/pending-count', authenticate, authorizePermission('orders'), getPendingOrderCount);
 router.get('/:id', authenticate, authorize('Admin', 'NhanVien', 'KhachHang'), getDonHangById);
 router.put('/:id/trang-thai', authenticate, authorizePermission('orders'), updateTrangThaiDonHang);
 router.put('/:id/huy', authenticate, authorize('KhachHang'), cancelDonHang);

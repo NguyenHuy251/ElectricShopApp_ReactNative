@@ -1,10 +1,12 @@
 import { useCallback, useDeferredValue, useMemo, useRef, useState } from 'react';
 import { Alert, App, Button, Descriptions, Drawer, Empty, Form, Image, Input, Select, Space, Table, Tooltip } from 'antd';
 import { DeleteOutlined, EditOutlined, EyeOutlined, ReloadOutlined } from '@ant-design/icons';
+import { useOutletContext } from 'react-router-dom';
 import Modal from '../components/FormModal';
 import PageHeading from '../components/PageHeading';
 import { orderApi } from '../api/order.api';
 import { useLoad } from '../hooks/useLoad';
+import type { RefreshPendingCount } from '../hooks/usePendingCounts';
 import LoadError from '../components/LoadError';
 import { errorMessage } from '../utils/errors';
 import { dateTime, labels, money, options, Status } from '../utils/format';
@@ -16,6 +18,7 @@ function confirmationLabel(order: Order) {
 }
 export default function OrdersPage() {
   const { message, modal } = App.useApp();
+  const refreshPendingCount = useOutletContext<RefreshPendingCount>();
   const result = useLoad(useCallback(() => orderApi.list(), []));
   const [search, setSearch] = useState(''); const [status, setStatus] = useState<string>(); const [page, setPage] = useState(1);
   const [detail, setDetail] = useState<Order | null>(null); const [busy, setBusy] = useState(false); const lock = useRef(false);
@@ -24,7 +27,7 @@ export default function OrdersPage() {
   const nextStatus = Form.useWatch('trang_thai', statusForm);
   const run = async (action: () => Promise<unknown>, success?: string) => {
     if (lock.current) throw new Error('Đang xử lý'); lock.current = true; setBusy(true);
-    try { await action(); if (success) { message.success(success); await result.reload(); } }
+    try { await action(); if (success) { refreshPendingCount('orders'); message.success(success); await result.reload(); } }
     catch (e) { message.error(errorMessage(e)); throw e; } finally { lock.current = false; setBusy(false); }
   };
   const deferredSearch = useDeferredValue(search).toLocaleLowerCase('vi');

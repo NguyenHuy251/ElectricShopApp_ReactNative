@@ -28,9 +28,11 @@ test('all four tabs share the header actions and remember the appearance prefere
   const darkButton = page.getByRole('button', { name: 'Bật giao diện tối' });
   const lightButton = page.getByRole('button', { name: 'Bật giao diện sáng' });
   const bell = page.getByRole('link', { name: 'Mở thông báo, 4 cập nhật chưa đọc', exact: true });
+  const badge = bell.getByText('4', { exact: true }).locator('..');
   const greeting = page.getByRole('heading', { name: 'Xin chào, bạn!' });
   await expect(darkButton).toBeInViewport({ ratio: 1, timeout: 30000 });
   await expect(bell).toBeInViewport({ ratio: 1 });
+  await expect(badge).toHaveCSS('background-color', 'rgb(220, 38, 38)');
   expect((await darkButton.boundingBox())!.x).toBeLessThan((await bell.boundingBox())!.x);
   await expect(greeting).toHaveCSS('color', 'rgb(23, 43, 42)');
   const coin = page.getByTestId('wallet-coin');
@@ -47,6 +49,7 @@ test('all four tabs share the header actions and remember the appearance prefere
     await expect(bell).toBeInViewport({ ratio: 1 });
     await expect(darkButton).toHaveCount(1);
     await expect(bell).toHaveCount(1);
+    await expect(badge).toHaveCSS('background-color', 'rgb(220, 38, 38)');
     const box = (await bell.boundingBox())!;
     expect(Math.abs(box.x - position.x)).toBeLessThan(1);
     expect(Math.abs(box.y - position.y)).toBeLessThan(1);
@@ -58,6 +61,7 @@ test('all four tabs share the header actions and remember the appearance prefere
   await expect(lightButton).toBeVisible();
   await expect(greeting).toHaveCSS('color', 'rgb(240, 246, 242)');
   await expect(bell).toHaveCSS('background-color', 'rgb(25, 37, 34)');
+  await expect(badge).toHaveCSS('background-color', 'rgb(220, 38, 38)');
   await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(16, 25, 23)');
   await page.screenshot({ path: testInfo.outputPath('profile-dark.png') });
 

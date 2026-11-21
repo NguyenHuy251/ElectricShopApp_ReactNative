@@ -17,6 +17,7 @@ test('actual management routes enforce staff group permissions including deletio
     if (sql.includes('token_version')) return [[{ma_tai_khoan:5,ten_dang_nhap:'staff',vai_tro:'NhanVien',trang_thai:'HoatDong'}]];
     if (sql.includes('staff_permissions')) return [[{permissions}]];
     writes++;
+    if (sql.includes("FROM don_hang WHERE trang_thai = 'ChoXacNhan'")) return [[{ count: '24' }]];
     if (sql.includes('sp_thuong_hieu_get_by_id')) return [[[{ma_thuong_hieu:1}]]];
     return [[[]]];
   };
@@ -29,6 +30,12 @@ test('actual management routes enforce staff group permissions including deletio
     const request = (path, method = 'GET') => fetch(`http://127.0.0.1:${server.address().port}/api/${path}`,{method,headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},...(method==='POST'||method==='PUT'?{body:'{}'}:{})});
     for (const [path, method] of [['san-pham/1','DELETE'],['products/1','DELETE'],['danh-muc/1','DELETE'],['thuong-hieu/1','DELETE'],['specifications/1','DELETE'],['don-hang/1','DELETE'],['don-hang/1/trang-thai','PUT'],['lien-he/1','DELETE'],['danh-gia','GET'],['dashboard','GET'],['shop/reports','GET'],['shop/inventory','POST'],['shop/vouchers','POST'],['uploads','POST']]) assert.equal((await request(path,method)).status,403,`${method} ${path}`);
     assert.equal(writes,0);
+    assert.equal((await request('don-hang/pending-count')).status, 403);
+    assert.equal(writes, 0);
+    permissions = ['orders'];
+    const pending = await request('don-hang/pending-count');
+    assert.equal(pending.status, 200);
+    assert.deepEqual((await pending.json()).data, { count: 24 });
     permissions=['catalog'];
     assert.equal((await request('thuong-hieu/1','DELETE')).status,200);
     assert.ok(writes>0);

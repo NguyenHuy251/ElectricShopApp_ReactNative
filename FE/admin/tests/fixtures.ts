@@ -13,7 +13,7 @@ export async function mockApi(page: Page, role = 'Admin', authenticated = true, 
     'lien-he': [{ ma_lien_he: 6, ho_ten: 'Khách mẫu', email: 'customer@example.test', tieu_de: 'Hỏi bảo hành', noi_dung: 'Nội dung liên hệ đầy đủ', trang_thai: 'ChoPhanHoi', ngay_gui: '2026-09-01' }],
   };
   const keys: Record<string, string> = { 'danh-muc': 'ma_danh_muc', 'thuong-hieu': 'ma_thuong_hieu', 'san-pham': 'ma_san_pham', 'tai-khoan': 'ma_tai_khoan', 'nhan-vien': 'ma_nhan_vien', 'don-hang': 'ma_don_hang', 'danh-gia': 'ma_danh_gia', 'lien-he': 'ma_lien_he' };
-  const requests: { resource: string; method: string; body: Record<string, unknown>; search: string }[] = [];
+  const requests: { resource: string; path: string; method: string; body: Record<string, unknown>; search: string }[] = [];
   let expired = false;
   await page.addInitScript((hasToken: boolean) => { if (hasToken) localStorage.setItem('admin_token', 'mock-token'); }, authenticated);
   await page.route('**/api/**', async route => {
@@ -21,10 +21,12 @@ export async function mockApi(page: Page, role = 'Admin', authenticated = true, 
     if (!url.pathname.startsWith('/api/')) return route.fallback();
     const [resource, id, child] = url.pathname.replace('/api/', '').split('/');
     const method = route.request().method(); const body = route.request().postDataJSON() || {};
-    requests.push({ resource, method, body, search: url.search });
+    requests.push({ resource, path: url.pathname, method, body, search: url.search });
     const reply = (value: unknown, pagination?: unknown) => route.fulfill({ json: { success: true, data: value, pagination } });
     if (expired) return route.fulfill({ status: 401, json: { message: 'Phiên đăng nhập đã hết hạn' } });
     if (resource === 'auth') return reply(id === 'login' ? { token: 'mock-token', user } : user);
+    if (id === 'pending-count' && resource === 'don-hang') return reply({ count: data['don-hang'].filter(order => order.trang_thai === 'ChoXacNhan').length });
+    if (id === 'pending-count' && resource === 'inbox') return reply({ count: 0 });
     if (resource === 'inbox') return reply(id === 'threads' && !child ? [] : {messages:[],hasMore:false});
     if (resource === 'permissions') {
       if (method === 'PUT') { const account = data['tai-khoan'].find(account => Number(account.ma_tai_khoan) === Number(id)); if (account) account.permissions = body.permissions; return reply(account); }

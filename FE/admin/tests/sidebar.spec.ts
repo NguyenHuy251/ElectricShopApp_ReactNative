@@ -21,6 +21,7 @@ test('sidebar toggles content width and the mobile drawer remains available', as
   await page.getByRole('button', { name: 'Mở menu', exact: true }).click();
   const drawer = page.getByRole('dialog');
   await expect(drawer.getByRole('link', { name: 'Đơn hàng', exact: true })).toBeVisible();
+  await expect(drawer.getByRole('link', { name: 'Đơn hàng', exact: true })).toHaveAccessibleDescription('1 đơn chờ xác nhận');
   await drawer.getByRole('link', { name: 'Đơn hàng', exact: true }).click();
   await expect(drawer).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'Đơn hàng', exact: true })).toBeVisible();

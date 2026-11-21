@@ -1,9 +1,10 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Link, useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
+import { CountBadge } from '@/components/count-badge';
 import { useNotifications } from '@/components/notification-provider';
-import { Pressable, Text } from '@/components/ui';
+import { Pressable } from '@/components/ui';
 import { useShopStyles } from '@/components/shop-appearance';
 import { type ShopPalette } from '@/constants/shop-theme';
 
@@ -21,11 +22,7 @@ export function NotificationBell() {
         style={styles.button}
       >
         <MaterialIcons name="notifications-none" size={25} color={shop.ink} />
-        {unread > 0 && (
-          <View aria-hidden style={styles.badge}>
-            <Text style={styles.badgeText}>{unread > 99 ? '99+' : unread}</Text>
-          </View>
-        )}
+        <CountBadge count={unread} />
       </Pressable>
     </Link>
   );
@@ -42,19 +39,4 @@ const makeStyles = (shop: ShopPalette) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  badge: {
-    position: 'absolute',
-    right: -3,
-    top: -3,
-    minWidth: 20,
-    height: 20,
-    borderRadius: 15,
-    backgroundColor: shop.action,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 4,
-    borderWidth: 2,
-    borderColor: shop.background,
-  },
-  badgeText: { color: '#fff', fontSize: 11, fontWeight: '700' },
 });

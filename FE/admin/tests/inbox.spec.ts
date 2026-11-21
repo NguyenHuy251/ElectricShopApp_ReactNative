@@ -12,6 +12,13 @@ test('seller inbox supports conversation drafts, retry identity, receipts and cu
       ngay_gui: '2026-11-17T10:00:00Z',
       ngay_doc: null,
     },
+    {
+      ma_tin_nhan: '2',
+      ben_gui: 'KhachHang',
+      noi_dung: 'Shop có thể kiểm tra giúp không?',
+      ngay_gui: '2026-11-17T10:00:30Z',
+      ngay_doc: null,
+    },
   ];
   let fail = true;
   const sent: any[] = [];
@@ -20,27 +27,30 @@ test('seller inbox supports conversation drafts, retry identity, receipts and cu
       path = url.pathname,
       method = route.request().method(),
       data = route.request().postDataJSON();
-    if (path.endsWith('/threads'))
+    const waitingForReply = messages.at(-1)?.ben_gui === 'KhachHang';
+    if (path.endsWith('/pending-count'))
+      return route.fulfill({ json: { data: { count: waitingForReply ? 2 : 1 } } });
+    if (path.endsWith('/threads')) {
+      const customerA = {
+        ma_tai_khoan: 2,
+        ho_ten: 'Khách A',
+        ten_dang_nhap: 'customer-a',
+        noi_dung: messages.at(-1)?.noi_dung,
+        ben_gui: messages.at(-1)?.ben_gui,
+        chua_doc: waitingForReply ? 2 : 0,
+      };
+      const customerB = {
+        ma_tai_khoan: 4,
+        ho_ten: 'Khách B',
+        ten_dang_nhap: 'customer-b',
+        noi_dung: 'Hỏi đơn hàng',
+        ben_gui: 'KhachHang',
+        chua_doc: 0,
+      };
       return route.fulfill({
-        json: {
-          data: [
-            {
-              ma_tai_khoan: 2,
-              ho_ten: 'Khách A',
-              ten_dang_nhap: 'customer-a',
-              noi_dung: 'Cần tư vấn bảo hành',
-              chua_doc: 1,
-            },
-            {
-              ma_tai_khoan: 4,
-              ho_ten: 'Khách B',
-              ten_dang_nhap: 'customer-b',
-              noi_dung: 'Hỏi đơn hàng',
-              chua_doc: 0,
-            },
-          ],
-        },
+        json: { data: waitingForReply ? [customerA, customerB] : [customerB, customerA] },
       });
+    }
     if (method === 'POST' && !path.endsWith('/read')) {
       sent.push(data);
       if (fail)
@@ -49,7 +59,7 @@ test('seller inbox supports conversation drafts, retry identity, receipts and cu
           json: { message: 'Chưa gửi được tin' },
         });
       messages.push({
-        ma_tin_nhan: '2',
+        ma_tin_nhan: '3',
         ben_gui: 'CuaHang',
         noi_dung: data.noi_dung,
         ngay_gui: '2026-11-17T10:01:00Z',
@@ -72,10 +82,17 @@ test('seller inbox supports conversation drafts, retry identity, receipts and cu
     });
   });
   await page.goto('/contacts');
+  const inboxLink = page.getByRole('link', { name: 'Hộp thư', exact: true });
+  const inboxRows = page.locator('.inbox-person');
+  await expect(inboxLink).toHaveAccessibleDescription('2 khách đang chờ trả lời');
+  await expect(inboxLink.locator('.nav-pending')).toHaveText('2');
+  await expect(inboxRows.first()).toContainText('Khách A');
   await page.getByRole('button', { name: /Khách A/ }).click();
   await expect(
     page.locator('.inbox-bubble').getByText('Cần tư vấn bảo hành'),
   ).toBeVisible();
+  await expect(inboxLink).toHaveAccessibleDescription('2 khách đang chờ trả lời');
+  await expect(inboxRows.first()).toContainText('Chờ trả lời');
   const input = page.getByRole('textbox', { name: 'Tin nhắn cho khách hàng' });
   await input.fill('Nội dung nháp');
   await page.getByRole('button', { name: /Khách B/ }).click();
@@ -87,6 +104,7 @@ test('seller inbox supports conversation drafts, retry identity, receipts and cu
     page.getByText('Chưa gửi được tin', { exact: true }),
   ).toBeVisible();
   await expect(input).toHaveValue('Nội dung nháp');
+  await expect(inboxLink).toHaveAccessibleDescription('2 khách đang chờ trả lời');
   fail = false;
   await page.getByRole('button', { name: 'Gửi', exact: true }).click();
   await expect(input).toHaveValue('');
@@ -95,12 +113,15 @@ test('seller inbox supports conversation drafts, retry identity, receipts and cu
   );
   expect(sent).toHaveLength(2);
   expect(sent[0].request_id).toBe(sent[1].request_id);
+  await expect(inboxLink).toHaveAccessibleDescription('1 khách đang chờ trả lời');
+  await expect(inboxRows.first()).toContainText('Khách B');
+  await expect(inboxRows.filter({ hasText: 'Khách A' })).not.toContainText('Chờ trả lời');
   await input.fill('Nháp khi chuyển tab');
   await page.clock.install();
   await page.getByRole('tab', { name: 'Liên hệ khách vãng lai' }).click();
   let backgroundRequests = 0;
   page.on('request', (request) => {
-    if (new URL(request.url()).pathname.startsWith('/api/inbox/'))
+    if (new URL(request.url()).pathname.startsWith('/api/inbox/threads'))
       backgroundRequests++;
   });
   await page.clock.fastForward(12000);

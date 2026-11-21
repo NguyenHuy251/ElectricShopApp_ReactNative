@@ -1,4 +1,5 @@
 import { Router, type Response } from 'express';
+import type { RowDataPacket } from 'mysql2/promise';
 import { pool } from '../config/database.js';
 import {
   authenticate,
@@ -122,6 +123,19 @@ router.get(
 router.post('/mine', limit, send(false));
 router.post('/mine/read', read(false));
 router.use(authorizePermission('contacts'));
+const latestMessagesByCustomer = 'SELECT ma_khach_hang, MAX(ma_tin_nhan) AS last_id FROM tin_nhan_ho_tro GROUP BY ma_khach_hang';
+router.get(
+  '/pending-count',
+  run(async (_req, res) => {
+    const [[{ count }]] = await pool.query<(RowDataPacket & { count: number })[]>(`
+      SELECT COUNT(*) AS count
+      FROM (${latestMessagesByCustomer}) x
+      JOIN tin_nhan_ho_tro n ON n.ma_tin_nhan = x.last_id
+      WHERE n.ben_gui = 'KhachHang'
+    `);
+    return sendSuccess(res, 'Khách hàng đang chờ trả lời', { count: Number(count) });
+  }),
+);
 router.get(
   '/threads',
   run(async (req, res) => {
@@ -132,9 +146,10 @@ router.get(
     const [rows] = await pool.query(
       `SELECT t.ma_tai_khoan,t.ho_ten,t.ten_dang_nhap,n.noi_dung,n.ngay_gui,n.ben_gui,
     (SELECT COUNT(*) FROM tin_nhan_ho_tro u WHERE u.ma_khach_hang=t.ma_tai_khoan AND u.ben_gui='KhachHang' AND u.ngay_doc IS NULL) AS chua_doc
-    FROM (SELECT ma_khach_hang,MAX(ma_tin_nhan) AS last_id FROM tin_nhan_ho_tro GROUP BY ma_khach_hang) x
+    FROM (${latestMessagesByCustomer}) x
     JOIN tai_khoan t ON t.ma_tai_khoan=x.ma_khach_hang JOIN tin_nhan_ho_tro n ON n.ma_tin_nhan=x.last_id
-    WHERE t.ho_ten LIKE ? OR t.ten_dang_nhap LIKE ? ORDER BY n.ma_tin_nhan DESC LIMIT 100`,
+    WHERE t.ho_ten LIKE ? OR t.ten_dang_nhap LIKE ?
+    ORDER BY (n.ben_gui = 'KhachHang') DESC, n.ma_tin_nhan DESC LIMIT 100`,
       [`%${q}%`, `%${q}%`],
     );
     return sendSuccess(res, 'Hộp thư', rows);

@@ -172,11 +172,6 @@ export default function ProfileScreen() {
             <Text style={styles.menuText}>Đơn hàng của tôi</Text>
             <MaterialIcons name="chevron-right" size={23} color={shop.muted} />
           </Pressable>
-          <Pressable style={styles.menuItem} onPress={() => router.push('/cart' as any)}>
-            <MaterialIcons name="shopping-cart" size={22} color={shop.primary} />
-            <Text style={styles.menuText}>Giỏ hàng</Text>
-            <MaterialIcons name="chevron-right" size={23} color={shop.muted} />
-          </Pressable>
           <Pressable style={styles.menuItem} onPress={() => router.push('/contact' as any)}>
             <MaterialIcons name="support-agent" size={22} color={shop.primary} />
             <Text style={styles.menuText}>Nhắn tin với cửa hàng</Text>

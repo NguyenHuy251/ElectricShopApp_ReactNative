@@ -1,5 +1,6 @@
 import { Pressable, Text, TextInput } from '@/components/ui';
 import { useShopStyles } from '@/components/shop-appearance';
+import { useCart } from '@/components/cart-provider';
 import { layout, radius, space, type ShopPalette } from '@/constants/shop-theme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -31,6 +32,7 @@ export default function CheckoutScreen() {
 
 function CheckoutContent({ initialSelection }: { initialSelection: CheckoutSelection }) {
   const { shop, styles } = useShopStyles(makeStyles);
+  const { refresh: refreshCart } = useCart();
   const router = useRouter();
   const [selection, setSelection] = useState(initialSelection);
   const [code,setCode]=useState('');
@@ -181,6 +183,7 @@ function CheckoutContent({ initialSelection }: { initialSelection: CheckoutSelec
       await AsyncStorage.setItem(storageKey.current, JSON.stringify(attempt));
       pending.current = attempt;
       const result = await orderService.createOrder(attempt.payload);
+      if (attempt.payload.source !== 'buy_now') void refreshCart(true).catch(() => undefined);
       // The server has confirmed the order. A local cleanup failure must not turn it into a failed purchase.
       await AsyncStorage.removeItem(storageKey.current).catch(() => undefined);
       pending.current = null;

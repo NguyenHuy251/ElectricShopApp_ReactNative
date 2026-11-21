@@ -5,8 +5,20 @@ import { AuthRequest } from '../middleware/auth.middleware.js';
 import { sendError, sendSuccess } from '../utils/response.js';
 import * as donHangService from '../services/donHang.service.js';
 import { CheckoutError } from '../utils/checkout.js';
+import type { RowDataPacket } from 'mysql2/promise';
 
 export { createDonHang } from './checkout.controller.js';
+
+export async function getPendingOrderCount(_req: AuthRequest, res: Response) {
+  try {
+    const [[{ count }]] = await pool.query<(RowDataPacket & { count: number })[]>(
+      "SELECT COUNT(*) AS count FROM don_hang WHERE trang_thai = 'ChoXacNhan'",
+    );
+    return sendSuccess(res, 'Đơn hàng chờ xác nhận', { count: Number(count) });
+  } catch {
+    return sendError(res, 500, 'Không thể tải số đơn hàng chờ xác nhận');
+  }
+}
 
 export async function getDonHang(req: AuthRequest, res: Response) {
   try {

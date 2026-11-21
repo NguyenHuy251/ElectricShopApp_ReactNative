@@ -7,6 +7,8 @@ import { Animated, Easing, I18nManager, Platform, StyleSheet, View } from 'react
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HapticTab } from '@/components/haptic-tab';
+import { useCart } from '@/components/cart-provider';
+import { CountBadge } from '@/components/count-badge';
 import { Text } from '@/components/ui';
 import { useShopStyles, useShopAppearance } from '@/components/shop-appearance';
 import { type ShopPalette } from '@/constants/shop-theme';
@@ -28,6 +30,7 @@ function dockBottomSpacing(inset: number) {
 
 function FloatingTabBar({ state, descriptors, emitter, navigateToTab, insets }: BottomTabBarProps) {
   const { shop, styles } = useShopStyles(makeStyles);
+  const { items } = useCart();
   const { buildHref } = useLinkBuilder();
   const reducedMotion = useReducedMotion();
   const reportHeight = useContext(BottomTabBarHeightCallbackContext);
@@ -81,6 +84,7 @@ function FloatingTabBar({ state, descriptors, emitter, navigateToTab, insets }: 
             const color = focused ? shop.primary : shop.muted;
             const icons = artwork[route.name] ?? artwork.index;
             const variant = focused ? 1 : 0;
+            const cartCount = route.name === 'cart' ? items.length : 0;
 
             return (
               <HapticTab
@@ -88,6 +92,7 @@ function FloatingTabBar({ state, descriptors, emitter, navigateToTab, insets }: 
                 href={buildHref(route.name, route.params)}
                 role={Platform.OS === 'ios' ? 'button' : 'tab'}
                 accessibilityLabel={options.tabBarAccessibilityLabel ?? label}
+                accessibilityHint={cartCount > 0 ? `${cartCount} loại sản phẩm trong giỏ` : undefined}
                 aria-selected={focused}
                 accessibilityShowsLargeContentViewer
                 accessibilityLargeContentTitle={label}
@@ -106,6 +111,7 @@ function FloatingTabBar({ state, descriptors, emitter, navigateToTab, insets }: 
                   ) : (
                     <MaterialCommunityIcons name={icons.fallback[variant]} size={24} color={color} />
                   )}
+                  {route.name === 'cart' ? <CountBadge count={cartCount} style={styles.cartBadge} /> : null}
                 </View>
                 <Text maxFontSizeMultiplier={1.3} style={[styles.label, { color }, focused && styles.selectedLabel]}>
                   {label}
@@ -183,6 +189,7 @@ const makeStyles = (shop: ShopPalette) => StyleSheet.create({
     borderRadius: 30,
   },
   icon: { width: 24, height: 24 },
+  cartBadge: { right: -14, top: -5 },
   label: { fontSize: 11, fontWeight: '500', textAlign: 'center' },
   selectedLabel: { fontWeight: '700' },
 });

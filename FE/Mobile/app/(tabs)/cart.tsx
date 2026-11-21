@@ -9,6 +9,7 @@ import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { EmptyState, LoadingState, ProductImage, ScreenHeading } from '@/components/shop-ui';
 import { TabHeaderActions } from '@/components/tab-header-actions';
+import { useCart } from '@/components/cart-provider';
 import { cartService } from '@/services/cart.service';
 import { productService } from '@/services/product.service';
 import type { CartItem, ProductVariant } from '@/types';
@@ -18,7 +19,7 @@ export default function CartScreen() {
   const { shop, styles } = useShopStyles(makeStyles);
   const dockHeight = useBottomTabBarHeight();
   const router = useRouter();
-  const [items, setItems] = useState<CartItem[]>([]);
+  const { items, refresh } = useCart();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [updating, setUpdating] = useState(false);
@@ -26,14 +27,13 @@ export default function CartScreen() {
   const [variantPicker, setVariantPicker] = useState<{ item: CartItem; variants: ProductVariant[] } | null>(null);
   const busy = useRef(false);
 
-  const loadCart = useCallback(async () => {
+  const loadCart = useCallback(async (afterChange = false) => {
     try {
-      const result = await cartService.getCart();
-      setItems(result.data?.items || []);
+      await refresh(afterChange);
       setError('');
     } catch (err) { setError(getApiMessage(err, 'Không thể tải giỏ hàng.')); }
     finally { setLoading(false); setRefreshing(false); }
-  }, []);
+  }, [refresh]);
   useFocusEffect(useCallback(() => { void loadCart(); }, [loadCart]));
 
   const update = async (item: CartItem, quantity: number) => {
@@ -44,7 +44,7 @@ export default function CartScreen() {
     try {
       if (quantity <= 0) await cartService.removeCartItem(item.ma_san_pham, item.ma_bien_the);
       else await cartService.updateCartItem(item.ma_san_pham, quantity, item.ma_bien_the);
-      await loadCart();
+      await loadCart(true);
     } catch (err) { setError(getApiMessage(err, 'Không thể cập nhật giỏ hàng.')); }
     finally { busy.current = false; setUpdating(false); }
   };
@@ -65,7 +65,7 @@ export default function CartScreen() {
     busy.current = true; setUpdating(true); setError('');
     try {
       await cartService.selectVariant(variantPicker.item.ma_san_pham, variant.ma_bien_the, variantPicker.item.ma_bien_the);
-      setVariantPicker(null); await loadCart();
+      setVariantPicker(null); await loadCart(true);
     } catch (err) { setError(getApiMessage(err, 'Không thể chọn biến thể.')); }
     finally { busy.current = false; setUpdating(false); }
   };
@@ -75,7 +75,7 @@ export default function CartScreen() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); void loadCart(); }} />}
     >
       <ScreenHeading eyebrow="GIỎ HÀNG CỦA BẠN" title="Sắp về với tổ ấm" subtitle="Kiểm tra sản phẩm rồi tiếp tục đến bước thanh toán." action={<TabHeaderActions />} />
-      {error ? <View accessibilityRole="alert" style={styles.errorBox}><Text style={styles.error}>{error}</Text><Pressable onPress={loadCart}><Text style={styles.link}>Tải lại giỏ hàng</Text></Pressable></View> : null}
+      {error ? <View accessibilityRole="alert" style={styles.errorBox}><Text style={styles.error}>{error}</Text><Pressable onPress={() => void loadCart()}><Text style={styles.link}>Tải lại giỏ hàng</Text></Pressable></View> : null}
       {loading ? <LoadingState message="Đang tải giỏ hàng..." /> : !items.length ? <EmptyState icon="shopping-bag" title="Giỏ hàng chờ bạn chọn" action="Khám phá sản phẩm" onAction={() => router.push('/products')} /> : <>
         {items.map(item => <View style={styles.item} key={`${item.ma_san_pham}:${item.ma_bien_the || 0}`}>
           <ProductImage uri={item.hinh_anh} style={styles.image} />

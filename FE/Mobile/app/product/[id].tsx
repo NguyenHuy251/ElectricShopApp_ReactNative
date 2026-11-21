@@ -9,6 +9,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { Image, Modal, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { EmptyState, LoadingState, ProductCard, ProductImage } from '@/components/shop-ui';
+import { useCart } from '@/components/cart-provider';
 import { cartService } from '@/services/cart.service';
 import { productService } from '@/services/product.service';
 import type { GroupedSpecification, Product, ProductImage as IProductImage, ProductReview, ProductSpecification, ProductVariant } from '@/types';
@@ -21,6 +22,7 @@ export default function ProductDetailScreen() {
 
 function ProductDetail({ id, initialQuantity }: { id: string; initialQuantity?: string }) {
   const { shop, styles } = useShopStyles(makeStyles);
+  const { refresh: refreshCart } = useCart();
   const router = useRouter();
   const [product, setProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(/^\d+$/.test(initialQuantity || '') && Number(initialQuantity) > 0 ? String(Math.min(999, Number(initialQuantity))) : '1');
@@ -105,6 +107,7 @@ function ProductDetail({ id, initialQuantity }: { id: string; initialQuantity?: 
     busy.current = true; setAdding(true); setError(''); setNotice('');
     try {
       await cartService.addToCart(product.ma_san_pham, count, selectedVariant?.ma_bien_the);
+      void refreshCart(true).catch(() => undefined);
       setNotice(`Đã thêm ${count} sản phẩm vào giỏ hàng.`);
     } catch (err: any) {
       setError(getApiMessage(err, 'Không thể thêm sản phẩm vào giỏ hàng.'));

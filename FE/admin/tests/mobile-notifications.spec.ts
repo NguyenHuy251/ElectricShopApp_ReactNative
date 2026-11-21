@@ -133,7 +133,7 @@ test('bell replaces the home cart shortcut, updates unread badges and opens orde
   await expect(
     page.getByRole('button', { name: 'Mở giỏ hàng', exact: true }),
   ).toHaveCount(0);
-  expect(state.cartRequests).toBe(0);
+  await expect.poll(() => state.cartRequests).toBe(1);
   await page.screenshot({ path: testInfo.outputPath('home-bell.png') });
   await bell.click();
   await expect(page.getByText('Cập nhật dành cho bạn')).toBeVisible();

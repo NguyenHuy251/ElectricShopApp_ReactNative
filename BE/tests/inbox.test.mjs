@@ -78,7 +78,7 @@ test('inbox requires authentication and contacts permission for seller routes', 
   const calls = dbStub();
   await serverTest(async (request) => {
     assert.equal((await request('mine', null)).status, 401);
-    for (const path of ['threads', 'threads/9']) {
+    for (const path of ['threads', 'threads/9', 'pending-count']) {
       assert.equal((await request(path, 1)).status, 403);
       assert.equal((await request(path, 3)).status, 403);
     }
@@ -223,6 +223,8 @@ test(
         const threads = (await (await request('threads', 2)).json()).data;
         assert.equal(threads.length, 1);
         assert.equal(threads[0].ma_tai_khoan, 1);
+        const pendingCount = async () => (await (await request('pending-count', 2)).json()).data.count;
+        assert.equal(await pendingCount(), 1);
         const history = (await (await request('threads/1', 2)).json()).data;
         assert.equal(history.messages.length, 4);
         const upper = history.messages.at(-1).ma_tin_nhan;
@@ -230,6 +232,7 @@ test(
           (await request('threads/1/read', 2, { up_to: upper })).status,
           200,
         );
+        assert.equal(await pendingCount(), 1);
         const receipt = (await (await request(`mine?after=${upper}`, 1)).json())
           .data;
         assert.equal(receipt.seenThrough, upper);
@@ -244,6 +247,7 @@ test(
         );
         const fresh = (await (await request(`mine?after=${upper}`, 1)).json())
           .data;
+        assert.equal(await pendingCount(), 0);
         assert.equal(fresh.messages.length, 1);
         assert.equal(fresh.messages[0].ben_gui, 'CuaHang');
         const other = (await (await request('mine', 2)).json()).data;
@@ -287,6 +291,15 @@ test(
           incremental.messages.map((m) => Number(m.ma_tin_nhan)),
           expected,
         );
+        await connection.query("INSERT INTO tai_khoan VALUES (3,'other','Other','KhachHang','HoatDong',0)");
+        await connection.query("INSERT INTO tin_nhan_ho_tro(ma_khach_hang,ben_gui,noi_dung) VALUES (3,'KhachHang','Newer question'),(3,'CuaHang','Already answered')");
+        const prioritized = (await (await request('threads', 2)).json()).data;
+        assert.deepEqual(prioritized.map(thread => thread.ma_tai_khoan), [1, 3]);
+        assert.equal(await pendingCount(), 1);
+        const filtered = (await (await request('threads?search=Other', 2)).json()).data;
+        assert.deepEqual(filtered.map(thread => thread.ma_tai_khoan), [3]);
+        await connection.query("INSERT INTO tin_nhan_ho_tro(ma_khach_hang,ben_gui,noi_dung) VALUES (3,'KhachHang','Follow-up'),(3,'KhachHang','Another question')");
+        assert.equal(await pendingCount(), 2);
       });
     } finally {
       await connection.query(

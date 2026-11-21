@@ -11,7 +11,7 @@ test('Strict Mode mounts fetch product lists and references only once', async ({
   expect(mock.requests.filter(request => request.resource === 'auth')).toHaveLength(1);
   await page.getByRole('link', { name: 'Đơn hàng', exact: true }).click();
   await expect(page.getByRole('cell', { name: 'Người nhận mẫu', exact: true })).toBeVisible();
-  expect(mock.requests.filter(request => request.resource === 'don-hang')).toHaveLength(1);
+  expect(mock.requests.filter(request => request.path === '/api/don-hang')).toHaveLength(1);
   await page.getByRole('link', { name: 'Nhân viên', exact: true }).click();
   await expect(page.getByRole('cell', { name: 'Nhân viên mẫu', exact: true })).toBeVisible();
   for (const resource of ['nhan-vien', 'permissions', 'tai-khoan']) {
@@ -25,6 +25,7 @@ test('voucher navigation never fetches catalog data', async ({ page }) => {
   await page.goto('/vouchers');
   await expect(page.getByRole('button', { name: 'Thêm mã giảm giá' })).toBeVisible();
   expect(mock.requests.filter(request => request.resource === 'san-pham')).toHaveLength(0);
+  expect(mock.requests.filter(request => request.path.endsWith('/pending-count'))).toHaveLength(0);
   await expect(page.getByRole('heading', { name: 'Bạn không có quyền truy cập trang này' })).toHaveCount(0);
 });
 

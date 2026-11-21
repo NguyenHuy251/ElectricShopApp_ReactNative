@@ -1,4 +1,5 @@
 import api from './api';
+import type { CartItem } from '../types';
 
 export const cartService = {
   selectVariant: async (ma_san_pham: number, new_ma_bien_the: number, ma_bien_the?: number | null) => {
@@ -6,7 +7,7 @@ export const cartService = {
     return response.data;
   },
   getCart: async () => {
-    const response = await api.get('/gio-hang');
+    const response = await api.get<{ data: { ma_gio_hang: number | null; items: CartItem[] } }>('/gio-hang');
     return response.data;
   },
   addToCart: async (ma_san_pham: number, so_luong = 1, ma_bien_the?: number | null) => {

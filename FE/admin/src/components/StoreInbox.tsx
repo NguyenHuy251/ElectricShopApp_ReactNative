@@ -11,9 +11,11 @@ import {
   Tag,
 } from 'antd';
 import { SendOutlined, ShopOutlined } from '@ant-design/icons';
+import { useOutletContext } from 'react-router-dom';
 import { api } from '../api/api';
 import { errorMessage } from '../utils/errors';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
+import type { RefreshPendingCount } from '../hooks/usePendingCounts';
 
 type Thread = {
   ma_tai_khoan: number;
@@ -32,6 +34,8 @@ type Message = {
   ngay_doc: string | null;
 };
 export default function StoreInbox({ active = true }: { active?: boolean }) {
+  const refreshPendingCount = useOutletContext<RefreshPendingCount>();
+  const [listRevision, setListRevision] = useState(0);
   const [threads, setThreads] = useState<Thread[]>([]),
     [selected, setSelected] = useState<Thread | null>(null),
     [messages, setMessages] = useState<Message[]>([]);
@@ -82,7 +86,7 @@ export default function StoreInbox({ active = true }: { active?: boolean }) {
       mounted = false;
       clearInterval(timer);
     };
-  }, [query, active]);
+  }, [query, active, listRevision]);
   const id = selected?.ma_tai_khoan;
   const loadThread = useCallback(
     async (before?: string) => {
@@ -186,6 +190,8 @@ export default function StoreInbox({ active = true }: { active?: boolean }) {
         noi_dung: value,
         request_id: pending.current.get(id)!.id,
       });
+      refreshPendingCount('inbox');
+      setListRevision(revision => revision + 1);
       drafts.current.delete(id);
       pending.current.delete(id);
       if (current.current === id) {
@@ -231,6 +237,7 @@ export default function StoreInbox({ active = true }: { active?: boolean }) {
                   {t.ben_gui === 'CuaHang' ? 'Cửa hàng: ' : ''}
                   {t.noi_dung}
                 </small>
+                {t.ben_gui === 'KhachHang' ? <span className="inbox-waiting">Chờ trả lời</span> : null}
               </span>
               <Badge count={Number(t.chua_doc)} />
             </button>
